@@ -1,0 +1,119 @@
+<html>
+<head>
+	
+<style>
+input {width:98%}
+</style>
+	
+<script>
+
+function send(){
+	var frm = document.frm;
+	
+		
+		//-- 아이템그룸 
+	if( frm.itemGroup.value == "" ){
+		alert( "itemGroup 를 입력해주세요" );
+		frm.itemGroup.focus();
+		return;
+	}
+		//-- 아이템명 
+	if( frm.itemNm.value == "" ){
+		alert( "itemNm 를 입력해주세요" );
+		frm.itemNm.focus();
+		return;
+	}
+		//-- 뉴스제공사명 
+	if( frm.newsNm.value == "" ){
+		alert( "newsNm 를 입력해주세요" );
+		frm.newsNm.focus();
+		return;
+	}
+		//-- 뉴스링크 
+	if( frm.newsLink.value == "" ){
+		alert( "newsLink 를 입력해주세요" );
+		frm.newsLink.focus();
+		return;
+	}
+		//-- 인코딩 
+	if( frm.charset.value == "" ){
+		alert( "charset 를 입력해주세요" );
+		frm.charset.focus();
+		return;
+	}
+		//-- 순서 
+	if( frm.stp.value == "" ){
+		alert( "stp 를 입력해주세요" );
+		frm.stp.focus();
+		return;
+	}
+		//-- 사용여부 
+	if( frm.useYn.value == "" ){
+		alert( "useYn 를 입력해주세요" );
+		frm.useYn.focus();
+		return;
+	}
+		//-- 뉴스사구분 
+	if( frm.flag.value == "" ){
+		alert( "flag 를 입력해주세요" );
+		frm.flag.focus();
+		return;
+	}
+		
+	frm.submit();
+
+}
+
+</script>
+
+</head>
+
+<body>
+
+<form name="frm" method="post" action="${action}.do">
+<table cellspacing="0" cellpadding="3" border="1" width="100%" style="border-collapse:collapse; border:1px gray solid;">
+<tr> 
+	<td width="100">itemGroup</td>	<!--아이템그룸 -->
+	<td><input type="text" name="itemGroup" value="$!test.itemGroup"></td>	
+</tr>
+<tr> 
+	<td width="100">itemNm</td>	<!--아이템명 -->
+	<td><input type="text" name="itemNm" value="$!test.itemNm"></td>	
+</tr>
+<tr> 
+	<td width="100">newsNm</td>	<!--뉴스제공사명 -->
+	<td><input type="text" name="newsNm" value="$!test.newsNm"></td>	
+</tr>
+<tr> 
+	<td width="100">newsLink</td>	<!--뉴스링크 -->
+	<td><input type="text" name="newsLink" value="$!test.newsLink"></td>	
+</tr>
+<tr> 
+	<td width="100">charset</td>	<!--인코딩 -->
+	<td><input type="text" name="charset" value="$!test.charset"></td>	
+</tr>
+<tr> 
+	<td width="100">stp</td>	<!--순서 -->
+	<td><input type="text" name="stp" value="$!test.stp"></td>	
+</tr>
+<tr> 
+	<td width="100">useYn</td>	<!--사용여부 -->
+	<td><input type="text" name="useYn" value="$!test.useYn"></td>	
+</tr>
+<tr> 
+	<td width="100">flag</td>	<!--뉴스사구분 -->
+	<td><input type="text" name="flag" value="$!test.flag"></td>	
+</tr>
+</table>
+
+<input type="hidden" name="p" value="$params.p">
+	
+</form>
+
+<p>
+	<a href="javascript:send()">등록</a> &nbsp;
+	<a href="testList.do?p=$params.p">목록</a> &nbsp;
+</p>
+	
+</body>
+</html>

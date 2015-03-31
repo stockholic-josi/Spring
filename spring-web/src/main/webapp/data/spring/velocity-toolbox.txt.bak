@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<toolbox>
+  <xhtml>true</xhtml>
+  
+  <tool>
+    <key>date</key>
+    <scope>application</scope>
+    <class>org.apache.velocity.tools.generic.DateTool</class>
+  </tool>
+  
+   <tool>
+   <key>number</key>
+   <scope>application</scope>
+   <class>org.apache.velocity.tools.generic.NumberTool</class>
+ </tool>
+  
+  <tool>
+   <key>alternator</key>
+   <scope>application</scope>
+   <class>org.apache.velocity.tools.generic.AlternatorTool</class>
+   <parameter name="auto-alternate" value="true"/>
+ </tool>
+ 
+  <tool>
+   <key>params</key>
+   <scope>request</scope>
+   <class>org.apache.velocity.tools.view.tools.ParameterParser</class>
+ </tool>
+
+  <tool>
+   <key>HtmlUtil</key>
+   <scope>application</scope>
+   <class>com.stockholic.common.util.HtmlUtil</class>
+ </tool> 
+ 
+   <tool>
+   <key>PagingUtil</key>
+   <scope>application</scope>
+   <class>com.stockholic.common.util.PagingUtil</class>
+ </tool>
+ 
+  <tool>
+   <key>DateUtil</key>
+   <scope>application</scope>
+   <class>com.stockholic.common.util.DateUtil</class>
+ </tool> 
+ 
+   <tool>
+   <key>auth</key>
+   <scope>application</scope>
+   <class>com.stockholic.authority.AuthUtil</class>
+ </tool> 
+ 
+</toolbox>

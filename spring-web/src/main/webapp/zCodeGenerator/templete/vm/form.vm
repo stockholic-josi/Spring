@@ -1,0 +1,59 @@
+<html>
+<head>
+	
+<style>
+input {width:98%}
+</style>
+	
+<script>
+
+function send(){
+	var frm = document.frm;
+	
+	#foreach($list in $cList)
+	#if( $list.columnComment != '' )//-- $!{list.columnComment} #end
+
+	if( frm.$!{list.columnName}.value == "" ){
+		alert( "$!{list.columnName} 를 입력해주세요" );
+		frm.$!{list.columnName}.focus();
+		return;
+	}
+	#end
+	
+	frm.submit();
+
+}
+
+</script>
+
+</head>
+
+<body>
+
+
+<form name="frm" method="post" action="${action}.do">
+<table cellspacing="0" cellpadding="3" border="1" width="100%" style="border-collapse:collapse; border:1px gray solid;">
+#foreach($list1 in $cList)
+#if( $list1.columnComment != '' )
+<!--$!{list1.columnComment} -->
+#end	
+<tr> 
+	<td width="100">${list1.columnName}</td>
+
+	<td><input type="text" name="$!{list1.columnName}" value="$!${classAlias}.${list1.columnName}"></td>	
+</tr>
+#end
+</table>
+
+<input type="hidden" name="p" value="$params.p">
+#if( $action == 'modify' )$!{input}#end
+	
+</form>
+
+<p>
+	<a href="javascript:send()">등록</a> &nbsp;
+	<a href="testList.do?p=$params.p">목록</a> &nbsp;
+</p>
+	
+</body>
+</html>

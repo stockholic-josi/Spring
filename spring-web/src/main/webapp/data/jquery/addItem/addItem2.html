@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+ <title> JQuery </title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/css/global.css" type="text/css">
+<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.tablednd_0_5.js"></script>
+
+
+<style>
+
+tr.alt td {
+	background-color: #ecf6fc;
+}
+
+tr.myDragClass td {
+    background-color: #F0F0F0;
+}
+td.showDragHandle {
+	background-image: url(updown.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	cursor: move;
+}
+
+</style>
+
+<script type="text/javascript">
+
+
+function addItem(){
+	var template = "<tr align='center'>"
+					+ "	<td></td>"
+					+ "	<td>1</td>"
+					+ "	<td>New</td>"
+					+ "	<td><input type='text' name='userNm' /></td>"
+					+ "	<td><button>삭제</button></td>"
+					+ "</tr>";
+	$("#tableDnd tbody").append(template);
+
+
+	$( "#tableDnd tbody button" ).button({
+		icons: {
+			primary: "ui-icon-document"
+		}
+	});
+
+
+	initDnd();
+}
+
+function initDnd(){
+	
+	// Make a nice striped effect on the table
+	//$("#tableDnd tr:even").addClass('alt');
+
+	// Initialise the second table specifying a dragClass and an onDrop function that will display an alert
+	$("#tableDnd").tableDnD({
+	    onDragClass: "myDragClass",
+	    onDrop: function(table, row) {
+            var rows = table.tBodies[0].rows;
+			var debugStr = "Text Box 값 : ";
+            for (var i=0; i<rows.length; i++) {
+               if(i != 0) debugStr += $(rows[i]).find("input[type=text]").val() + " ";
+            }
+	        $("#debugArea").html(debugStr);
+	    },
+		onDragStart: function(table, row) {
+			$("#debugArea").html("ID 값 : "+row.id);
+		}
+	});
+
+	 $("#tableDnd tr").hover(function() {
+          $(this.cells[0]).addClass('showDragHandle');
+    }, function() {
+          $(this.cells[0]).removeClass('showDragHandle');
+    });
+
+
+	$("#tableDnd").find("button").click(function (){
+		$(this).parent().parent().remove();
+	});
+}
+
+
+$(document).ready(function() {
+
+	$( "button" ).button({
+		icons: {
+			primary: "ui-icon-document"
+		}
+	});
+
+
+	initDnd();
+
+});
+</script>
+
+
+ </head>
+
+ <body>
+
+<button onClick="addItem()">추가</button><br><br>
+
+<table  cellpadding="5" cellspacing="0" border="1"  id="tableDnd" style="border-collapse:collapse; border:1px gray solid;">
+
+<tbody>
+<tr class="nodrop nodrag" align="center">
+	<th width="30"></th>
+	<th width="30" bgcolor="#D9D9D9">A</th>
+	<th width="50" bgcolor="#D9D9D9">B</th>
+	<th width="150" bgcolor="#D9D9D9">C</th>
+	<th width="70" bgcolor="#D9D9D9">D</th>
+</tr>
+<tr id="1" align="center">
+	<td></td>
+	<td>1</td>
+	<td>One</td>
+	<td><input type="text" name="userNm" value="one"/></td>
+	<td><button >삭제</button></td>
+</tr>
+<tr id="2" align="center">
+	<td></td>
+	<td>2</td>
+	<td>Two</td>
+	<td><input type="text" name="userNm" value="two"/></td>
+	<td><button >삭제</button></td>
+</tr>
+<tr id="3" align="center">
+	<td></td>
+	<td>3</td>
+	<td>Three</td>
+	<td><input type="text" name="userNm" value="three"/></td>
+	<td><button >삭제</button></td>
+</tr>
+<tr id="4" align="center">
+	<td></td>
+	<td>4</td>
+	<td>Four</td>
+	<td><input type="text" name="userNm" value="four"/></td>
+	<td><button >삭제</button></td>
+</tr>
+</tbody>
+</table>
+
+<div id="debugArea" style="margin:20px 0 0 45px">&nbsp;</div>
+  
+ </body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="/css/global.css" type="text/css">
+	<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+	<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+	<script type="text/javascript" src="/js/common.js"></script>
+
+
+	<style>
+	#sortable1, #sortable2 { list-style-type: none; margin: 0; padding: 0 0 2.5em; float: left; margin-right: 10px; }
+	#sortable1 li, #sortable2 li { margin: 0 5px 5px 5px; padding: 5px; font-size: 1.2em; width: 120px; }
+	.ui-state-list { background-color:#fff;border:1px solid #C9C9C9;height: 20px; }
+	.ui-state-highlight2 { height: 20px; background-color:#E0E0E0;border:1px solid #C9C9C9;border-style: dashed;}
+	</style>
+
+	<script>
+
+
+	$(function() {
+		$( "#sortable1, #sortable2" ).sortable({
+			connectWith: ".connectedSortable",
+			cursor: 'move',
+			placeholder: "ui-state-highlight2"
+		}).disableSelection();
+
+
+
+		$( "button" ).button({
+			icons: {
+				primary: "ui-icon-document"
+			}
+		});
+
+	});
+
+	</script>
+
+ </head>
+
+ <body>
+
+
+
+
+<ul id="sortable1" class="connectedSortable">
+	<li class="ui-state-list" id="item_1">Item 1</li>
+	<li class="ui-state-list" id="item_2">Item 2</li>
+	<li class="ui-state-list" id="item_3">Item 3</li>
+	<li class="ui-state-list" id="item_4">Item 4</li>
+	<li class="ui-state-list" id="item_5">Item 5</li>
+</ul>
+
+<ul id="sortable2" class="connectedSortable">
+	<li class="ui-state-highlight" id="item_6">Item 6</li>
+	<li class="ui-state-highlight" id="item_7">Item 7</li>
+	<li class="ui-state-highlight" id="item_8">Item 8</li>
+	<li class="ui-state-highlight" id="item_9">Item 9</li>
+	<li class="ui-state-highlight" id="item_10">Item 10</li>
+</ul>
+
+
+<button id="btn" onClick="alert( $( '#sortable1' ).sortable( 'serialize') )">Serialize 1</button>
+<button id="btn" onClick="alert( $( '#sortable2' ).sortable( 'serialize') )">Serialize 2</button>
+
+ </body>
+</html>
+
+
+

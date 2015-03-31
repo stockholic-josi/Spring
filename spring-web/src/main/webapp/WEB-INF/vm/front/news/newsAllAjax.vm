@@ -1,0 +1,21 @@
+<div>
+	#foreach($list in $newsList)
+        <div class="newstitle"><a href="$!list.link" target="_blank">[$!list.newsNm]  $!list.title</a>
+    		<span class="newsPubdate">
+    			$!list.pubDate
+    			
+				#set ($timeDiff = $list.timeDiff)
+    			#if($timeDiff == 0)
+    				- <b>1 분전</b>
+    			#elseif($timeDiff > 0 &&  $timeDiff < 60)
+    				- <b>$timeDiff 분전</b>
+    			#elseif($timeDiff > 60 &&  $timeDiff < 1440)
+    				- <b>$HtmlUtil.getRoundInt($timeDiff,60)  시간전</b>
+    			#end
+				
+    		</span>
+    	</div>
+    	<div class="newsDescription">$HtmlUtil.lineBreak($!list.description)</div>
+	#end
+		
+</div>

@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+ <title> JQuery </title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/css/global.css" type="text/css">
+<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+
+<script language="javascript" type="text/javascript" src="jquery.tablednd_0_5.js"></script>
+
+
+<style>
+#tb span{display:none}
+#tb .up, #tb .down{cursor:pointer}
+</style>
+
+<script>
+
+
+function delBind(obj){
+
+	obj.bind("click",function(){
+		if( $("#tb tr").length == 1 ) return;
+		obj.parent().parent().remove();
+	});
+}
+
+function showBind(obj){
+
+	obj.mouseover(function(){
+		$(this).find(".up ,.down").show();
+		if($(this).index()  == 0 ) $(this).find("td:last .up").hide();
+		if($(this).next().index() == -1) $(this).find("td:last .down").hide();
+	});
+
+	obj.mouseout(function(){
+		$(this).parent().parent().find(".up ,.down").hide();
+	});
+}
+
+function itemUp(obj){
+	obj.bind("click",function(){
+		 obj.parent().parent().insertBefore($(this).parent().parent().prev());
+	});
+}
+
+function itemDown(obj){
+	obj.bind("click",function(){
+		 obj.parent().parent().insertAfter($(this).parent().parent().next());
+	});
+}
+
+
+var cnt = 0;
+$.fn.addItem = function() {
+
+	cnt++;
+	var tr = $(this).find("tr:first").clone();
+	$(this).append( tr );
+	tr.find("td:first").text(cnt);
+
+	delBind(tr.find(".itemDel"));
+	itemUp(tr.find(".up"));
+	itemDown(tr.find(".down"));
+	showBind(tr);
+
+}
+
+
+
+$(document).ready(function(){
+	cnt = $("#tb").find("tr").length;
+
+	$("#tb").find("tr").each(function(){
+
+		delBind($(this).find(".itemDel"));
+		itemUp($(this).find(".up"));
+		itemDown($(this).find(".down"));
+
+	});
+
+	$("#tb").find("tr").each(function(){
+		showBind($(this));
+	});
+	
+
+});
+</script>
+
+
+ </head>
+
+ <body>
+
+<button onClick="$('#tb').addItem();">추가</button>
+<table width="500" cellpadding="5" cellspacing="0" border="1" id="tb" style="border-collapse:collapse; border:1px gray solid;">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="15%">
+ <tr>
+	<td align="center">1</td>
+	<td>AAA</td>
+	<td>BBB</td>
+	<td>CCC</td>
+	<td>DDD</td>
+	<td><button class="itemDel">삭제</button></td>
+	<td align="left"><span class="up">▲</span>&nbsp;<span class="down">▼</span></td>
+ </tr>
+ <tr>
+	<td align="center">2</td>
+	<td>AAA</td>
+	<td>BBB</td>
+	<td>CCC</td>
+	<td>DDD</td>
+	<td><button class="itemDel">삭제</button></td>
+	<td align="left"><span class="up">▲</span>&nbsp;<span class="down">▼</span></td>
+ </tr>
+ </table>
+ 
+
+  
+ </body>
+</html>

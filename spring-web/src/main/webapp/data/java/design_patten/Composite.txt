@@ -1,0 +1,154 @@
+자바 디자인 패턴 7 - Composite
+
+
+
+1. Composite 패턴은..
+
+
+Component : 구성요소
+Composite	 : 합성물
+
+파일 데이터와 같은 일반적인 트리 구조의 데이터 타입을 만드는 것이 Composite 패턴입니다.
+Composite 패턴에서 주요등장 인물은 3개입니다. 
+첫째는 상위 컴포넌트. 
+둘째는 상위 컴포넌트를 상속 받으며 자식 컴포넌트를 가질 수 있는 Composite. 
+세째는 상위 컴포넌트를 상속 받으며, 하위 컴포넌트를 가질 수 없는 Leaf. 디렉토리가 Composite라면, 파일은 Leaf라고 보시면 됩니다.
+
+2. 예제
+
+이번 것은 소스가 좀 깁니다. 주석부 부분만 중점적으로 보세요.
+
+----------------- 상위 Component ----------------- 
+
+import java.util.ArrayList;
+import java.util.List;
+public abstract class Component {			// class Component
+    private String componentName;
+    protected List<Component> children = new ArrayList<Component>();
+    public Component(String componentName) {
+        this.componentName = componentName;
+    }
+    public String getComponentName() {
+        return componentName;
+    }
+
+    public abstract void add(Component c);	// add
+    public List<Component> getChildren(){	// getChildren
+        return children;
+    }
+    public String getString(){
+        return getString(0);
+    }
+    private String getString(int depth){
+        StringBuffer sb = new StringBuffer();
+        if (this instanceof Composite) {
+            for (int i = 0; i < depth; i++) {
+                sb.append("  ");
+            }
+            sb.append("+"+getComponentName() +"\n");
+            for (Component comp: children) {
+                sb.append(comp.getString(depth+1));
+            }
+        }else{
+            for (int i = 0; i < depth; i++) {
+                sb.append("  ");
+            }
+            sb.append("-"+getComponentName()+"\n");
+        }
+        return sb.toString();  
+    }
+}
+
+----------------- 하위 Composite(하위 노드 가질 수 있음) ----------------- 
+
+public class Composite extends Component {		// extends Component
+    public Composite(String componentName) {
+        super(componentName);
+    }
+    @Override
+    public void add(Component c) {				// add
+        children.add(c);
+    }
+}
+
+----------------- 하위 Leaf(하위 노드 가질 수 없음) ----------------- 
+
+public class Leaf extends Component{			// extends Component
+    public Leaf(String componentName) {
+        super(componentName);
+    }
+    @Override
+    public void add(Component c) {				// add
+        throw new UnsupportedOperationException();
+    }
+}
+
+----------------- 테스트 클래스 ----------------- 
+
+
+public class Test {
+    public static void main(String[] args) {
+        Composite main = new Composite("Main");
+        Composite sub1 = new Composite("sub1");
+        Composite sub2 = new Composite("sub2");
+        Composite sub11 = new Composite("sub11");
+        Composite sub12 = new Composite("sub12");
+        Composite sub13 = new Composite("sub13");
+        Composite sub21 = new Composite("sub21");
+        Composite sub22 = new Composite("sub22");
+        Leaf leaf14 = new Leaf("leaf14");
+        Leaf leaf121 = new Leaf("leaf121");
+        
+        main.add(sub1);
+        main.add(sub2);
+        sub1.add(sub11);
+        sub1.add(sub12);
+        sub1.add(sub13);
+        sub2.add(sub21);
+        sub2.add(sub22);
+        sub1.add(leaf14);
+        sub12.add(leaf121);
+        
+        System.out.println(main.getString());
+    }
+}
+
+----------------- 테스트 결과 ----------------- 
++Main
+  +sub1
+    +sub11
+    +sub12
+      -leaf121
+    +sub13
+    -leaf14
+  +sub2
+    +sub21
+    +sub22
+
+
+
+
+Component는 멤버 변수로 List<Component>를 가집니다. 이것이 트리 구조를 만드는 포인트입니다.
+Component에 있어서 중요한 메쏘드는 add()와 getChildren()입니다. add()의 인자는 Component 이고, getChildren()의 리턴 타입도 List<Component>입니다. Composite인지 Leaf인지 구분하지 않습니다.
+
+
+
+
+3. add와 getChildren 의 구현 방법
+
+첫째, Component 에서 모든 것을 구현하고, Leaf에서는 add 메쏘드 호출 시 UnsupportedOperationException 을 던집니다. Component-Composite-Leaf 3 개의 구조가 아니라 Component-Leaf의 2개 구조만 있어도 됩니다. 
+그래서 구조가 간단해집니다. 그러나 Composite에는 있고, Leaf에는 없는 메쏘드를 구현할 방법이 없어집니다. 
+위의 예제는 단지 트리구조를 구현하는 것이라 상관없지만, 추가 기능을 구현할 가능성이 있는 경우는 이 방법을 쓰면 후에 문제가 생길 수 있습니다.
+
+둘째, Component 에서는 abstract로 선언만 하고 Composite와 Leaf에서 구현을 합니다. Leaf에서는 첫번째 방법과 마찬가지로 UnsupportedOperationException 를 던지면 됩니다. 
+구조는 복잡하지만, 첫번째 방법에 비해 다른 기능 추가는 상대적으로 쉽습니다.
+
+
+
+
+
+4. JAVA API에 있는 Composite
+
+java.awt의 Container 는 Component를 상속 받고, Component를 다시 하위 객체로 가집니다. (여기서 하위는 상속의 하위 개념이 아닙니다. UI 구조상의 하위 구조입니다.) 
+예제에서 설명한 Leaf의 역할을 하는 객체들은 여러가지가 있습니다. Button, Text 등 우리가 알고 있는 일반적인 awt의 컴포넌트는 전부 포함된다고 보시면 됩니다.
+

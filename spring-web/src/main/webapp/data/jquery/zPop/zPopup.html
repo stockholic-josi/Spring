@@ -1,0 +1,96 @@
+<!DOCTYPE HTML >
+<html>
+ <head>
+ <title> zPop </title>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="./zpop.js"></script>
+
+<link rel="stylesheet" href="./zpop.css" type="text/css" />
+
+<script>
+
+$(document).ready(function(){
+
+	$("#pop").zpop({
+		title : "zPop 가가가 가가가 가가가 가가가 가가가 가가가 가가가 가가가 가가가 ",
+		width:400,
+		height:400,
+		modal : true,
+		callback : function(){
+			alert(1);
+		}
+	});
+
+});
+
+
+function ifrm(){
+	zpop.iframe({
+		title : "iframe",
+		width:700,
+		height:600,
+		url : "http://www.naver.com",
+		modal : false,
+		header: false
+	},function(){
+		alert('click iframe');
+	})
+}
+</script>
+
+
+
+ </head>
+
+<body>
+<button onClick="zpop.alert('이름을 입력하세요.')">alert</button>
+<button onClick="zpop.confirm('삭제하겠습니까 ?',function(){alert('click confirm')})">confirm</button>
+<button onClick="ifrm()">iframe</button>
+<div id="pop" style="display:none">Content</div>
+ 
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+ <p>.......</p>
+  
+ </body>
+</html>

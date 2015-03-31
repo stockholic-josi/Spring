@@ -1,0 +1,28 @@
+ <decorators defaultdir="/WEB-INF/layout">
+
+	<excludes>
+        <pattern>/*.html</pattern>
+        <pattern>/**/*.html</pattern>
+        <pattern>/**/*.jsp</pattern>
+        <pattern>/user/login.do*</pattern>
+        <pattern>/**/*Json.do*</pattern>
+        <pattern>/**/*Ajax.do*</pattern>
+        <pattern>/**/*Popup.do*</pattern>
+        <pattern>/**/*.xml</pattern>
+        <pattern>/**/*.json</pattern>
+        <pattern>/**/*Proc.do*</pattern>
+        <pattern>/**/*Write.do*</pattern>
+        <pattern>/**/*Modify.do*</pattern>
+        <pattern>/**/*Delete.do*</pattern>
+        <pattern>/**/*Reply.do*</pattern>
+
+    </excludes>
+
+	<!-- front Page -->
+    <decorator name="main" page="main.jsp">
+        <pattern>/front/**/*.do*</pattern>
+        <pattern>/user/*.do*</pattern>
+        <pattern>/manage/**/*.do*</pattern>
+    </decorator>
+    
+</decorators>

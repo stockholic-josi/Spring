@@ -1,0 +1,81 @@
+<html>
+<head>	
+	
+
+<script>
+function removeSession(ts,sessionId){
+
+	cfDialog("확인","로그아웃을 하겠습니까?.",function(){
+		$("#dialog").dialog("close"); 
+		
+		jQuery.ajax({
+        	url: 'userSessionLogOut.do',
+        	type : 'POST',
+    		data: 'sessionId=' + sessionId,
+        	timeout : 3000,
+    		error: function(){
+            	alertDialog("알림","로그아웃 실패",function(){
+        			$("#dialog").dialog("close"); 
+        		});
+        	},
+    		success: function(data){
+    		  $(ts).parent().html("<font color='red'>로그아웃</font>");
+    		}
+        });
+	});
+
+	
+
+   
+}
+
+</script>
+	
+</head>
+
+<body>
+<div id="wrapper" style="width:900px">
+	
+	<div class="title">사용자관리 > 세션목록</div>
+	
+    <div>총 $total 명 [ $p / $totalPage  ]</div>
+    <table cellpadding="3" cellspacing="0" border="1" style="border-collapse:collapse; border:1px gray solid;margin-top:5px">
+    <tr align="center" bgcolor="#E1E1E1">
+    	<td width="40">번호</td>
+    	<td width="110">아이디</td>
+    	<td width="80">이름</td>
+    	<td width="140">권한</td>
+    	<td width="220">세션아이디</td>
+    	<td width="110">로그인시간</td>
+    	<td width="80">상태</td>
+    </tr>
+	
+	#set($idx = $total - $start)
+	#foreach($list in $userList)
+    <tr>
+    	<td align="center">$idx</td>
+    	<td>$list.userId</td>
+    	<td>$list.userNm</td>
+    	<td>$list.roleList</td>
+    	<td>$list.sessionId</td>
+    	<td align="center">$date.format('yyyy.MM.dd HH:mm',$list.loginDate)</td>
+    	<td align="center">로그인 <img src="/images/icon/close.gif" align="absmiddle" class="hand" onClick="removeSession(this,'$list.sessionId');"></td>
+    </tr>
+	#set($idx = $idx - 1)
+	#end	
+
+    </table>
+	
+	#if($total != 0)
+	<div id='paging'>
+		$!PagingUtil.paging($totalPage,$p,'','userSessionList.do')
+	</div>
+    #end
+	
+</div>
+
+
+
+</body>
+	
+</html>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+name : 프로젝트 이름
+default : 초기치로 설정되는 작업, 아무 것도 지정하지 않고 실행하면 이 작업을 수행
+basedir : 프로젝트에 대한 기준 폴더를 지정
+property : 프로젝트에서 사용할 각 폴더들의 위치를 지정
+${basedir} : 이미 앞에서 설정된 값을 읽어온다
+-->
+
+<project name="Stock" default="help" basedir="." >
+
+<property file="${basedir}/build.properties" />
+
+<!-- Class Path -->
+<path id="compile.classpath">
+    <pathelement location="${build.classes}"/>
+    <pathelement location="."/>
+    <fileset dir="${src.lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+</path>
+
+
+ <target name="02.init">
+    <echo>Project ${project.Name} ${project.version} ...</echo>
+    <buildnumber/>
+    <mkdir dir="${src.dir}"/>
+	<mkdir dir="${src.lib.dir}"/>
+    <mkdir dir="${build.classes}"/>
+    <mkdir dir="${build.jar}"/>
+ </target>
+
+
+<!--
+target : 각각의 타겟을 지정, 타겟이란 프로젝트를 이루는 하나 하나의 작업 단위
+srcdir : 컴파일 하기 위한 자바 소스 파일의 위치를 지정
+destdir : 어느 폴더에 클래스 파일들을 위치 시킬지 지정
+-->
+
+<target name="01.compile">
+	<echo message="Compiling from ${src.dir}" />
+	<javac
+	  encoding		="${javac.encoding}"
+	  srcdir			="${src.dir}"
+	  destdir			="${build.classes}"
+	  optimize		="${javac.optimize}"
+	  deprecation	="${javac.deprecation}"
+	  debug			="${javac.debug}">
+	  <classpath refid="compile.classpath"/>
+	</javac>
+
+	<copy
+      todir		="${build.classes}"
+      preservelastmodified="true"
+      verbose	="yes">
+      	<!--
+       <fileset dir="${src.dir}"
+        includes="**/*.properties"
+        />
+        -->
+		 <fileset dir="${src.dir}"
+        includes="**/*.xml"
+        />
+    </copy>
+</target>
+
+<!--
+jar : 파일을 만든다
+depends : compile 정상적으로 수행되어야만 진행
+jarfile : jar 파일의 위치와 파일 이름 지정
+basedir : jar로 묶을 클래스 파일의 위치
+includes : 모든 폴더에서 클래스 파일들만 포함
+-->
+
+<target name="jar" depends="01.compile">
+	<echo message="Making jar file from ${build.classes}" />
+	<jar
+      jarfile		="${build.jar}/${final.name}.jar"
+      basedir	="${build.classes}"
+    />
+</target>
+
+<!--
+javadoc을 실행
+depends : compile과 jar 수행이 정상적으로 끝나야만 실행
+sourcepath : 소스 폴더 지정
+sourcefiles : 소스 파일 지정
+windowtitle : 제목 지정
+destdir : 파일 생성후 저장할 폴더 지정
+-->
+
+
+ <target name="javadoc" depends="01.compile">
+    <mkdir dir="${build.javadoc}"/>
+    <javadoc
+      sourcepath		="${src.dir}"
+	  overview			="${javadoc.overview}"
+	  packagenames	="*"
+      destdir				="${build.javadoc}"
+      author				="${javadoc.author}"
+      version			="${javadoc.version}"
+      charset			="${javadoc.encoding}"
+      use					="true"
+      windowtitle		="${javadoc.windowtitle}"
+      doctitle			="${javadoc.doctitle}"
+      bottom				="${javadoc.bottom}"
+      >
+    </javadoc>
+</target>
+
+<!--
+소스 코드를 제외한 모든 작업 파일들과 폴더를 삭제한다
+-->
+
+<target name="03.clean" >
+	<delete dir="${build.classes}/dto"/>
+	<delete dir="${build.classes}/controller"/>
+	<delete dir="${build.classes}/service"/>
+	<delete dir="${build.classes}/dao"/>
+	<delete dir="${build.classes}/util"/>
+	<delete dir="${build.classes}/db"/>
+	<delete dir="${build.classes}/chart"/>
+	<delete dir="${build.classes}/filters"/>
+	<delete dir="${build.jar}"/>
+	<delete dir="${build.javadoc}"/>
+</target>
+
+<!-- FTP -->
+<target name="UpLoad(FTP)" >
+	<echo message="==================================== FTP START  ===================================" />
+	<ftp server="${ftp.ip}"
+	   userid="${ftp.id}"
+	   password="${ftp.pwd}"
+	   port="${ftp.port}"
+	   binary="yes"
+	   passive="yes"
+	   remotedir="${ftp.remote.dir}"
+	   depends="yes"
+	   newer="yes"
+	   timediffauto="yes"
+	   verbose="yes">
+	   	
+   	 <fileset dir="${ftp.home.dir}">
+        <include name="**/*.java"/> 
+        <include name="**/*.class"/> 
+        <include name="**/*.jar"/> 
+        <include name="**/*.vm"/> 
+        <include name="**/*.xml"/> 
+        <include name="**/*.properties"/> 
+        <include name="**/*.html"/> 
+        <include name="**/*.jsp"/> 
+        <include name="**/*.css"/> 
+        <include name="**/*.js"/> 
+        <include name="**/*.jpg"/> 
+        <include name="**/*.png"/> 
+        <include name="**/*.gif"/> 
+        <include name="**/*swf"/> 
+     </fileset>   
+
+	</ftp>
+	
+	<echo message="==================================== FTP END =====================================" />
+</target>
+
+
+<target name="04.all"
+	  depends="03.clean, 02.init, jar, javadoc">
+</target>
+
+<target name="help">
+	<echo>
+	Usage: ant [ 02.init | 03.clean | 04.all | jar | javadoc | delete ]
+	</echo>
+</target>
+
+
+</project>
+

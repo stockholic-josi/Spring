@@ -1,0 +1,25 @@
+# yum install vsftpd
+
+
+
+# vi /etc/vsftpd/vsftpd.conf
+
+#  vi /etc/vsftpd/chroot_list
+
+# chkconfig --add /etc/init.d/vsftpd
+# chkconfig --level 2345 vsftpd on
+# chkconfig --list
+
+
+-----------------------------------------------------------------error 
+500 OOPS: cannot change directory:/home/******* 
+
+# setsebool -P ftp_home_dir 1		<== 시간점 걸림
+
+다운로드는 되는데 업로드가 안되는 현상
+553 could not create file
+/etc/selinux/config 파일에서 SELINUX=disabled 라고 수정한뒤 재부팅
+
+
+
+

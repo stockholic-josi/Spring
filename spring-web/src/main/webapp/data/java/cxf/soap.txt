@@ -1,0 +1,67 @@
+1. 다운로드
+	http://cxf.apache.org/download.html
+
+2. 필요한 서버/클라이언트 파일 : WEB-INFO/lib 에 복사
+    asm-3.3.1.jar
+    cxf-2.7.8.jar
+    neethi-3.0.2.jar
+    stax2-api-3.1.1.jar
+  	woodstox-core-asl-4.2.0.jar
+    wsdl4j-1.6.3.jar
+    xmlschema-core-2.0.3.jar
+  
+  	javax.ws.rs-api-2.0-m10.jar	-- RESTful Service 때 필요
+  	jettison-1.3.4.jar				-- RESTful(JSON) Service 때 필요
+  
+
+3.소스 경로
+  /com/stockholic/cxf ~
+  
+  
+4.----------------------------------------------------------------------------------------------------------------------------  Server Example
+  
+ -----------------------------------------------------  application-cxf-server.xml
+  
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+                       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                       http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+                       http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+     
+     
+    <import resource="classpath:META-INF/cxf/cxf.xml" ></import>
+    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" ></import>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" ></import>
+
+	<!-- SOAP Service -->
+    <jaxws:endpoint 
+    	id="soapService" 
+    	implementor="com.stockholic.cxf.service.SoapServiceImpl" 
+    	address="/soapService" ></jaxws:endpoint>
+    
+    <!-- RESTful Service -->	
+    <bean id="restServiceBean" class="com.stockholic.cxf.service.RestService"></bean>
+    <jaxrs:server id="restService" address="/restService">
+        <jaxrs:serviceBeans><ref bean="restServiceBean" ></ref></jaxrs:serviceBeans>
+    </jaxrs:server>
+    	
+</beans>  
+  
+
+5. ---------------------------------------------------------------------------------------------------------------------------- web.xml
+ 	<servlet>  
+  		<servlet-name>CXFServlet</servlet-name>  
+  		<servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>  
+  		<load-on-startup>1</load-on-startup>  
+	</servlet>  
+	<servlet-mapping>  
+  		<servlet-name>CXFServlet</servlet-name>  
+  		<url-pattern>/cxf-service/*</url-pattern>  
+	</servlet-mapping>       
+      
+
+

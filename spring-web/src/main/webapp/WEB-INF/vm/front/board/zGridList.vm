@@ -1,0 +1,92 @@
+#parse( "front/board/subTitle.vm" )
+<html>
+<head>	
+	
+<script type="text/javascript" src="/js/zGrid/zGrid-core.js"></script>
+<script type="text/javascript" src="/js/zGrid/zGrid-util.js"></script>
+<script type="text/javascript" src="/js/zGrid/jquery.mousewheel.js"></script>
+<link rel="stylesheet" type="text/css" href="/js/zGrid/zGrid.css"/>
+
+<script>
+
+function fileImg(value,record){
+	return (value >  0) ? "<img src='/images/board/file.gif'>" : "";
+}
+
+function titleRender(value,record){
+	var newImg = ( record.isNew == 1) ? "<img src='/images/board/new.gif' align='absmiddle'>" : ""; 	
+	return newImg + " " + value;
+}
+
+$(window).load(function(){
+
+	$("#grid").zGrid({
+		columns : [
+			{columnId : "num", columnNm: "번호", width: 50, align:"center"},
+			{columnId : "title", columnNm: "제목", width: 500, align:"left",sortable : true, renderer : titleRender},
+			{columnId : "userNm", columnNm: "이름", width: 100, align:"center"},
+			{columnId : "fileCount", columnNm: "파일", width: 50, align:"center",renderer : fileImg},
+			{columnId : "regDate", columnNm: "등록일", width: 120, align:"center"}
+		],
+		gridHeight : 435,						//그리드 높이
+		rowHeight :28,						//row 높이
+		autoColumn :true,					//컬럼 너비 자동 조정
+		stripeRows : true,						//로우구분 컬로 표시
+		url : "/front/sqlite/boardJson.do",		//URL
+		params :$("#frm").serializeObject(),
+		paging : { limit : 15 ,pageSize : 10},	//paging
+		page : ${dto.page}							//첫페이지
+	}) ;
+	
+	
+});
+
+
+
+function search() {
+	 zGrid.setParam($("#frm").serializeObject());
+	 zGrid.getGridData();
+}
+
+</script>
+
+</head>
+
+<body>
+
+<div id="wrapper">
+<div class="searchBox">
+	<table cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+		<form name="frm" id="frm" onSubmit="search();return false">
+		<td width="50%">
+		<select name="searchKey" id="searchKey" style="width:60px">
+			#set ($sKey = ['title','content'])
+			#set ($sVal = ['제목','내용'])
+			$HtmlUtil.makeSelect($sKey,$sVal,$!dto.searchKey)
+		</select>
+		<input type="text" name="searchValue" value="$!{dto.searchValue}" class="inputBox" style="width:200px">
+		&nbsp;<button class="word2">검색</button>
+		<input type="hidden" name="flag" value="$!{flag}">
+		</td>
+		</form>
+		<td width="50%" align="right">
+			<button class="word2" onClick="addBoard()">등록</button>
+		</td>
+	</tr>
+	</table>
+	
+</div>
+
+<div id="grid"></div>
+
+</div>
+
+
+
+
+
+
+</body>
+	
+</html>

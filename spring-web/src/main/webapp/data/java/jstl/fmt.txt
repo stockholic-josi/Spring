@@ -1,0 +1,28 @@
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+  
+  1. 날짜
+ -- 현재날짜
+<jsp:useBean id="now" class="java.util.Date" ></jsp:useBean>
+ <fmt:formatDate value="${now}" pattern="yyyy-MM-dd hh:mm:ss" ></fmt:formatDate>
+  
+
+      
+  
+  2. 숫자
+  
+<fmt:formatNumber value="1234567.89" type="number" ></fmt:formatNumber>
+   
+<fmt:formatNumber value="1234567.89" type="currency" ></fmt:formatNumber>
+  
+<fmt:formatNumber value="1234567.89" type="percent" ></fmt:formatNumber>
+  
+<fmt:formatNumber value="1234567.89" pattern=".000" ></fmt:formatNumber>
+  
+<fmt:formatNumber value="1234567.89123" pattern="#,#00.0#" ></fmt:formatNumber>
+  
+  
+  -- Round
+  <fmt:formatNumber  value="${130  / 60 }"  maxFractionDigits="0" ></fmt:formatNumber>
+    
+   You could subtract 0.0005 from the number before formatting it. That way the rounding will be equivalent to truncating the original number to 3 decimal places 
+  <fmt:formatNumber value="${myNumber - 0.0005}" maxFractionDigits="3" ></fmt:formatNumber>

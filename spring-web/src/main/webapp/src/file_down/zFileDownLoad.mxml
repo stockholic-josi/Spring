@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" 
+   layout="absolute"
+   title="fileDownLoad" width="500" height="400" fontSize="12"  fontFamily="굴림" backgroundGradientColors="[#FFFFFF, #FFFFFF]" 
+   verticalScrollPolicy="off" 
+   horizontalScrollPolicy="off" 
+   showStatusBar="false" showTitleBar="false"
+   maxHeight="400" maxWidth="500" minHeight="400" minWidth="500"
+   creationComplete="creationCompleteHandler(event)"
+   >
+
+ <mx:Style>
+     ToolTip { 
+        fontFamily: "굴림"; 
+        fontSize: 12; 
+     }
+     
+    .headerCustomStyle {
+     	font-weight: nomal;
+        text-align: center;
+    }
+     
+    DataGrid {
+	   rollOverColor: #DFDFFF;
+	   selectionColor : #DFDFFF;
+	}
+  </mx:Style>
+
+  <mx:Script>
+ 	<![CDATA[
+ 		import mx.states.SetProperty;
+ 	
+ 		import mx.formatters.NumberFormatter;
+ 		import mx.controls.Alert;
+ 		import mx.events.ListEvent;
+ 		
+ 		var outBound:LocalConnection = new LocalConnection();
+        var inBound:LocalConnection = new LocalConnection();
+        var conStatus : Boolean = true;
+ 		
+ 		var cnt :  int = 0;
+ 		var totalCnt : int = 0;										//총 파일 수
+       	var remoteURL : String = "";								//URL
+       	var localURL : String = File.userDirectory.resolvePath("Downloads").nativePath;		//Local Path
+       	var fileArr : Array = new Array();
+       	
+       	//파일 다운로드 경로 설정
+       	var so:SharedObjectUtil = new SharedObjectUtil("zFileDownLoad","filePath",localURL);
+      
+       	
+ 		private function creationCompleteHandler(event: Event): void {
+ 			
+ 			//window  중앙 
+ 			nativeWindow.x = (Capabilities.screenResolutionX - nativeWindow.width) / 2;
+            nativeWindow.y = (Capabilities.screenResolutionY - nativeWindow.height) / 2;
+            
+            //로컬 저장 경로 설정
+            localURL = so.getSo("filePath");
+            savePath.text = localURL;
+            
+            //파일 전송 후 창 닫기 설정
+            if(so.getSo("closeWindow") == "NO"){
+            	closeConfirmChk.selected = false;
+            }
+            
+ 			//air LocalConnection air <-> flex 통신
+			outBound.addEventListener(StatusEvent.STATUS, onStatus);
+			inBound = new LocalConnection();
+			inBound.allowDomain('*');
+			inBound.client = this;
+			try {
+				inBound.connect("airCon");
+			} catch (error:ArgumentError) {
+				//Alert.show("Connection Failure");
+				conStatus = false;
+			}
+			
+			//flex 에 파일목록 요청	--> sendFileList
+			if(conStatus == true) outBound.send("localhost:flexcon", "sendFileList", outBound.domain);
+ 			
+        }
+        
+		private function onStatus(event:StatusEvent):void {
+			if(event.level == "error"){
+				//Alert.show("error");
+				conStatus = false;
+			} else{
+				//Alert.show("scccess");
+				conStatus = true;
+			}
+		}
+        
+        /**
+        * flex 에서 파일 목록 수신
+        */
+        public function setFileList(fileArr:Array):void {
+            
+			var fileData:Array = new Array();
+        	
+        	//데이터 셋팅
+        	if( fileArr != null && fileArr.length > 0){
+        		for(var i : int ; i < fileArr.length > 0; i++){
+        			
+        			if(i == 0) {
+        				remoteURL= fileArr[i];
+        			}else{
+        				var fileInfo:Array = fileArr[i].split("<@>");
+        				fileData.push({status:"대기", fileNm:fileInfo[0] ,size:fileInfo[1]});
+        			}
+        		}
+        		
+        		totalCnt = fileArr.length - 1;
+       			totalCount.text = String(fileArr.length - 1);
+       			
+	       		fileList.dataProvider = fileData;
+	       		
+	       		starDownLoad();
+        	}
+        	
+       		//Grid Click 이벤트
+       		//fileList.addEventListener(ListEvent.ITEM_CLICK , getGridIndex);        	
+        
+        }
+        
+        
+       /**
+       * 그리드 선택값
+       */
+       private function getGridIndex(event:ListEvent):void {
+			//Alert.show( String(event.columnIndex +":"+ event.rowIndex) );
+			var col : String = fileList.columns[event.columnIndex].dataField;
+			Alert.show( fileList.dataProvider[event.rowIndex]["" + col + ""]  );
+		}
+		
+		/**
+		 * 파일 다운로드 시작
+		 */
+		private function starDownLoad() : void{
+			 cnt = 0;
+			 downCount.text = "1";
+			  fileList.dataProvider[cnt].status = "진행";
+			  fileList.dataProvider.refresh();
+			 downLoadProc(fileList.dataProvider[cnt].fileNm);
+		}
+		
+		/**
+		 * 대기 파일 다운로드
+		 */
+		private function nextFileDownLoad() : void {
+			if(totalCnt > cnt){
+				 downCount.text = String(cnt + 1);
+				 fileList.dataProvider[cnt].status = "진행";
+				 fileList.dataProvider.refresh();
+        		 downLoadProc(fileList.dataProvider[cnt].fileNm);
+   			}else{
+   				if(closeConfirmChk){
+       				//downloadClose()
+       			}
+   			}
+		}
+		
+		/**
+		 * 파일다운로드 프로세서	
+		 */
+        private function downLoadProc(fileNm : String) : void {
+            	
+            	pb.label = fileNm + " - %3%";
+            	
+                // Create the stream for the data request
+                var urlStream : URLStream = new URLStream();
+
+                // Used to initiate request for remote file
+                var request : URLRequest = new URLRequest(remoteURL + "/" + fileNm);
+
+                // Create file stream
+                var fileStream : FileStream = new FileStream();
+
+                // Create a reference to a location on disk
+                var file : File = File.desktopDirectory.resolvePath(localURL + "/" + fileNm);
+                
+             	var  nbf :NumberFormatter  = new NumberFormatter();
+
+                // Called as download progresses
+                var writeFile = function(pge : ProgressEvent ) : void{
+
+                    // Write to file
+                    if (urlStream.bytesAvailable > 51200){
+                        var dataBuffer : ByteArray = new ByteArray();
+                        urlStream.readBytes(dataBuffer, 0, urlStream.bytesAvailable);
+                        fileStream.writeBytes(dataBuffer, 0, dataBuffer.length);
+                    }
+                    
+                   //프로그래스바
+                   pb.setProgress( pge.bytesLoaded, pge.bytesTotal ) ;
+                   
+                   //파일 다운로드 상황 표시
+                   readByte.text = nbf.format(Math.round(pge.bytesLoaded / 1024) );
+                   totalByte.text = nbf.format(Math.round(pge.bytesTotal / 1024) );
+                   
+                }
+
+                // Called when download completes
+                var finishWriteFile= function(event:Event) : void  {
+                    // Write to file
+  	                 if(urlStream.bytesAvailable > 0){
+                        var dataBuffer = new ByteArray();
+                        urlStream.readBytes(dataBuffer, 0, urlStream.bytesAvailable);
+                        fileStream.writeBytes(dataBuffer, 0, dataBuffer.length);
+                    }
+                   
+                    // Close streams
+                    fileStream.close();
+                    urlStream.close();
+                   
+                   fileList.dataProvider[cnt].status = "완료";
+                   
+                  // fileList.columns[0].setStyle('color', 'blue');
+
+                   //fileList.dataProvider[cnt].fileNm = fileNm;
+                  //fileList.dataProvider[cnt].size = Math.round((Number(totalByte.text.replace(",","")) / 1024 ) / .01) * .01 ;
+                   fileList.dataProvider.refresh();
+                   ++cnt;
+                   nextFileDownLoad();
+                }
+                
+                // Called when download fail
+                var failWriteFile = function(event:Event) : void{
+                	
+                	fileStream.close();
+                    urlStream.close();
+                	
+					fileList.dataProvider[cnt].status = "실패";
+				  	fileList.dataProvider[cnt].fileNm = fileNm;
+				  	if(file.exists) file.deleteFile();
+					fileList.dataProvider.refresh();
+					++cnt;
+					nextFileDownLoad();
+                }
+
+                // Initiate download
+                fileStream.openAsync(file, FileMode.WRITE); 
+                urlStream.load(request);
+
+                // Add event listeners
+                urlStream.addEventListener(Event.COMPLETE, finishWriteFile);
+                urlStream.addEventListener(ProgressEvent.PROGRESS, writeFile);
+                urlStream.addEventListener(IOErrorEvent.IO_ERROR, failWriteFile); 
+                
+       }
+            
+       
+     //--------------------------------------------------------------- 창 닫기
+       private function downloadClose():void {
+          	this.close();            	
+       }
+       
+ 
+		//--------------------------------------------------------------- 저장 폴더 선택 
+         var file : File;
+        private function openSaveFolder(event:MouseEvent):void {
+        	file = File.desktopDirectory.resolvePath(localURL);
+        	
+            file.addEventListener(Event.SELECT, folderSelect);
+//            file.browseForOpen("파일을 선택해주세요.");
+            file.browseForDirectory("파일을 선택해주세요.");
+        }
+ 
+        private function folderSelect(event:Event):void {
+          savePath.text = file.nativePath;
+          localURL = file.nativePath;
+          
+          //저장폴더 히스토리 로컬 저장
+           so.createSo("filePath",localURL);
+        }
+        
+        //--------------------------------------------------------------- 저장 폴더 열기
+        private function openFolder(event:MouseEvent):void {
+//			var file : File = File.documentsDirectory;
+			var file : File = File.desktopDirectory.resolvePath(localURL);
+			file.openWithDefaultApplication();
+        }
+        
+       private function closeConfirm(event:MouseEvent):void {
+       		if(closeConfirmChk.selected){
+       			so.createSo("closeWindow","YES");
+       		}else{
+       			so.createSo("closeWindow","NO");
+       		}
+       }
+        
+    ]]>
+	</mx:Script>
+
+	<mx:ProgressBar id="pb" y="34" mode="manual" label="DownLoading - %3%" width="315" height="47" 
+		trackHeight="14" labelPlacement="top" indeterminate="false" borderColor="#ffffff" fontWeight="normal" x="20" />
+	
+	<mx:Label x="375" y="35" text="0" id="downCount" textAlign="right" width="20"/>
+	<mx:Label x="394" y="35" text="/" width="10"/>
+	<mx:Label x="402" y="35" text="0" id="totalCount" width="18"/>
+	
+	<mx:Label x="344" y="54" text="0" id="readByte" width="50" textAlign="right"/>
+	<mx:Label x="393" y="54" text="/" width="10"/>
+	<mx:Label x="402" y="54" text="0" id="totalByte" width="50"/>
+	<mx:Label x="449" y="53" text="(KB)"/>
+	
+	<!-- 저장경로  -->
+	<mx:Label x="42" y="89" text="저장경로 : " fontSize="12" height="24"/>
+	<mx:Text x="104" y="89" width="374" id="savePath" fontSize="11" height="21"/>
+	
+	<mx:DataGrid x="19" y="121" width="460" id="fileList" editable="false" headerStyleName="headerCustomStyle" height="200">
+		<mx:columns>
+			<mx:DataGridColumn headerText="상태" dataField="status" width="40" textAlign="center"/>
+			<mx:DataGridColumn headerText="파일" dataField="fileNm"/>
+			<mx:DataGridColumn headerText="크기(MB)" dataField="size" width="65" textAlign="right" paddingRight="5" />
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<mx:Image x="22" y="89" source="@Embed(source='folder.png')" click="openSaveFolder(event)"  toolTip="폴더찾기" />
+	
+	<mx:CheckBox x="19" y="354" label="완료 후 창닫기" click="closeConfirm(event)" selected="true" id="closeConfirmChk"/>
+	<mx:CheckBox x="170" y="354" label="완료 후 폴더 열기" selected="true" id="openFolderConfirmChk"/>
+	
+	<mx:Button y="354" label="폴더열기" id="folderBtn0" click="openFolder(event)" width="75" height="22" fontSize="12" fontWeight="normal" color="#000000" x="345"/>
+	<mx:Button y="354" label="닫기" id="closeBtn" click="downloadClose()" width="50" height="22" fontSize="12" fontWeight="normal" color="#000000" x="430"/>
+
+</mx:WindowedApplication>

@@ -1,0 +1,9 @@
+<ul>
+#foreach($ks in $kospiStatus)
+#if($ks.fluctuate.indexOf('-') == -1) #set($color = "#FF3300")	#else  #set($color = "#3366FF")	#end
+    <li id="kospiBox" style="color:$color">
+		<div class="kb1">$!ks.codeNm</div>
+        <div class="kb2">$!ks.price  $!ks.price2  #if($ks.fluctuate.indexOf('-') == -1)▲#else▼#end $!ks.fluctuate ($!ks.rate)</div>
+	</li>
+#end
+</ul>

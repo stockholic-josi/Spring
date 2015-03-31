@@ -1,0 +1,48 @@
+--------------------------------------------------------------  text
+
+get   $("input[name=inputname]").val();
+
+set   $("input[name=inputname]").val("value");
+
+
+--------------------------------------------------------------  selectbox (1.7 --> attr ==> prop)
+
+get   $("select[name=selectname] > option:selected").val();
+
+set   $("select[name=selectname] > option[value=selectvalue]").attr("selected", "true");
+
+
+--------------------------------------------------------------  radio , checkbox (1.7 --> attr ==> prop)
+
+get   $("input[name=inputname]:checked").val();
+
+set  $("input:radio[name=chk]").attr("checked", "checked");
+      $("input[name=inputname]").filter("input[value=selectvalue]").attr("checked", "checked");
+       
+set   $("input[name=inputname]").filter("input[value=selectvalue]").attr("checked", "");
+
+count    $("input[name=inputname]:checkbox:checked").length;
+
+
+--------------------------------------------------------------  All check (1.7 --> attr ==> prop)
+$(function() {
+    $("#btnAllCheck").click(function() {
+        $("input:checkbox[name=num]:not(checked)").attr("checked", "checked");
+    });
+	
+    $("#btnUnCheck").click(function() {
+        $("input:checkbox[name=num]:checked").attr("checked", "");
+    });
+})
+
+
+--------------------------------------------------------------  Object
+var params = { aa:'0000', bb:'9999' };
+ $.param(params, true);
+
+$("#frm").serialize();
+
+$("#frm").serializeArray();
+
+
+

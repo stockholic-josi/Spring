@@ -1,0 +1,311 @@
+<html>
+<head>	
+	
+<script type="text/javascript" src="/extjs/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/extjs/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css"/>	
+
+<script>
+
+var store = null; 													//data store
+var grid = null; 													//grid
+var fields = null;
+var storeUrl = "./authCodeJson.do";						//검색페이지 URL
+
+var store2 = null; 												
+var grid2 = null; 													
+var fields2 = null;
+var storeUrl2 = "./authUserRoleJson.do";						
+
+Ext.onReady(function(){
+
+	//=============================================================================== 마스터 권한코드
+
+    // Data Store 설정
+	
+	store = new Ext.data.Store({
+		proxy: new Ext.data.HttpProxy({
+			url: storeUrl,
+   	     	method: 'POST'
+		}),
+
+		reader: new Ext.data.JsonReader(
+			{ root: 'dataList'  },
+			fields = Ext.data.Record.create([
+				'roleCd','roleNm',{name: 'roleStp', type: 'int'},'editCd'
+			])
+		)
+	});
+     
+
+    // Grid 패널/컬럼 정의
+	var sm = new Ext.grid.CheckboxSelectionModel( { id: "check", width:30 } );		//체그박스
+	var fm = Ext.form;
+	grid = new Ext.grid.EditorGridPanel({
+        el:'GridDataList',
+		height:500,
+        width:344,
+        title:'마스터 권한코드',
+        store: store,
+        loadMask: {msg:'로딩 ...'},
+        stripeRows: true,			//로우구분 컬로 표시
+		sm: sm,
+
+		columns: [
+			sm,
+            {header: "코드", width: 100, align: 'center', sortable: true, dataIndex: 'roleCd', editor: new fm.TextField({allowBlank: true}) },
+            {header: "코드명", width: 160, align: 'left', sortable: true, dataIndex: 'roleNm',editor: new fm.TextField({allowBlank: true}) },
+            {header: "순서", width: 50, align: 'center', sortable: true, dataIndex: 'roleStp', editor: new fm.NumberField( { allowBlank : false, allowNegative : false }) }
+        ],
+
+    }); 
+
+	grid.addListener("rowmousedown", function() { return false; } );
+	
+    // render it
+    grid.render();
+
+	 // trigger the data store load
+	store.load();
+
+
+
+	//=============================================================================== 권한목록
+
+    // Data Store 설정
+	
+	store2 = new Ext.data.Store({
+		proxy: new Ext.data.HttpProxy({
+			url: storeUrl2,
+   	     	method: 'POST'
+		}),
+
+		reader: new Ext.data.JsonReader(
+			{ root: 'dataList'  },
+			fields2 = Ext.data.Record.create([
+				'seqNo','userId','userNm','roleNm'
+			])
+		)
+	});
+     
+
+    // Grid 패널/컬럼 정의
+	grid2 = new Ext.grid.GridPanel({
+        el:'GridDataList2',
+		height:500,
+        width:500,
+        title:'유저권한목록',
+        store: store2,
+        loadMask: {msg:'로딩 ...'},
+        stripeRows: true,
+
+		viewConfig: {
+			forceFit: true 				// column width 자동조정 
+		},
+
+		columns: [
+            {header: "아이디", width: 90, align: 'center', sortable: true, dataIndex: 'userId',renderer: renderId },
+            {header: "이름", width: 90, align: 'center', sortable: true, dataIndex: 'userNm' },
+            {header: "권한", width: 338, align: 'left', sortable: true, dataIndex: 'roleNm' }
+        ],
+
+    }); 
+
+    grid2.render();
+
+	store2.load();
+
+	//------------------------------------------------------  사용자 함수
+    function renderId(value,p,record){
+	    return String.format('<a href="javascript:addRole(\'' + record.data.userId + '\')">{0}</a>', value,record.data.userId);
+    }
+
+});
+
+
+
+
+//-------------------------------------------  권한코드 수정
+function saveRecod(){
+	
+	cfDialog("확인","저장하겠습니까.",function(){
+		$("#dialog").dialog("close"); 
+		modifyRecordProc();
+	});
+	
+}
+function modifyRecordProc(){
+
+	var params = {lstRoleCd : [],lstRoleNm : [],lstRoleStp : [],lstEditCd : []};
+
+	var modifyRecords = store.getModifiedRecords();	//수정된 레코드 모두 찾기
+	var len = modifyRecords.length;
+
+	if(len > 0){
+		for(var i = 0; i < len ; i++){
+			params.lstRoleCd.push( modifyRecords[i].get('roleCd') );
+			params.lstRoleNm.push( modifyRecords[i].get('roleNm') );
+			params.lstRoleStp.push( modifyRecords[i].get('roleStp') );
+			params.lstEditCd.push( modifyRecords[i].get('editCd') );
+		}
+
+		jQuery.ajax({
+			url: 'authCodeInsert.do',
+			type: 'POST',
+			data: jQuery.param(params,true),
+			timeout : 3000,
+			error: function(){
+				alertDialog("알림","저장에 실패하였습니다.",function(){
+					$("#dialog").dialog("close"); 
+				});
+			},
+			success: function(msg){
+				store.load();
+			}
+		});
+
+		store.commitChanges();					//isDirty Flag 없애기
+	
+	}else{
+		alertDialog("알림","변경된 자료가 없습니다.",function(){
+			$("#dialog").dialog("close"); 
+		});
+		
+	}
+}
+
+//----------------------------------------------- 권한코드 등록
+function addRecord(){
+	var r = new fields( {
+			roleCd : 'AAA',
+			roleNm : '새권한',
+			roleStp : 99,
+			editCd : 'I',					// 등록 상태
+		});
+		grid.stopEditing();
+		store.insert(0, r);
+		grid.startEditing(0, 0);		// 등록할 rowIndex, colIndex 위치
+}
+
+//------------------------------------------------ 권한코드 삭제
+function deleteRecord() {
+	
+	if(grid.getSelectionModel().getSelections().length == 0) return;
+
+	cfDialog("확인","삭제하시겠습니까.",function(){
+		$("#dialog").dialog("close"); 
+		deleteRecordProc();
+	});
+	
+}
+function deleteRecordProc(){
+
+	var params ={lstRoleCd: []};
+
+	var chk = grid.getSelectionModel().getSelections();
+	 for( var i = 0; i < chk.length; i++) {
+		params.lstRoleCd.push( chk[i].data.roleCd);   
+	} 
+ 	
+	if(chk.length > 0){
+		jQuery.ajax({
+			url: 'authCodeDelete.do',
+			type : 'POST',
+			data : jQuery.param(params,true),
+			timeout : 3000,
+
+			error: function(){
+				alertDialog("알림","삭제에 실패하였습니다.",function(){
+        			$("#dialog").dialog("close"); 
+        		});
+				
+			},
+			success: function(msg){
+				store.load();
+			}
+		});
+
+	}else{
+		alertDialog("알림","대상을 선택해주세요.",function(){
+			$("#dialog").dialog("close"); 
+		});
+	}
+}
+
+
+function addRole(userId){
+
+		jQuery.ajax({
+			url: './authCodeRegFormAjax.do?userId=' + userId,
+			type : 'POST',
+			timeout : 3000,
+			error: function(){
+				alertDialog("알림","로딩실패",function(){
+        			$("#dialog").dialog("close"); 
+        		});
+			},
+			success: function(msg){
+				$("#authReg").html(msg);
+			}
+		});
+	
+
+	regDialog("authReg","유저권한등록",350,300,function(){
+		setRoleCd();
+	})
+}
+
+
+</script>
+	
+</head>
+
+<body>
+<div id="wrapper" style="width:900px">
+	
+	<div class="title">코드관리 > 권한코드</div>
+	
+	<!-- 권한코드 -->
+	<div style="float:left">
+		<div id="GridDataList"></div>	
+
+		<div style="margin-top:10px;">
+			<div style="float:left">
+			<button class="word2" onClick="deleteRecord()">삭제</button>
+			</div>
+
+			<div style="float:right">
+			<button class="word2" onClick="addRecord()">등록</button>
+			<button class="word2" onClick="saveRecod()">저장</button>
+			<button class="word4" onClick="store.load()">새로고침</button>	
+			</div>
+		</div>
+	</div>
+
+	<!-- 유저권한 -->
+	<div style="float:left;margin-left:50px">
+		<div id="GridDataList2"></div>
+		
+		<div style="margin-top:10px;">
+			<div style="float:left">
+			<button class="word2" onClick="">삭제</button>
+			</div>
+
+			<div style="float:right">
+			<button class="word2" onClick="addRole('')">등록</button>
+			<button class="word4" onClick="store2.load()">새로고침</button>	
+		</div>
+		</div>
+
+	</div>
+
+	
+</div>
+
+<div id='authReg' style="display: none">
+</div>
+
+
+</body>
+	
+</html>

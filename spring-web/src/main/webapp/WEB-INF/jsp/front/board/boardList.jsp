@@ -1,0 +1,213 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://www.springframework.org/tags"	prefix="spring" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="shkr" uri="/WEB-INF/tld/Shkr.tld" %>
+
+<script type="text/javascript" src="/extjs/adapter/ext/ext-base.js"></script>
+<script type="text/javascript" src="/extjs/ext-all.js"></script>
+<link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css"/>
+
+<script>
+var store = null; 													//data store
+var grid = null; 													//grid
+var fields = null;
+var pagingBar = null;
+var storeUrl = "./boardJson.do";							//검색페이지 URL
+var rowCount = 15;												//페이지 로우수
+
+
+Ext.onReady(function(){
+
+	//파라미터 처리
+	var uri = storeUrl + "?" + $("#frm").serialize();
+
+    // Data Store 설정
+	
+	store = new Ext.data.Store({
+		proxy: new Ext.data.HttpProxy({
+			url: uri,
+   	     	method: 'POST'
+		}),
+
+		reader: new Ext.data.JsonReader(
+			{totalProperty : 'totalCount', root : 'dataList'  },
+			fields = Ext.data.Record.create([
+				{name: 'num', type: 'int'},'no','lev','title','userId','userNm','fileCount','regDate','isNew'
+			])
+		)
+	});
+
+	 // 페이징
+   pagingBar = new Ext.PagingToolbar({
+        pageSize: rowCount,
+        store: store,
+        displayInfo: true,
+        beforePageText : "페이지", 
+        afterPageText  : "/ {0}",
+        displayMsg: '총 {2} [{0} - {1}]',
+        emptyMsg: "자료가 없습니다." 
+    });
+     
+
+    // Grid 패널/컬럼 정의
+	grid = new Ext.grid.GridPanel({
+        el:'GridDataList',
+		height:475,
+        width:600,
+        store: store,
+        loadMask: {msg:'로딩 ..'},
+        stripeRows: true,			//로우구분 컬로 표시
+
+		viewConfig: {
+			forceFit: true 				// column width 자동조정 
+		},
+
+		columns: [
+            {id: 'no',header: "번호", dataIndex: 'num', width: 30, align: 'center'},
+            {header: "제목", width: 400, height:50, align: 'left', sortable: true, dataIndex: 'title',renderer: renderTopic },
+            //{header: "이름", width: 60, align: 'center', sortable: true, dataIndex: 'userNm' },
+            {header: "이름", width: 60, align: 'center', sortable: true, dataIndex: 'userNm' },
+            {header: "파일", width: 30, align: 'center', dataIndex: 'fileCount',renderer: renderFile },
+            {header: "등록일", width: 80, align: 'center', sortable: true, dataIndex: 'regDate' }            
+        ],
+
+		 // paging bar on the bottom
+        bbar: pagingBar
+
+    }); 
+
+    // render it
+    grid.render();
+
+	//------------------------------------------- 그리드 리사이징
+	$( window ).resize( gridResize ); 
+	function gridResize(){
+	 	grid.setWidth( $("#wrapper").width() );
+	}
+	grid.setWidth( $("#wrapper").width() );
+	
+	 // trigger the data store load
+	store.load({params:{start:${dto.start}, limit:rowCount}});
+	//search();
+
+
+	//------------------------------------------------------  사용자 함수
+    function renderTopic(value,p,record){
+		var newImg = ( record.data.isNew == 1) ? "<img src='/images/board/new.gif' align='absmiddle'>" : ""; 		
+		
+		if(record.data.lev > 0) newImg += " " + strRepeat('&nbsp;&nbsp;&nbsp;',record.data.lev) + "<img src='/images/board/re.jpg' align='absmiddle'>";
+		
+	    return String.format(newImg + ' <a href="javascript:viewPost(\'' + record.data.no + '\')">{0} </a> ', value,record.data.title);
+    }
+	
+	 function renderFile(value,p,record){
+		var fileImg = ( record.data.fileCount > 0 ) ? "<img src='/images/board/file.gif' align='absmiddle' title='" + record.data.fileCount + "'>" : ""; 		
+	    return String.format(fileImg);
+    }
+	
+	function strRepeat(str, num){
+		var result = "";
+		for(i = 0; i < num; i++){
+			result += str; 
+		}
+		return result;
+	}	
+
+
+});
+
+
+function viewPost(no){
+	var start =  (pagingBar.getPageData().activePage - 1) * rowCount;
+	var params = {
+		no  : no,
+		start : start
+	}
+	
+	location.href = "./boardRead.do?" + $.param(params,true) + "&" + $("#frm").serialize();
+}
+
+function search() {
+	store.proxy.conn.url = storeUrl + "?" + $("#frm").serialize();
+	store.load({params:{start:0, limit:rowCount}});
+}
+
+function addBoard(){
+	var start =  (pagingBar.getPageData().activePage - 1) * rowCount;
+	var params = {
+		start : start
+	}
+	
+	location.href = "./boardForm.do?" + jQuery.param(params,true) + "&" + $("#frm").serialize();
+	
+	//alert( pagingBar.getPageData().total )
+	//alert( pagingBar.getPageData().activePage )
+	//alert( pagingBar.getPageData().pages )
+	//pagingBar.changePage(2);
+	
+	
+}
+</script>
+	
+<div id="wrapper">
+	<!-- <p class="title">$!{subTitle}</p> -->
+
+	<div class="searchBox">
+	<form name="frm" id="frm" onSubmit="search();return false">
+	<table cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+		<td width="50%">
+		 <c:set var="key" value="title,content" />
+    	<c:set var="value" value="제목,내용" />
+    	<shkr:selectArray key="${fn:split(key, ',')}" value="${fn:split(value, ',')}" id="searchKey" selectKey="${dto.searchKey}" style="width:80px" />
+		<input type="text" name="searchValue" value="${dto.searchValue}" class="inputBox" style="width:200px">
+		&nbsp;<button class="word2" onClick="search()">검색</button>
+		<input type="hidden" name="flag" value="${dto.flag}">
+		</td>
+		<td width="50%" align="right">
+			<button class="word2" onClick="addBoard()">등록</button>
+		</td>
+	</tr>
+	</table>
+	</form>
+	
+	</div>
+
+    <div id="GridDataList"></div>	
+	
+</div>
+
+
+<!--
+
+#set ($arrlist = [1, 2, 3, 5, 8, 13])
+#foreach($list in $arrlist)
+$list
+#end
+<br><br>
+
+==> DateTool <br>
+$date <br>
+$date.get("yyyy-MM-dd HH:mm:ss") <br>
+$date.format('yyyy.MM.dd HH:mm',$date)<br><br>
+
+==> NumberTool <br>
+#set ($val = 1234567)
+$number.format('integer',$val) <br>
+$number.format('currency',$val)<br>
+#set ($val2 = 2)
+$number.format('00',$val2)
+<br><br>
+
+==> Resource <br>
+$rc.getMessage("URL.image")
+<br><br> (action-servlet.xml 에서 정의)
+
+==> params <br>
+$!params.flag<br>
+$!params.getNumber('flag')<br> 
+
+-->
+

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="front.sqlite">
+
+
+<!-- =================== 목록 개수 =================== -->
+<select id="getBoardCount" resultType="java.lang.Integer">
+SELECT count(1) FROM sk_board
+WHERE  flag = #{flag}
+
+<if test="searchKey == 'title'  and searchValue !='' ">
+ AND title LIKE '%' || #{searchValue} || '%'
+</if>
+<if test="searchKey == 'content' and searchValue !='' ">
+ AND content LIKE '%' || #{searchValue} || '%'
+</if>
+</select> 
+
+<!-- =================== 목록 =================== --> 
+<select id="getBoardList"  resultType="com.taxholic.front.board.dto.Board">
+SELECT
+	no, 
+	lev,
+	user_id AS userId,
+	(select user_nm from auth_member where user_id = A.user_id) AS userNm,
+	title,
+	strftime('%Y.%m.%d %H:%M',datetime()) AS regDate,
+	read_cnt AS readCnt,
+	(select count(*) from sk_board_file where no = A.no and flag = 'F') AS fileCount,
+   CASE WHEN datetime('now','localtime') &lt; datetime(reg_date,'start of day','+3 day') THEN '1' ELSE '0' END AS isNew
+FROM sk_board A
+WHERE flag = #{flag}
+
+<if test="searchKey == 'title'  and searchValue !='' ">
+ AND title LIKE '%' || #{searchValue} || '%'
+</if>
+<if test="searchKey == 'content' and searchValue !='' "> 
+ AND content LIKE '%' || #{searchValue} || '%'
+</if>
+
+<if test="sortKey != '' and sortKey !=null">
+ORDER BY ${sortKey} ${sortValue}
+</if>
+<if test="sortKey == '' or sortKey == null">
+ORDER BY fid DESC,stp ASC
+</if>
+
+<if test="limit != 0">
+LIMIT #{start},#{limit}
+</if>
+
+</select>
+
+<!-- =================== 조회 =================== -->
+<select id="getBoard" resultType="com.taxholic.front.board.dto.Board">
+SELECT
+	no,
+	title,
+	user_id AS userId,
+	'stockholic' AS userNm,
+	content,
+	strftime('%Y.%m.%d %H:%M:%S',datetime()) AS regDate,
+	read_cnt AS readCnt,
+	html
+FROM sk_board t1 
+WHERE no = #{no} 
+</select>
+
+<update id="readCntUpdate">
+UPDATE sk_board SET read_cnt = read_cnt + 1 WHERE no=#{no}
+</update>
+
+
+<!-- =================== 다음글 이전글 =================== -->
+<select id="getBoardReadList" resultType="com.taxholic.front.board.dto.Board">
+
+	SELECT
+   		 CASE WHEN A.no is null THEN '0' ELSE A.no END AS no , A.title ,A.flag
+	FROM(
+	   select max(no) as no,title,flag from sk_board where no &lt; #{no} and lev = 0 and flag=#{flag}
+	   UNION All 
+	   select min(no) as no,title,flag from sk_board where no &gt; #{no} and lev = 0 and flag=#{flag}
+	) A
+	LEFT OUTER JOIN sk_board B ON A.no = B.no
+	
+</select>
+
+<!-- =================== 등록 =================== -->
+<select id="getBoardFidMax" resultType="java.lang.Integer">
+	SELECT 
+		CASE WHEN MAX(fid) is null THEN 1 ELSE MAX(fid)+1 END AS fid 
+	FROM sk_board where flag = #{flag}
+</select>
+
+<insert id="boardInsert">
+
+INSERT INTO sk_board(
+	fid,
+	lev,
+	stp,
+	user_id,
+	title,
+	content,
+	html,
+	ip,
+	read_cnt,
+	flag,
+	reg_date
+)VALUES(
+	#{fid},
+	0,
+	1,
+	#{userId},
+	#{title},
+	#{content},
+	#{html},
+	#{ip},
+	0,
+	#{flag},
+	datetime('now','localtime')
+)
+
+<selectKey resultType="java.lang.String"  keyProperty="no"  order="AFTER">
+  SELECT last_insert_rowid() AS lastId;
+</selectKey>
+
+</insert>
+
+<!-- =================== 파일등록 =================== -->
+<insert id="boardFileInsert" >
+INSERT INTO sk_board_file(
+	idx,
+	no,
+	file_name,
+	file_real_name,
+	file_ext,
+	file_size,
+	flag)
+VALUES(
+	#{idx},
+	#{no},
+	#{fileName},
+	#{fileRealName},
+	#{fileExt},
+	#{fileSize},
+	#{flag}
+)
+</insert>
+
+<!-- =================== 수정  =================== -->
+<update id="boardUpdate">
+UPDATE sk_board SET 
+	title = #{title},
+	content = #{content},
+	html = #{html},
+	ip = #{ip}
+WHERE no=#{no}
+AND user_id = #{userId}
+</update>
+
+<!-- =================== 댓글 =================== -->
+<select id="getBoardReply" resultType="com.taxholic.front.board.dto.Board">
+SELECT 
+	no,
+	fid,
+	lev+1 as lev,
+	stp+1 as stp
+FROM sk_board 
+WHERE no= #{value}
+</select>
+
+<insert id="boardReply">
+INSERT INTO sk_board( 
+	fid,
+	lev,
+	stp,
+	user_id,
+	title,
+	content,
+	html,
+	ip,
+	read_cnt,
+	flag,
+	reg_date
+)VALUES(
+	#{fid},
+	#{lev},
+	#{stp},
+	#{userId},
+	#{title},
+	#{content},
+	#{html},
+	#{ip},
+	0,
+	#{flag},
+	datetime('now','localtime')
+)
+
+<selectKey resultType="java.lang.String"  keyProperty="no"  order="AFTER">
+  SELECT last_insert_rowid() AS no
+</selectKey>
+
+
+</insert>
+
+<update id="boardReplyStp">
+UPDATE sk_board SET stp=stp + 1 WHERE flag=#{flag} AND fid=#{fid} AND stp >= #{stp}
+</update>
+
+
+<!-- =================== 삭제 =================== -->
+<delete id="boardDelete">
+DELETE FROM  sk_board  WHERE no = #{no} AND user_id = #{userId}
+</delete>
+
+<!-- =================== 파일목록 =================== -->
+<select id="getFileList" resultType="com.taxholic.front.board.dto.BoardFile">
+SELECT
+	idx,
+	file_name AS fileName,
+	file_real_name AS fileRealName,
+	file_ext AS fileExt,
+	file_size AS fileSize
+FROM sk_board_file
+WHERE no = #{no} 
+
+<if test="flag != null">
+ AND flag = #{flag}
+</if>
+
+ORDER BY idx
+</select>
+
+<!-- =================== 삭제 파일 목록 =================== --> 
+<delete id="fileDelete">
+
+DELETE FROM sk_board_file WHERE idx in 
+<foreach collection="array" item="delFileIdx" separator="," open="(" close=")">
+    ${delFileIdx}
+</foreach>
+
+
+</delete>
+
+</mapper>

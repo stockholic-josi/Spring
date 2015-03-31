@@ -1,0 +1,91 @@
+.groupWrapper{
+	width: 350px;
+	height: 600px;
+	float: left;
+	margin-right: 20px;
+}
+
+.groupItem{
+	margin-bottom: 20px;
+}
+.groupItem .itemHeader{
+	background-color: #DFE8F6;
+	border-top: 2px solid #99BBE8;
+	color: #2B6AB9;
+	padding: 0px 0px 3px 10px;
+	cursor: move;
+	font-weight: bold;
+	font-size: 9pt;
+	height: 24px;
+	position: relative;
+}
+.groupItem .itemContent{
+	font-size:9pt;
+	height: 200px;
+	padding-top:10px;
+	line-height:20px;
+}
+.groupItem .itemHeader .refresh{
+	position: absolute;
+	right: 30px;
+	top: 0px;
+	margin-top:4px;
+	cursor:hand;
+}
+.groupItem .itemHeader .close{
+	position: absolute;
+	right: 10px;
+	top: 0px;
+	margin-top:6px;
+	cursor:hand;
+}
+.groupItem .itemHeader .closeEl{
+	float:left;
+	padding: 5px 0px 0px 0px;
+}
+.groupItem .itemHeader .title{
+	padding: 7px 0px 0px 12px;
+}
+.groupItem .itemContent ul{
+	list-style:none; padding:0; margin:0;
+}
+.groupItem .itemContent ul li{
+	height:22px;
+
+	list-style:none; 
+	border-bottom:1px dashed #D1D1D1;
+}
+.groupItem .itemContent ul li .list{
+	float:left;
+	text-overflow: ellipsis; 
+	width: 290px; 
+	overflow:hidden;
+	white-space : nowrap;
+}
+.groupItem .itemContent ul li .date{
+	float:right;
+	color:#737373
+}
+
+.sortHelper{
+	border: 3px dashed #666;
+	width: auto !important;
+}
+
+#itemMenu{
+	width : 1090px;
+	border : 1px solid #99BBE8;
+	background-color: #DFE8F6;
+	color: #2B6AB9;
+	padding: 2px;
+	font-weight: bold;
+	font-size: 9pt;
+	margin-bottom:20px;
+	height: 40px;
+
+}
+
+#itemMenu .menuName{
+	float:left;
+	width : 200px;
+}

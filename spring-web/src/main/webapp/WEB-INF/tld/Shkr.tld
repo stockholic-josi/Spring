@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+    version="2.0">
+            
+	<description>Shkr Tag llibrary</description>
+	<tlib-version>1.1</tlib-version>
+	<short-name>shkr</short-name>
+	 
+	<tag>
+		<description>페이징처리</description>
+		<name>nav</name>								<!-- 태그의 이름 jsp페이지에서 선언할때 prefix속성을 shkr라고 했을경우<shkr:nav/>형식으로 태그를 사용한다 -->
+		<tag-class>com.taxholic.tld.Paging</tag-class>
+		<body-content>empty</body-content>		<!-- 바디 부분의 컨텐츠 타입을 기술 -->
+		 <attribute>
+		     <name>totalPage</name> 					<!-- 태그 속성이름 <shkr:nav totalCount="100"/>과 같은 식으로 사용가능-->
+		     <required>true</required>					<!-- 필수입력 여부 (true / false) -->
+		     <rtexprvalue>true</rtexprvalue>		 	<!-- 자바 표현식 사용 여부 true값을 갖을때는 속성값이 ${aaa}와 같은 형식이 올수 있다.-->
+	     	<description>총로우수</description>	
+   		 </attribute>
+   		  <attribute>
+		     <name>page</name> 
+		     <required>true</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>현재페이지</description>﻿
+   		 </attribute>
+   		   <attribute>
+		     <name>param</name> 
+		     <required>true</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>파라미터</description>﻿
+   		 </attribute>
+   		 <attribute>
+		     <name>url</name> 
+		     <required>true</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>URL</description>﻿
+   		 </attribute>
+   		    <attribute>
+		     <name>pageCount</name> 
+		     <required>false</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>페이징수</description>﻿
+   		 </attribute>
+   	</tag>
+   		
+   	<tag>
+   		<description>콤보박스</description>
+   		 <name>selectArray</name>
+		<tag-class>com.taxholic.tld.SelectArray</tag-class>
+		<body-content>empty</body-content>
+		  <attribute>
+		     <name>id</name> 
+		     <required>true</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>id / name</description>﻿
+   		 </attribute>
+   		  <attribute>
+		     <name>key</name> 
+		     <required>true</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>option Value</description>﻿
+   		 </attribute>
+   		   <attribute>
+		     <name>value</name> 
+		     <required>true</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>option Text</description>﻿
+   		 </attribute>
+   		   <attribute>
+		     <name>selectKey</name> 
+		     <required>false</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>선택값</description>﻿
+   		 </attribute>
+   		 <attribute>
+		     <name>style</name> 
+		     <required>false</required>
+		     <rtexprvalue>true</rtexprvalue>
+	     	<description>CSS</description>﻿
+   		 </attribute>
+	</tag>      
+	
+</taglib>

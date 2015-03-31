@@ -1,0 +1,137 @@
+================================== 설정및 설치 ====================================
+# groupadd dba
+
+# useradd -d /export/home/oracle -g dba -m  -s /bin/bash oracle
+
+# passwd oracle
+
+# vi ~oracle/.bash_profile
+--------------------------------------------------------------------
+# aliases
+alias   l='ls -AsCF'
+alias   ll='ls -laFg |less'
+alias   ls='ls -F'
+alias   dir='ls -laF | less'
+alias   h='history'
+alias   work='ps -ef | grep '
+alias   du='du -h'
+
+# environment variables
+export PATH=/usr/local/bin:/usr/sfw/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/ccs/bin
+export PS1='[\u@\h:\W]# '
+export LANG=ko_KR.UTF-8
+export LD_LIBRARY_PATH=/usr/local/xml/lib:/usr/lib:/usr/local/lib:/usr/ucblib:/usr/ccs/lib:/usr/sfw/lib
+export JAVA_HOME=/usr/java
+
+export DISPLAY=localhost:0.0
+export ORACLE_BASE=/usr/local/oracle10g
+export ORACLE_HOME=/usr/local/oracle10g/oraapp
+export ORACLE_SID=ORCL
+--------------------------------------------------------------------
+
+# mkdir -p /usr/local/oracle10g/oraapp
+
+# chown -R oracle:dba /usr/local/oracle10g
+
+
+# vi /etc/system  
+ ----- x86버전인 경우
+set semsys:seminfo_semmni=100
+set semsys:seminfo_semmns=1024
+set semsys:seminfo_semmsl=256
+set semsys:seminfo_semvmx=32767
+set shmsys:shminfo_shmmax=4294967295
+set shmsys:shminfo_shmmni=100
+
+----- /etc/system
+set noexec_user_stack=1
+set semsys:seminfo_semmni=100
+set semsys:seminfo_semmns=1024
+set semsys:seminfo_semmsl=256
+set semsys:seminfo_semvmx=32767
+set shmsys:shminfo_shmmax=4294967295
+set shmsys:shminfo_shmmin=1
+set shmsys:shminfo_shmmni=100
+set shmsys:shminfo_shmseg=10
+
+ 
+# touch /reconfigure  
+ 
+# reboot 
+
+#/usr/openwin/bin/xhost +		<---- (X-window 에서) root 로 반드시 해주자
+
+# su - oracle
+
+# ./runInstaller
+
+===================================================================================
+
+
+============================= Oracle 구동 및 설정 ==================================
+# vi /usr/local/oracle10g/oraapp/network/admin/listener.ora
+
+LISTENER =
+
+        (ADDRESS_LIST =
+
+                (ADDRESS= (PROTOCOL= IPC)(KEY= ORCL))
+
+                (ADDRESS= (PROTOCOL= IPC)(KEY= PNPKEY))
+
+                (ADDRESS= (PROTOCOL= TCP)(Host=192.168.0.200)(Port= 1521))
+
+        )
+
+SID_LIST_LISTENER =
+
+        (SID_LIST =
+
+                (SID_DESC =
+
+                (GLOBAL_DBNAME= ORCL)
+
+                (ORACLE_HOME= /usr/local/oracle10g)
+
+                (SID_NAME = ORCL)
+
+        )
+
+)
+
+# vi /usr/local/oracle10g/oraapp/network/admin/tnsnames.ora  (클라이언트에 관계있는 듯)
+
+ORCL=
+
+        (DESCRIPTION=
+
+                (ADDRESS = (PROTOCOL=TCP)(HOST=192.168.0.200)(PORT=1521))
+
+                (CONNECT_DATA=(SERVICE_NAME=ORCL))
+
+)
+
+
+# /usr/local/oracle10g/oraapp/bin/sqlplus '/ as sysdba'
+
+# /usr/local/oracle10g/oraapp/bin/sqlplus system/Wkwkdaus@ORCL
+
+SQL> select * from tab;
+
+
+----- /usr/local/oracle10g/oraapp/bin/dbstart 할 수 있게 ----
+# mkdir /var/opt/oracle
+# vi /var/opt/oracle/oratab
+orcl:/usr/local/oracle10g/oraapp:Y
+
+------- DB LISTENER ----
+# /usr/local/oracle10g/oraapp/bin/lsnrctl start
+
+------- DB START ----
+# /usr/local/oracle10g/oraapp/bin/dbstart /usr/local/oracle10g/oraapp
+
+------- DB SHUTDOWN----
+# /usr/local/oracle10g/oraapp/bin/dbshut /usr/local/oracle10g/oraapp
+
+
+===================================================================================

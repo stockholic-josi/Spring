@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="manage.community.authCode">
+
+<!-- =================== 권한마스터 목록  =================== -->
+<select id="getAuthCodeList" resultType="com.taxholic.manage.system.code.dto.AuthCode">
+SELECT 
+	role_cd AS roleCd,
+	role_nm AS roleNm,
+	role_stp AS roleStp,
+	'U' AS editCd
+FROM auth_master 
+ORDER BY role_stp
+</select>
+
+
+<!-- =================== 권한마스터 등록  =========
+========== -->
+<insert id="authCodeInsert">
+INSERT INTO auth_master(
+	role_cd,
+	role_nm,
+	role_stp
+)VALUES(
+	#{roleCd},
+	#{roleNm},
+	#{roleStp}
+)
+</insert>
+
+<!-- =================== 권한마스터 수정  =================== -->
+<update id="authCodeUpdate">
+UPDATE auth_master SET
+	role_nm = #{roleNm},
+	role_stp = #{roleStp}
+WHERE role_cd = #{roleCd}
+</update>
+
+<!-- =================== 권한마스터 삭제  =================== -->
+<delete id="authCodeDelete">
+DELETE FROM auth_master WHERE role_cd = #{value}
+</delete>
+
+<!-- =================== 유저 목록  =================== -->
+<select id="getAuthUserList" resultType="com.taxholic.manage.system.code.dto.AuthCode">
+SELECT
+ 	A.user_id AS userId,
+ 	B.user_nm AS userNm
+FROM auth_member_role A, auth_member B
+WHERE A.user_id = B.user_id
+GROUP BY A.user_id
+</select>
+
+<!-- =================== 유저권한  =================== -->
+<select id="getAuthUserRoleList" resultType="com.taxholic.manage.system.code.dto.AuthCode">
+SELECT
+	B.seq_no AS seqNo,
+	A.role_cd AS roleCd,
+	A.role_nm AS roleNm
+FROM auth_master A, auth_member_role B
+WHERE A.role_cd = B.role_cd
+AND user_id = #{value}
+ORDER BY A.role_stp
+</select>
+
+<!-- =================== 유저체크  =================== -->
+<select id="getUserCount" resultType="java.lang.Integer">
+SELECT count(*) FROM auth_member where user_id = #{value}
+</select>
+
+<!-- =================== 유저권한 삭제  =================== -->
+<delete id="authCodeRegDelete">
+DELETE FROM auth_member_role WHERE user_id = #{value}
+</delete>
+
+<!-- =================== 유저권한 등록  =================== -->
+<insert id="authCodeRegProc">
+INSERT INTO auth_member_role (user_id, role_cd, modify_dt) VALUES
+<foreach collection="list" item="item" separator="," >
+    ( '${item.userId}','${item.roleCd}',SYSDATE() )
+</foreach>
+
+ </insert>
+
+
+
+</mapper>

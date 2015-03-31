@@ -1,0 +1,18 @@
+#!/bin/sh 
+
+USER=oracle
+ORACLE_HOME=/usr/local/oracle10g/oraapp
+
+case "$1" in
+        start)
+        # Starting Oracle database 
+        su - $USER -c "$ORACLE_HOME/bin/dbstart $ORACLE_HOME"
+        ;;
+        stop)
+        # Shutting down Oracle database 
+        su - $USER -c "$ORACLE_HOME/bin/dbshut $ORACLE_HOME"
+        ;;
+        *)
+        echo "Usage: `basename $0` {start|stop}" >&2
+        ;;
+esac

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="manage.community.memo">
+
+<!-- =================== 메모목록  수 =================== -->
+<select id="getMemoCount" resultType="java.lang.Integer">
+SELECT 
+	count(1)
+FROM sk_memo
+WHERE user_id = #{userId} 
+
+<if test="searchString != null">
+	AND MATCH(content)  AGAINST (${searchString} IN BOOLEAN MODE)  
+</if>
+
+</select>
+
+<!-- =================== 메모목록  =================== -->
+<select id="getMemoList" resultType="com.taxholic.manage.community.dto.Memo">
+SELECT 
+	seq_no AS seqNo,
+	content,
+	DATE_FORMAT(reg_date,'%Y/%m/%d  %H:%i') AS regDate 
+FROM sk_memo
+WHERE user_id = #{userId} 
+
+<if test="searchString != null">
+	AND MATCH(content)  AGAINST (${searchString} IN BOOLEAN MODE)  
+</if>
+
+ORDER BY seq_no DESC
+LIMIT #{start},#{limit}
+</select>
+
+<!-- =================== 메모조회  =================== -->
+<select id="getMemo" resultType="java.lang.String">
+SELECT 
+	content
+FROM sk_memo
+WHERE seq_no = #{seqNo} AND user_id = #{userId} 
+</select>
+
+<!-- =================== 메모등록  =================== -->
+<insert id="memoInsert">
+INSERT INTO sk_memo(
+	user_id,
+	content,
+	reg_date
+)VALUES(
+	#{userId},
+	#{content},
+	SYSDATE()
+)
+</insert>
+
+<!-- =================== 메모수정  =================== -->
+<update id="memoUpdate">
+UPDATE sk_memo SET 
+	content = #{content}
+WHERE seq_no = #{seqNo} AND user_id = #{userId} 
+</update>
+
+<!-- =================== 메모삭제  =================== -->
+<update id="memoDelete">
+DELETE FROM sk_memo WHERE  seq_no = #{seqNo} AND user_id = #{userId}
+</update>
+
+</mapper>

@@ -1,0 +1,71 @@
+#appMem{
+	width:35px;
+	float:left;
+	margin:0px 10px 0px 5px
+}
+#appMem .memTitle{
+	text-align:center
+}
+#appMem .lineWraper .lineBase{
+	height:2px;
+	background-color: #DDDDDD;
+	margin-bottom:1px;
+}
+#appMem .lineWraper .lineActive{
+	height:2px;
+	background-color: #2B6AB9;
+	margin-bottom:1px;
+}
+#appMem .appRate .digit{
+	width:18px;
+	float:left;
+	text-align:right;
+}
+#appMem .appRate .per{
+	width:10px;
+	float:left;
+	padding-left:2px;
+}
+#appMemStatus{
+	padding-top:10px;
+	line-height:18px;
+	text-align:left;
+}
+
+#stockSyncDiv{
+	width:210px;
+	float:left;
+	text-align:right
+}
+
+#stockUpdateDiv{
+	width:210px;
+	float:right;
+	text-align:right
+}
+
+#stockPriceSync{
+	float:left;
+	text-align:center;
+	border:2px solid #C9C9C9;
+	width:190px;
+	height:60px;
+	padding:10px;
+}
+
+#stockPriceBatch{
+	float:right;
+	text-align:center;
+	border:2px solid #C9C9C9;
+	width:190px;
+	height:60px;
+	padding:10px;
+}
+
+.batchBox DIV{
+	border:2px solid #C9C9C9;
+	height:300px;
+	padding:10px;
+	line-height:18px;
+	overflow:auto
+}

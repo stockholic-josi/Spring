@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Set some variables
+MYSELF=`basename $0`
+
+case "$1" in
+        start)
+        /usr/sbin/vsftpd & >/dev/null 2>&1 ; echo 'vsftp start'
+        ;;
+        *)
+        echo "Usage: ${MYSELF} { start }"
+        exit 64
+        ;;
+esac

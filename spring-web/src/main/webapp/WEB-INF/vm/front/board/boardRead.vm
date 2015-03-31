@@ -1,0 +1,248 @@
+#parse( "front/board/subTitle.vm" )
+<html>
+<head>	
+<script type="text/javascript" src="/js/reply.js"></script>
+<script type="text/javascript" src="/js/jquery.flash.js"></script>
+<script type="text/javascript" src="/js/jquery.externalinterface.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/extjs/resources/css/ext-all.css"/>
+	
+<script>
+
+//--------------------------------------------------------------------- fileDownLoad Start
+//------------------------------------ Air / App 설치 확인
+function setUpApp(msg){
+	
+	if(msg == "Air"){
+		document.location.href = "/zFileDownLoad/fileDownLoadInstallAir.html";
+	}else if(msg == "App"){
+		document.location.href = "/zFileDownLoad/fileDownLoadInstallApp.html";
+	}
+
+}
+
+var fileData = {};
+
+//------------------------------------ Flex 에서 호출
+function checkFileList(){
+
+	if( $(".fileList").find("input:checkbox:checked").length == 0){
+		alertDialog("알림","파일을 선택해 주세요",function(){
+			$("#dialog").dialog("close"); 
+		});
+	}else{
+		callFlexSetFileList();
+	}
+}
+
+//------------------------------------ Flex setFileList 호출
+function callFlexSetFileList(){
+	
+	if(fileData.fileNm.length > 0){
+		
+		$("#zFileDownLoad").externalInterface({
+			method : 'setFileList',
+			args : {
+				fileData : fileData
+			}
+		});
+	}
+}
+
+function sendFileList(){
+
+	 fileData = {
+	 	filePath : "",
+		fileNm : [],
+		fileRealNm : [],
+		fileSize : []
+	};
+
+	if( $(".fileList").find("input:checkbox:checked").length == 0) return;
+
+	fileData.filePath = "$rc.getMessage("URL.host")$rc.getMessage("board.filePath")/$!{dto.flag}";
+	
+	 $(".fileList").find("input:checkbox").each(function() {
+		if( $(this).attr("checked") ){
+			var file = $(this).val().split("<@>");
+			
+			fileData.fileNm.push(file[0]);
+			fileData.fileRealNm.push(file[1]);
+			fileData.fileSize.push(file[2]);
+		}
+    });
+	
+}
+
+
+$(document).ready(function(){
+
+	$('#downFile').flash({
+		src : '/zFileDownLoad/zFileLauncher.swf',
+		id : 'zFileDownLoad',
+		width : '75',
+		height : '22',
+		bgcolor : '#ffffff',
+		allowScriptAccess : 'always'
+	});
+	
+	 $("input:checkbox").click(function() {
+		sendFileList();
+    });
+	
+	$("#btnAllCheck").click(function() {
+		
+		if( $(this).attr("checked") == true ){
+			$(".fileList").find("input:checkbox").attr("checked", "checked");
+		}else{
+			$(".fileList").find("input:checkbox").attr("checked", "");
+		}
+
+		sendFileList();
+    });
+
+
+});
+
+
+//--------------------------------------------------------------------- fileDownLoad End
+
+var params = {
+		start : '$!{dto.start}',
+		flag : '$!{dto.flag}',
+		searchKey : '$!{dto.searchKey}',
+		searchValue : '$!{dto.searchValue}'
+}
+function boardList(){
+	location.href = "./boardList.do?" + jQuery.param(params,true);
+}
+function boardDelete(no){
+	
+	cfDialog("알림","삭제하시겠습니까.",function(){
+		$("#dialog").dialog("close"); 
+		location.href = "./boardDelete.do?no=" + no + "&" + jQuery.param(params,true);
+	});
+	
+}
+function boardUpdate(no){
+	location.href = "./boardUpdateForm.do?no=" + no + "&" + jQuery.param(params,true);
+}
+function boardReply(no){
+	location.href = "./boardReplyForm.do?no=" + no + "&" + jQuery.param(params,true);
+}
+
+function downLoad(T,FN,FRN){
+	location.href = "/downLoad.do?target=" + T + "&fileNm=" + FN + "&fileRnm=" + encodeURIComponent(FRN);
+}
+
+
+//댓글
+$(document).ready(function() {
+	reply.init('board','$!board.no');
+});
+</script>
+
+</head>
+
+<body>
+	
+<div id="wrapper">
+	
+	<p class="title">$!{subTitle}</p>	
+
+	<table cellspacing=0 cellpadding=0 border=0 width="100%">
+	<tr height=20>
+		<td width="50%">이름 : $!board.userNm</td>
+		<td width="50%" align=right>
+			날짜  : $board.regDate&nbsp;&nbsp;&nbsp;
+			조회 : $board.readCnt
+		</td>
+	</tr>
+
+	<tr><td height=2 colspan="2" bgcolor='#ACBDEA'></td></tr>
+	<tr height=28>
+		<td colspan="2" style="padding:0 0 0 5"><font color=#8C8C8C><b>$board.title </b></font></td>
+	</tr>
+	<tr><td colspan="2" height=1 bgcolor='#D2D2D2'></td></tr>
+	<tr>
+		<td colspan="2" height=200 style="line-height:20px;padding:5" valign="top">
+			$board.content
+		</td>
+	</tr>
+	<tr><td colspan="2" height=2 bgcolor=#D2D2D2></td></tr>
+	
+	<tr>
+		<td colspan="2" height='50' style="line-height:20px;padding:10">
+			<div style="margin:10px 0px 10px 0px">
+				<div style="font-size:10pt;float:left"><input type="checkbox" id="btnAllCheck"> 전체선택</div> &nbsp;
+				<div id="downFile"></div>
+			</div>
+			
+			 #foreach($list in $fileList)
+			<div style="height:25px" class="fileList">
+				
+				<input type="checkbox" value="$!list.fileName<@>$!list.fileRealName<@>$!list.fileSize">
+				#if($HtmlUtil.getFileExist("${rc.getMessage('DocBase')}/images/board/ext_img/${list.fileExt.toLowerCase()}.gif"))
+				<img src="/images/board/ext_img/${list.fileExt.toLowerCase()}.gif" align="absmiddle">
+				#else
+				<img src="/images/board/ext_img/etc.gif" align="absmiddle">
+				#end
+				<a href="javascript:downLoad('board','$!{dto.flag}/$!list.fileName','$!list.fileRealName')">$list.fileRealName ($HtmlUtil.getFileSize($list.fileSize))</a>
+			 </div>
+			 #end
+			 
+		</td>
+	</tr>
+	<tr><td colspan="2" height=2 bgcolor=#D2D2D2></td></tr>
+	
+	<tr>
+		<td height=40 colspan="2">
+            <button onClick="boardList()">목록</button>
+            <button onClick="boardReply('$!board.no')">답변</button>
+            <button onClick="boardUpdate('$!board.no')">수정</button>
+            <button onClick="boardDelete('$!board.no')">삭제</button>
+		</td>
+	</tr>
+	
+	<tr>
+		<td colspan="2">
+			
+		<table cellspacing=0 cellpadding=0 border=0 width='100%'>
+		
+		<tr><td colspan="2" height=2 bgcolor=#E3E3E3></td></tr>
+		#foreach($list in $readList)
+
+		#if($velocityCount == 1)	
+		<tr>	
+			<td width=100 bgcolor=#F9F9F9 height='28' align='center'><font color=#616161><b>이전글</b></font></td>
+			<td bgcolor=#FFFFFF>&nbsp;&nbsp;
+				<a href="./boardRead.do?no=$!list.no&flag=$!params.flag">$!list.title</a>
+			</td>
+		</tr>	
+		#end
+		
+		#if($velocityCount == 2)
+		<tr>	
+			<td width=100 bgcolor=#F9F9F9 height=28 align=center><font color=#616161><b>다음글</b></font></td>
+			<td bgcolor=#FFFFFF>&nbsp;&nbsp;
+				<a href="./boardRead.do?no=$!list.no&flag=$!params.flag">$!list.title</a>
+			</td>
+		</tr>	
+		#end
+
+		<tr><td colspan="2" height=1 bgcolor=#E3E3E3></td></tr>
+		#end
+		</table>
+		
+		</td>
+		
+	</tr>
+	</table>
+	
+	<!-- 댓글 -->
+    <div id="reply"></div>
+
+</div>
+	
+</body>
+</html>

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+VPOP_UID=`id -u vpopmail`
+VPOP_GID=`id -g vpopmail`
+
+MAXSMTPD=`cat /var/qmail/control/concurrencyincoming`
+
+exec /usr/local/bin/softlimit -m 64000000 \
+        /usr/local/bin/tcpserver -vRHl0 \
+        -x /etc/tcprules.d/tcp.smtp.cdb \
+        -c ${MAXSMTPD} \
+        -u ${VPOP_UID} -g ${VPOP_GID} 0 25 \
+        /var/qmail/bin/qmail-smtpd \
+        /home/vpopmail/bin/vchkpw /bin/true 2>&1

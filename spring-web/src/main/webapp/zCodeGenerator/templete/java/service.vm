@@ -1,0 +1,94 @@
+package ${pkgNm}.service;
+
+import java.util.List;
+import java.util.ArrayList;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Service;
+import com.stockholic.dao.CommonDao;
+import ${pkgNm}.dto.${classNm};
+
+@Service("${pkgNm}.service.${classNm}Service")
+public class ${classNm}Service{
+
+	@Resource
+	private CommonDao commonDao;
+	
+	/**
+	 * 목록 개수
+	 * @param dto : ${pkgNm}
+	 * @return int
+	 */
+	public int get${classNm}Count(${classNm} dto) {		
+		return this.commonDao.getInt("${pkgNm}.get${classNm}Count",dto);	
+	}
+	
+	/**
+	 * 목록
+	 * @param dto : ${pkgNm}
+	 * @return List
+	 */
+	public List get${classNm}List(${classNm} dto) {
+		
+		int total = get${classNm}Count(dto);				
+		dto.setTotal(total);		
+	
+		List list = new ArrayList();
+		
+		int idx = 1;
+		if(total > 0 ){
+			dto.setLimit(10);
+			dto.setTotalPage((int) Math.ceil( total / (double)dto.getLimit()));
+			dto.setStart((Integer.parseInt(dto.getP()) - 1) * dto.getLimit());		
+			
+			list = this.commonDao.getList("${pkgNm}.get${classNm}List",dto);
+			idx = total - dto.getStart();
+			for(int i = 0; i < list.size(); i++) {				
+				
+				${classNm} c = (${classNm})list.get(i);
+				c.setNum(idx);
+				list.set(i, c);
+				
+				idx--;
+			}
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * 조회
+	 * @param dto : ${pkgNm}
+	 * @return ${pkgNm}
+	 */
+	public ${classNm} get${classNm}(${classNm} dto) {
+		return this.commonDao.getObject("${pkgNm}.get${classNm}",dto);
+	}
+	
+	/**
+	 * 등록
+	 * @param dto : ${pkgNm}
+	 * @return boolean
+	 */
+	public boolean ${classAlias}Insert(${classNm} dto) {
+		return this.commonDao.insert("${pkgNm}.get${classNm}Insert",dto);	
+	}
+	
+	/**
+	 * 수정
+	 * @param dto : ${pkgNm}
+	 * @return boolean
+	 */
+	public boolean ${classAlias}Update(${classNm} dto) {
+		return this.commonDao.update("${pkgNm}.get${classNm}Update",dto);	
+	}
+	
+	/**
+	 * 삭제
+	 * @param dto : ${pkgNm}
+	 * @return boolean
+	 */
+	public boolean ${classAlias}Delete(${classNm} dto) {
+		return this.commonDao.delete("${pkgNm}.get${classNm}Deletet",dto);	
+	}
+
+}

@@ -1,0 +1,1015 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+ <title> 정규식 </title>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" href="/css/global.css" type="text/css">
+
+  <SCRIPT LANGUAGE="JavaScript">
+  <!--
+    var tagColor = [];
+    tagColor.push([/\b(function)\b/g, "#6633FF" ]);
+    tagColor.push([/\b(String)\b/g, "#FF0000" ]);
+    tagColor.push([/\b(document)\b/g, "#FF0000" ]);
+    tagColor.push([/\b(return)\b/g, "#CC00CC" ]);
+    tagColor.push([/\b(var)\b/g, "#FF3399" ]);
+    tagColor.push([/\b(if)\b/g, "#6699CC" ]);
+    tagColor.push([/\b(else)\b/g, "#6699CC" ]);
+    tagColor.push([/\s+(\w+)\s*\(/g, "#00FF66" ]);
+
+    var cnt = 0;
+    function colorful(object){
+        var inner = object.innerHTML;
+        inner = inner.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\t/g, "&nbsp;&nbsp;&nbsp;&nbsp;").replace(/ /g, "&nbsp;").replace(/\n/g, "<br>\n");
+        for( cnt=0; cnt < tagColor.length; cnt++){
+            inner = inner.replace(tagColor[cnt][0], function (str, p1){
+                return str.replace(p1, "<font color = '" + tagColor[cnt][1] + "'>" + p1 + "</font>");
+            });
+        }
+        var newDiv = document.createElement("div");
+        newDiv.id = object.id;
+        newDiv.innerHTML = inner;
+        object.parentElement.insertBefore(newDiv, object);
+        object.parentElement.removeChild(object);
+    }
+
+    function XMPColor(){
+        var xmps = document.getElementsByTagName("XMP");
+        while( xmps.length > 0 ){
+            colorful(xmps[0]);
+        }
+    }
+    /*
+    * checkReg 함수를 호출하여 결과를 화면에 뿌린다.
+    */
+    function writeExample(re, tests){
+        document.write(checkReg(re,tests));
+    }
+
+    /*
+    * (정규식, 체크할 스트링 array)
+    * 정규식을 뿌려주고, array의 element들을 입력받은 정규식에 적합한지 판단하여
+    * 결과를 String으로 돌려준다.
+    */
+    function checkReg(re, tests){
+        var res = "<b>" + re.toString() +"</b>";
+        res += "<UL>";
+        for (var i=0; i< tests.length; i++){
+            var result ="";
+            if (re.test(tests[i])){
+                result = tests[i].replace(re, function (str){ 
+                        return "<b>" + str  + "</b>";
+                    } ) + "<font color=\"green\"><b>ⓥ</b></font>";
+                var remembered = re.exec(tests[i]);
+                if (remembered != null && remembered.length > 1){
+                    for (var j=1; j< remembered.length; j++){
+                        result += "<br>" + j +"th :"+ remembered[j]; 
+                    }
+                }
+            }else{
+                result = tests[i] + "<font color=\"red\"><i>ⓘ</i></font>";
+            }
+            res +="<LI>"+ result + "<br>";
+        }
+        res +="</UL>";
+        return res;
+    }
+  //-->
+  </SCRIPT>
+ </HEAD>
+
+ <BODY onload="XMPColor()">
+
+ 
+<div style="background-color:#CCFFCC;color:#3333FF">본 문서의 저작권은 <a href="http://iilii.egloos.com/4445254">anti-nhn license</a>에 따릅니다.
+</div>
+
+<div style="background-color:#FFFFCC">*본 페이지에는 자바스크립트가 많이 들어있습니다. 자바스크립트가 실행되지 않으면 제대로 보이지 않습니다.<br>
+*본 페이지는 IE용 태그를 사용하였으므로, firefox 등에서는 정상작동하지 않을 수 있습니다.<br>
+*테스트를 해보실라문 <a href="http://kio.zc.bz/Lecture/reg_test.html">요기를 클릭</a>
+</div>
+
+<H1>차례</H1>
+<UL>
+    <LI><a href="#chap01">1. 정규식이란?</a>
+    <LI><a href="#chap02">2. 정규식 만들기</a>
+    <LI><a href="#chap03">3. 정규식 표현법</a>
+    <LI><a href="#chap04">4. 정규식 사용 예제</a>
+    <LI><a href="#chap05">5. Javascript 정규식 함수</a>
+    <LI><a href="#chap06">6. 정규식으로 만든 유용한 Javascript 함수</a>
+    <LI><a href="#chap07">7. Java 정규식 함수</a>
+</UL>
+
+ <a name="chap01"><H1>1. 정규식이란?</H1></a>
+    <UL style="font-size:12pt;color:#7777FF">
+        <LI>String의 <b><font color="#FF0000">검색</font></b>, <b><font color="#FF0000">치환</font></b>, <b><font color="#FF0000">추출</font></b>을 위한 패턴.
+        <LI>언어별 사용법은 대동소이함.
+        <LI>패턴예>전화번호 형식, 이메일 형식 등.
+    </UL>
+
+
+ <a name="chap02"><H1>2. 정규식 만들기</H1></a>
+ <OL style="font-size:14pt;color:#6666FF">
+    <LI>Javascript
+    <UL style="font-size:12pt;color:#7777FF">
+        <LI><div style="background-color:#FFFFCC">var regexp = <i>/pattern/[flags]</i> ;<br>
+        var test = regexp.test(<i>to be checked</i>)</div>
+        <LI><div style="background-color:#CCFFFF">var regexp = new RegExp(<i>"pattern"[, "flags"]</i>);<br>
+        var test = regexp.test(<i>to be checked</i>) </div>
+        <LI>flags for javascript
+        <UL style="font-size:12pt;color:#7777FF">
+            <LI>g : global match, 일반적으로 패턴이 1번만 발견되면 찾기를 종료하지만, g flag가 있으면, 문자열 내에서 모든 패턴을 찾는다.
+            <LI>i : ignore case, 대소문자를 고려하지 않고 체크한다.[a-z]와 [A-Z]는 같은 표현이 된다.
+            <LI>m : match over multiple lines, 여러 줄에 걸쳐 체크를 한다.
+        </UL>
+    </UL>
+    <LI>Java
+    <UL style="font-size:12pt;color:#7777FF">
+        <LI>java.util.regex package
+        <LI><div style="background-color:#FFFFCC">Pattern p = Pattern.compile(<i>"pattern"</i>); <br>
+            Matcher m = p.matcher(<i>"string to be checked"</i>); <br>
+            boolean b = m.matches();</div>
+        <LI><div style="background-color:#CCFFFF">
+        boolean b = Pattern.matches(<i>"pattern"</i>, <i>"string to be checked"</i>);</div>
+    </UL>
+ </OL>
+
+
+ <a name="chap03"><H1>3. 정규식 표현법</H1></a>
+ *<font color="green"><b>ⓥ</b></font>는 valid, <font color="red"><i>ⓘ</i></font>는 invalid<br>
+ *두꺼운 글씨체는 매칭되는 부분.<br>
+ *예제는 javascript 기준이며, 언어에 따라 다소 차이가 발생할 수 있다.
+  <TABLE width=900 border=0 CELLPADDING="5" CELLSPACING="1" BGCOLOR="#CCCCCC">
+  <TR bgcolor="#DDDDDD">
+    <TH width=50>문자</TH>
+    <TH width=300>용도</TH>
+    <TH width=426>예제</TH>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\</TD>
+    <TD width="300">
+    <UL>
+    <LI>특수문자를 의미
+    <LI>특수문자의 사용을 제외(특수문자 앞에서)
+    </UL>
+    </TD>
+    <TD>
+    <UL>
+        <LI>b는 b라는 글자를 의미 하지만 \b는 단어 경계를 의미
+        <LI>*은 0번이상 반복이라는 의미이지만, \*는 *이라는 글자를 의미.
+    </UL>
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>^</TD>
+    <TD width="300">문자열의 시작. []안에서는 not의 의미<br>
+        * ^A는 "A로 시작"이라기 보다는 "시작 직후에 A가 나온다"는 의미로 해석하는 것이 좋다. 즉, 시작과 끝과 같은 빈 공간을 하나의 문자로 간주하는 것이 좋다.
+    </TD>
+    <TD>
+    <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^A/g, ["A string", "an A"]);
+        writeExample(/[^A]/g, ["A string", "an A"]);
+    //-->
+    </SCRIPT>
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>$</TD>
+    <TD width="300">문자열의 마지막<br>
+    </TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/t$/, ["eat", "GREAT"]);
+    //-->
+    </SCRIPT>
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>*</TD>
+    <TD width="300">0번 이상 반복 (b 가 0번이상)</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/ab*d/g, ["ad", "abd", "abdcdeabbbbdedb", "ab" , "axd"]);
+    //-->
+    </SCRIPT>    
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>+</TD>
+    <TD width="300">1번 이상 반복 ( = {1,} ) , (b 가 1번이상)</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/ab+d/g, ["ad", "abd", "abdcdeabbbbdedb", "ab" , "axd"]);
+    //-->
+    </SCRIPT>    
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>?</TD>
+    <TD width="300">0번 이나 1번 <br> (e 가 0번이나 1번이상, le 가 0번이나 1번이상)</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/e?le?/g, ["angel", "angle", "element"]);
+        writeExample(/abc\-?d/g, ["abc-d", "abcd"]);
+    //-->
+    </SCRIPT>    
+
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>.</TD>
+    <TD width="300">new line 을 제외한 모든 글자</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/.n/g, ["nay, an apple is on the tree", "nay"]);
+    //-->
+    </SCRIPT>    
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>(x)</TD>
+    <TD width="300">x를 체크하고 체크한 값을 변수로 저장</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/(f..) (b..)/, ["foo bar"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>(?:x)</TD>
+    <TD width="300">x를 체크하고 체크한 값을 변수로 저장하지 않음</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/(?:f..) (b..)/, ["foo bar", "bar foo"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>x|y</TD>
+    <TD width="300">x 또는 y</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/green|red/, ["green apple", "red apple", "yellow apple"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>x(?=y)</TD>
+    <TD width="300">x후에 y가 나오고, x부분만 매칭되는 부분으로 간주</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/blah(?=soft|hard)/, ["blahsoft", "blahhard", "blah soft"]);
+        writeExample(/blah(?=soft).*/, ["blahsoft", "blahhard", "blah soft"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>x(?!y)</TD>
+    <TD width="300">x가 나오고 그 뒤에 y가 있으면 안 됨</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/blah(?!hard)/, ["blahsoft", "blahhard", "blah soft"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>{n}</TD>
+    <TD width="300">앞에 지정한 것이 n개</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/.{3}/, ["ab", "abc", "abcd", "홍길동"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>{n,}</TD>
+    <TD width="300">앞에 지정한 것이 n개 이상</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/.{3,}/, ["ab", "abc", "abcd"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>{n,m}</TD>
+    <TD width="300">앞에 지정한 것이 n~m개</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/.{3,5}/, ["ab", "abc", "abcd", "홍길동"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>[xyz]</TD>
+    <TD width="300">x나 y나 z. []안에는 얼마든지 쓸 수 있다.</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/[abc]{2}/, ["ab", "abc", "adbd"]);
+    //-->
+    </SCRIPT>
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>[x-z]</TD>
+    <TD width="300">x에서 z까지</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/[a-z]{4,}/g, ["She sells sea shells by the sea shore는 Very 어렵다!"]);
+    //-->
+    </SCRIPT>
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>[^xyz]</TD>
+    <TD width="300">x,y,z를 제외한 나머지 모든 것</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/[^a-z]{2,}/g, ["I'm a good man", "I am A good Man"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>[\b]</TD>
+    <TD width="300">백스페이스. \b와 혼동하지 말것.</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/[\b]/g, ["ab\bcd"]);
+    //-->
+    </SCRIPT>
+    일반적인 String에서는 \b가 백스페이스를 의미한다.
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\b</TD>
+    <TD width="300">단어의 경계.[\b]와 혼동하지 말것.</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/\bn[a-z]/g, ["I am not a boy", "online", "nope"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\B</TD>
+    <TD width="300">\b 를 제외한 전부</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/\Bn[a-z]/g, ["noonday", "online", "nope"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\cX</TD>
+    <TD width="300">컨트롤X와 매칭. \cM은 컨트롤M과 매칭</TD>
+    <TD></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\d</TD>
+    <TD width="300">숫자.[0-9]와 같음</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/\d/g, ["7 eight 9", "123"]);
+        writeExample(/^0[0-9]{2}/g, ["0120", "12011"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\D</TD>
+    <TD width="300">\d 를 제외한 전부</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/\D/g, ["7 eight 9", "12?3" ]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\f</TD>
+    <TD width="300">form-feed</TD>
+    <TD></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\n</TD>
+    <TD width="300">new line</TD>
+    <TD></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\r</TD>
+    <TD width="300">carriage return</TD>
+    <TD></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\s</TD>
+    <TD width="300">white space<BR>ex&gt;탭, 띄어쓰기, \n, \r</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/k\s/g, ["korea", "blank is", "blank"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\S</TD>
+    <TD width="300">\s 를 제외한 전부</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/k\S/g, ["korea", "blank is"]);
+    //-->
+    </SCRIPT></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\t</TD>
+    <TD width="300">탭</TD>
+    <TD></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\v</TD>
+    <TD width="300">vertical tab</TD>
+    <TD></TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\w</TD>
+    <TD width="300">알파벳+숫자+_. [A-Za-z0-9_]와 동일</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/\w/g, ["!@#$%^&*()+_-[]{}\\|\"':;,.<>?/"]);
+    //-->
+    </SCRIPT>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_가 &lt;b&gt;를 먹여도 별로 티가 안 난다.
+    </TD>
+  </TR>
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\W</TD>
+    <TD width="300">\w 빼고 전부</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/\W/g, ["!@#$%^&*()+_-[]{}\\|\"':;,.<>?/"]);
+    //-->
+    </SCRIPT>
+    </TD>
+  </TR>
+
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\n</TD>
+    <TD width="300">\n이 자연수일때, ()로 지정한 n번째 정규식</TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/(.{2})e tru\1 is out \1ere/, ["the truth is out there ..."]);
+    //-->
+    </SCRIPT>
+    (th)가 \1로 지정된다.
+    </TD>
+  </TR>
+
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\xhh</TD>
+    <TD width="300">hh는 hexacode, </TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/[\x21-\x40]/g, ["!@#$%^&*()po"]);
+    //-->
+    </SCRIPT>
+    <a href="http://www.utoronto.ca/webdocs/HTMLdocs/NewHTML/iso_table.html" target="_blank">Code table 보기</a>
+    </TD>
+  </TR>
+
+  <TR valign="top" bgcolor="#FFFFFF">
+    <TD>\uhhhh</TD>
+    <TD width="300">hhhh는 hexacode, </TD>
+    <TD><SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/[\u3131-\u3163\uac00-\ud7a3]/g, ["나는 blah 직원입니다.ㅋㅋ"]);
+    //-->
+    </SCRIPT>
+    코드 번호> 3131:ㄱ    3163:ㅣ ac00:가    d7a3:힣 (javascript, java)
+    </TD>
+  </TR>
+  </TABLE>
+<br>
+
+ <a name="chap04"><H1>4. 정규식 사용 예제</H1></a>
+
+  <TABLE width=900 border=0 CELLPADDING="5" CELLSPACING="1" BGCOLOR="#CCCCCC">
+  <TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^[0-9]/, ["09없다", "100점", "집이 10평"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^\w+$/, ["blahsoft","blah(co)" ,"blah soft"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^[a-zA-Z][\w\-]{4,11}$/, ["blah2010","blah-2010!", "2010blah", "ILikegoooooooooooooooooogle"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}/, ["02-6288-2114", "031-779-7114", "12-1234-5678", "02-6288-2114545", "02-0288-2114"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^0\d{1,2}-[1-9]\d{2,3}-\d{4}$/, ["02-6288-2114", "031-779-7114", "12-1234-5678" , "02-2123-12314545", "02-0288-2114"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^[\.a-zA-Z0-9\-]+\.[a-zA-Z]{2,}/, ["r-d.blah.co.kr","r-d.blah.co.kr입니다.", "blah..co.kr", "a.com"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^(?:[\w\-]{2,}\.)+[a-zA-Z]{2,}$/, ["r-d.blah.co.kr","r-d.blah.co.kr입니다." ,"blah..co.kr", "a.com"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^[_a-zA-Z0-9\-]+@[\._a-zA-Z0-9\-]+\.[a-zA-Z]{2,}/, ["abc@haha.co.kr", "abc@haha..co.kr", "hwang@a.com"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^[\w\-]+@(?:(?:[\w\-]{2,}\.)+[a-zA-Z]{2,})$/, ["abc@haha.co.kr", "abc@haha..co.kr", "hwang@a.com"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+    writeExample(/^([a-z]+):\/\/((?:[a-z\d\-]{2,}\.)+[a-z]{2,})(:\d{1,5})?(\/[^\?]*)?(\?.+)?$/i, ["http://www.blah.co.kr/main/index.jsp?var=value", "http://www.blah.co.kr/main/index.jsp", "http://blah.co.kr/", "http://blah.co.kr",  "http://blah.co.kr:8088/main/"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td>
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/^[ㄱ-ㅣ가-힣]+$/, ["티맥스소프트", "ㅜㅜ", "ㅎㅎ"]);
+    //-->
+    </SCRIPT>
+  </td>
+</tr>
+
+</table>
+<br>
+
+ <a name="chap05"><H1>5. Javascript 정규식 함수</H1></a>
+  <TABLE width=900 border=0 CELLPADDING="5" CELLSPACING="1" BGCOLOR="#CCCCCC">
+  <TR bgcolor="#DDDDDD">
+  <th width=200>함수</th>
+  <th width=450>코드예제</th>
+  <th width=455>코드설명</th>
+  </tr>
+
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=200>Array RegExp.exec (<i>to be checked</i>)</td>
+  <td valign="top" width=450>
+  <XMP id ="ex_exec">
+var myRe=/d(b+)(d)/ig;
+var myArray = myRe.exec("cdbBdbsbz");
+</XMP>
+<p>
+
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/d(b+)(d)/ig, ["cdbBdbsbz"]);
+    //-->
+    </SCRIPT>
+  </td>
+  <td width=455>
+<SCRIPT LANGUAGE="JavaScript1.2">
+    <!--
+    eval(document.getElementById('ex_exec').innerHTML);
+
+    document.write("myArray.index =" + myArray.index +" ; (처음으로 매칭되는 위치, 컴터가 늘 그렇듯 위치는 0번째부터 센다.)<br>");
+    document.write("myArray.input = "+ myArray.input +"; (체크할 대상)<br>");
+    document.write("myArray[0] = "+myArray[0]+";(검사에 통과한 부분)<br>");
+    document.write("myArray[1] = "+myArray[1]+";(1번째 괄호에서 체크된 부분)<br>");
+    document.write("myArray[2] = "+myArray[2]+";(2번째 괄호에서 체크된 부분)<br>");
+    document.write("<br>");
+    
+    document.write("myRe.lastIndex =" + myRe.lastIndex +" ; (다음번 체크를 하기위한 위치.)<br>");
+    document.write("myRe.ignoreCase = " + myRe.ignoreCase +"; (/i 플래그 체크)<br>");
+    document.write("myRe.global = " + myRe.global +"; (/g 플래그 체크)<br>");
+    document.write("myRe.multiline = " + myRe.multiline +"; (/m 플래그 체크)<br>");
+
+
+    document.write("<br>");
+    document.write("RegExp.$_ = "+(RegExp.$_ ) +";(입력한 스트링)<br>");
+//    document.write("RegExp.$& = "+(RegExp.$& ) +";(정규식)<br>");
+//    document.write("RegExp.$+ = "+(RegExp.$+ ) +";(정규식)<br>");
+//    document.write("RegExp.$' = "+(RegExp.$' ) +";(정규식)<br>");
+//    document.write("RegExp.$` = "+(RegExp.$` ) +";(정규식)<br>");
+    document.write("RegExp.$1 = "+(RegExp.$1 ) +";(1번째 괄호에서 체크된 부분 )<br>");
+    //-->
+</SCRIPT>
+
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=200>boolean RegExp.test(<i>to be checked</i>)</td>
+  <td valign="top" width=450>
+
+
+  <XMP id="ex_test">
+var myRe=/d(b+)(d)/ig;
+var checked = myRe.test("cdbBdbsbz");
+document.write("checked = " + checked +";<br>");
+</XMP>
+<p>
+
+  <SCRIPT LANGUAGE="JavaScript">
+    <!--
+        writeExample(/d(b+)(d)/ig, ["cdbBdbsbz"]);
+    //-->
+    </SCRIPT>
+  </td>
+  <td  valign="top" width=455>실행결과:
+<SCRIPT LANGUAGE="JavaScript1.2">
+    <!--
+eval(document.getElementById('ex_test').innerHTML);
+    //-->
+</SCRIPT>
+
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=200>String RegExp.toString()</td>
+  <td valign="top" width=450>
+
+  <XMP id="ex_toString">
+var myRe=/d(b+)(d)/ig;
+var str = myRe.toString();
+document.write(str);
+</XMP>
+<p>
+  </td>
+  <td  valign="top" width=455>실행 결과:
+<SCRIPT LANGUAGE="JavaScript1.2">
+    <!--
+eval(document.getElementById('ex_toString').innerHTML);
+    //-->
+</SCRIPT>
+
+  </td>
+</tr>
+
+
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=200 rowspan=4>String String.replace(<i>pattern or string</i>, <i>to be replaced</i>)</td>
+  <td valign="top" width=450>
+  
+  <XMP id="ex_str_str">
+var str = "abcdefe";
+document.write(str.replace("e" , "f"));
+</XMP>
+  </td>
+  <td  valign="top" width=455>실행 결과:
+<SCRIPT LANGUAGE="JavaScript1.2">
+    <!--
+eval(document.getElementById('ex_str_str').innerHTML);
+    //-->
+</SCRIPT>
+    <br><br>
+    e가 2번 있지만, 첫번째 인자가 정규식이 아니라 문자열일 경우는 첫번째 것만 바꾼다.
+
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=450>
+  <XMP id="ex_reg_str">
+var str = "aba";
+document.write(str.replace(/^a/ , "c"));
+</XMP>
+  </td>
+  <td  valign="top" width=455>실행 결과:
+<SCRIPT LANGUAGE="JavaScript1.2">
+    <!--
+eval(document.getElementById('ex_reg_str').innerHTML);
+    //-->
+</SCRIPT>
+
+  </td>
+</tr>
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=450>
+  <XMP id="ex_str_$">
+var re = /(\w+)\s(\w+)/;
+var str = "John Smith";
+newstr = str.replace(re, "$2, $1");
+document.write(newstr)
+</XMP>
+  </td>
+  <td  valign="top" width=455>실행 결과:
+<SCRIPT LANGUAGE="JavaScript1.2">
+<!--
+eval(document.getElementById('ex_str_$').innerHTML);
+//-->
+</SCRIPT>
+<br><br>
+    re에 의해서 찾아진 문자열 들은 re에서 ()로 표현된 순서대로 $1, $2와 같이 변수로 저장된다.
+  </td>
+</tr>
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=450>
+  <XMP  id="ex_str_fun">
+var re = /\s(?:http|https):\/\/\S*(?:\s|$)/g;
+var str = "url is http://iilii.egloos.com/ !!\n";
+str += "blah home: http://www.blah.co.kr";
+newstr = str.replace(re, function (str,p1,offset,s) {
+     return "<a href='" + str + "'>" + str + "</a>";
+  }
+).replace(/\n/, "<br>");
+document.write(newstr);
+</XMP>
+  </td>
+  <td  valign="top" width=455>
+<SCRIPT LANGUAGE="JavaScript1.2">
+<!--
+eval(document.getElementById('ex_str_fun').innerHTML);
+//-->
+</SCRIPT>
+    <br>
+    <br>
+     str: 찾은 문자열<br>
+     p1: ()에서 검색된 1번째 문자열. 마찬가지로 p2,p3 등도 가능<br>
+     offset: str을 찾은 위치<br>
+     s : 원본 문자열.<br>
+  </td>
+</tr>
+
+
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=200>Array String.match(<i>regular expression</td>
+  <td valign="top" width=450>
+  <XMP id="ex_match">
+var str = "ABCdEFgHiJKL";
+var myResult = str.match(/[a-z]/g );
+for(var cnt = 0 ; cnt < myResult.length; cnt++){
+    document.write(cnt +":" + myResult[cnt] +"<br>");
+}
+
+document.write("비교<br>");
+
+var str = "ABCdEFgHiJKL";
+var myResult = /[a-z]/g.exec(str);
+for(var cnt = 0 ; cnt < myResult.length; cnt++){
+    document.write(cnt +":" + myResult[cnt] +"<br>");
+}
+</XMP>
+
+  </td>
+  <td  valign="top" width=455>실행 결과:<br>
+<SCRIPT LANGUAGE="JavaScript1.2">
+    <!--
+eval(document.getElementById('ex_match').innerHTML);
+    //-->
+</SCRIPT>
+    <br>
+    String.match(RegExp) =>g flag가 있어도 다 찾아낸다. <br>
+    RegExp.exec(String) =>g flag가 있으면, 한 개만 찾고 끝낸다.
+  </td>
+</tr>
+
+<TR bgcolor="#FFFFFF">
+  <td valign="top" width=200>Array String.split(<i>[separator[, limit]]</i>)</td>
+  <td valign="top" width=450>
+  <XMP id="ex_split">
+var str = "ABCdEFgHiJKL";
+var myResult = str.split(/[a-z]/g , 3);
+for(var cnt = 0 ; cnt < myResult.length; cnt++){
+    document.write(cnt +":" + myResult[cnt] +"<br>");
+}
+</XMP>
+  </td>
+  <td  valign="top" width=455>실행 결과:<br>
+<SCRIPT LANGUAGE="JavaScript1.2">
+    <!--
+eval(document.getElementById('ex_split').innerHTML);
+    //-->
+</SCRIPT>
+    <br>
+    주어진 문자열을 separator를 기준으로 limit 만큼 자른다.
+  </td>
+</tr>
+
+
+  </table>
+
+ <a name="chap06"><H1>6. 정규식으로 만든 유용한 Javascript 함수</H1></a>
+     <TABLE width=900 border=0 CELLPADDING="5" CELLSPACING="1" BGCOLOR="#CCCCCC">
+
+<TR bgcolor="#DDDDDD"><td><h3>String removeTags(<i>input</i>)</h3>
+HTML tag부분을 없애준다
+</td></tr>
+<TR bgcolor="#FFFFFF"><td>
+<XMP id="func_remove">
+function removeTags(input) {
+    return input.replace(/<[^>]+>/g, ""); 
+};</XMP>
+</td></tr>
+<TR bgcolor="#FFFFFF"><td>
+example&gt;<br>
+<XMP id="func_remove_ex">
+var str = "<b>blah</b> <i>soft</i>";
+document.write(str +"<br>");
+document.write(removeTags(str));
+</XMP>
+result&gt;<br>
+<SCRIPT LANGUAGE="JavaScript1.2">
+<!--
+eval(document.getElementById('func_remove').innerHTML);
+eval(document.getElementById('func_remove_ex').innerHTML);
+//-->
+</SCRIPT>
+</td></tr>
+<TR bgcolor="#DDDDDD"><td><h3>String String.trim()</h3>
+문자열의 앞뒤 공백을 없애준다.
+</td></tr>
+<TR bgcolor="#FFFFFF"><td>
+<XMP id="func_trim">
+String.prototype.trim = function() {
+    return this.replace(/^\s+|\s+$/g, ''); 
+};</XMP>
+</td></tr>
+<TR bgcolor="#FFFFFF"><td>
+example&gt;<br>
+<XMP id="func_trim_ex1">
+var str = "         untrimed string            ";
+document.write("========" + str+ "==============<br>");
+document.write("========" + str.trim() + "==============");
+</XMP>
+result&gt;<br>
+<SCRIPT LANGUAGE="JavaScript1.2">
+<!--
+eval(document.getElementById('func_trim').innerHTML);
+eval(document.getElementById('func_trim_ex1').innerHTML);
+//-->
+</SCRIPT>
+</td></tr>
+<TR bgcolor="#DDDDDD"><td><h3>String String.capitalize()</h3>
+단어의 첫 글자를 대문자로 바꿔준다.
+</td></tr>
+<TR bgcolor="#FFFFFF"><td>
+<XMP id="func_capitalize">
+String.prototype.capitalize = function() {
+    return this.replace(/\b([a-z])/g, function($1){
+        return $1.toUpperCase();
+    }) ;  
+};</XMP>
+</td></tr>
+<TR bgcolor="#FFFFFF"><td>
+example&gt;<br>
+<XMP id="func_capitalize_ex1">
+var str = "korea first world best";
+document.write(str.capitalize());
+</XMP>
+result&gt;<br>
+<SCRIPT LANGUAGE="JavaScript1.2">
+<!--
+eval(document.getElementById('func_capitalize').innerHTML);
+eval(document.getElementById('func_capitalize_ex1').innerHTML);
+//-->
+</SCRIPT>
+</td></tr>
+  <TR bgcolor="#DDDDDD">
+    <td><h3>String number_format(<i>input</i>)</h3>
+입력된 숫자를 ,를 찍은 형태로 돌려준다</td>
+</tr>
+  <TR bgcolor="#FFFFFF"><td>
+<XMP id="func_number_format">
+function number_format(input){
+    var input = String(input);
+    var reg = /(\-?\d+)(\d{3})($|\.\d+)/;
+    if(reg.test(input)){
+        return input.replace(reg, function(str, p1,p2,p3){
+                return number_format(p1) + "," + p2 + "" + p3;
+            }    
+        );
+    }else{
+        return input;
+    }
+}</XMP>
+</td></tr>
+<TR bgcolor="#FFFFFF"><td>
+example&gt;<br>
+<XMP id="func_number_format_ex1">
+document.write(number_format(1234562.12) + "<br>");
+document.write(number_format("-9876543.21987")+ "<br>");
+document.write(number_format("-123456789.12")+ "<br>");
+</XMP>
+result&gt;<br>
+<SCRIPT LANGUAGE="JavaScript1.2">
+<!--
+eval(document.getElementById('func_number_format').innerHTML);
+eval(document.getElementById('func_number_format_ex1').innerHTML);
+//-->
+</SCRIPT>
+</td></tr>
+</table>
+
+
+
+
+
+
+<a name="chap07"> <H1>7. Java 정규식 함수</H1> </a>
+
+     <TABLE width=900 border=0 CELLPADDING="5" CELLSPACING="1" BGCOLOR="#CCCCCC">
+<TR bgcolor="#FFFFFF"><td>
+<pre>
+Pattern p = Pattern.compile("(a*)(b)");
+Matcher m = p.matcher("aaaaab");
+if (m.matches()) {
+    for (int i = 0; i < m.groupCount() + 1; i++) {
+        System.out.println(i + ":" + m.group(i));
+    }
+} else {
+    System.out.println("not match!");
+}
+
+result>
+0:aaaaab
+1:aaaaa
+2:b
+0번째는 매칭된 부분.
+</pre>
+    </td></tr>
+<TR bgcolor="#FFFFFF"><td>
+<pre>
+String a = "I love her";
+System.out.println(a.replaceAll("([A-Z])", "\"$1\""));
+
+result>
+"I" love her
+자바도 $1을 쓸 수 있다.
+</pre>
+    </td></tr>
+<TR bgcolor="#FFFFFF"><td>
+<pre>
+Pattern p = Pattern.compile("cat");
+Matcher m = p.matcher("one cat two cats in the yard");
+StringBuffer sb = new StringBuffer();
+while (m.find()) {
+    m.appendReplacement(sb, "dog");
+    System.out.println(sb.toString());
+}
+m.appendTail(sb);
+System.out.println(sb.toString());
+
+result>
+one dog
+one dog two dog
+one dog two dogs in the yard
+</pre>
+    </td></tr>
+</table>
+
+ </BODY>
+</HTML>

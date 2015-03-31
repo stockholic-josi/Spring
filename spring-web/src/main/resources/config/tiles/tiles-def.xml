@@ -1,0 +1,45 @@
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+
+  	<definition name="layout.noSkin" template="/WEB-INF/layout/layout_noSkin.jsp">
+  		<put-attribute name="body" value="" />
+  	</definition>
+       <definition name="layout.user" template="/WEB-INF/layout/layout_user.jsp">
+        <put-attribute name="title" value="::: Shkr :::" />
+        <put-attribute name="body" value="" />
+    </definition>
+    <definition name="layout.main" template="/WEB-INF/layout/layout_main.jsp">
+        <put-attribute name="body" value="" />
+    </definition>
+
+    
+      <definition name="user/*" extends="layout.user">
+        <put-attribute name="body"   value="/WEB-INF/jsp/user/{1}.jsp" /> 
+    </definition>
+    
+      <definition name="front/*/*Ajax" extends="layout.noSkin">
+        <put-attribute name="body"   value="/WEB-INF/jsp/front/{1}/{2}Ajax.jsp" /> 
+     </definition>
+     <definition name="front/*/*" extends="layout.main">
+        <put-attribute name="body"  value="/WEB-INF/jsp/front/{1}/{2}.jsp" /> 
+    </definition>
+
+	<!-- manage/community -->
+     <definition name="manage/*/*Ajax" extends="layout.noSkin">
+        <put-attribute name="body"  value="/WEB-INF/jsp/manage/{1}/{2}Ajax.jsp" /> 
+    </definition>
+     <definition name="manage/*/*" extends="layout.main">
+        <put-attribute name="body"  value="/WEB-INF/jsp/manage/{1}/{2}.jsp" /> 
+    </definition>
+    
+    <!-- manage/system -->
+    <definition name="manage/*/*/*Ajax" extends="layout.noSkin">
+        <put-attribute name="body"  value="/WEB-INF/jsp/manage/{1}/{2}/{3}Ajax.jsp" /> 
+    </definition>
+     <definition name="manage/*/*/*" extends="layout.main">
+        <put-attribute name="body"  value="/WEB-INF/jsp/manage/{1}/{2}/{3}.jsp" /> 
+    </definition>
+
+</tiles-definitions>

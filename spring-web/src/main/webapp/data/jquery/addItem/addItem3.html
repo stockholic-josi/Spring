@@ -1,0 +1,420 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+ <title> JQuery </title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/css/global.css" type="text/css">
+<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+
+<script language="javascript" type="text/javascript" src="jquery.tablednd_0_5.js"></script>
+
+
+<style>
+
+tr.alt td {
+	background-color:#2B3EC1;
+}
+
+tr.myDragClass td {
+    background-color: #F0F0F0;
+}
+td.showDragHandle {
+	background-image: url(updown.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	cursor: move;
+}
+.subject{border:1px solid #A0A0A0}
+.ans{border:1px solid #A0A0A0}
+.item{border:1px solid #A0A0A0}
+
+</style>
+
+<script type="text/javascript">
+
+var tbCnt = 0;
+
+function trim (strSource) {
+	re = /^\s+|\s+$/g;
+	return strSource.replace(re, '');
+}
+
+function numChk(ts){
+	if(!ts.value) return;
+
+	var reg = /^[0-9]*[0-9]$/ ;
+
+	if( reg.test(ts.value) == false){
+		alert("숫자만 입력해주세요");
+		ts.select();
+	}
+}
+
+function setUpper(ts){
+	if(!ts.value) return;
+
+	var reg = /^[a-zA-Z]$/g ;
+
+	if(reg.test(ts.value) == false || (ts.value.toUpperCase() != "O" && ts.value.toUpperCase() != "X")){
+		alert("영문 O 또는 X 를 입력해주세요");
+		ts.select();
+	}else{
+		ts.value = ts.value.toUpperCase();
+	}
+
+}
+
+//객관식 문제생성
+function addSubject(){
+	tbCnt++;
+	
+	var template = ""
+	+ "<div style='width:600px;margin-top:20px;text-align:right;' class=\"tb" + tbCnt + "\">"
+	+ "	<input type='button' value='문제삭제' onClick=\"removeSubject('tb" + tbCnt + "')\">"
+	+ "	<input type='button' value='문항추가' onClick=\"addItem('tb" + tbCnt + "')\">"
+	+ "</div>"
+	+ "<table id=\"tb" + tbCnt + "\" cellspacing='0' cellpadding='2' border='0' width='600' class='border'>"
+	+ "<tbody>"
+	+ "<tr class='nodrop nodrag'>"
+	+ "	<td  width='20' align='center' class='subNum'></td>"
+	+ "	<td colspan='4'><input type='text' class='subject' style='width:100%'></td>"
+	+ "</tr>"
+	+ "<tr class='nodrop nodrag'>"
+	+ "	<td  width='20' align='center'></td>"
+	+ "	<td colspan='3'>"
+	+ "	정답 : <input type='text' class='ans' style='width:50px;margin-right:10px' onkeyup='numChk(this)'>"
+	+ "	난이도 : <input type='radio' class='level' name='level" + tbCnt + "' value='1'>상  <input type='radio' class='level' name='level" + tbCnt + "' value='2'>중  <input type='radio' class='level' name='level" + tbCnt + "' value='3'>하"
+	+" </td>"
+	+ "</tr>"
+	+ "<tr id='1' align='center'>"
+	+ "	<td width='20'></td>"
+	+ "	<td width='20' class='itemNum'>1</td>"
+	+ "	<td width='530' align='left'><input type='text' name='itemNm' class='item' value='one' style='width:98%'></td>"
+	+ "	<td width='30'><input type='button' value='삭제'></td>"
+	+ "</tr>"
+	+ "<tr id='1' align='center'>"
+	+ "	<td width='20'></td>"
+	+ "	<td width='20' class='itemNum'>2</td>"
+	+ "	<td width='530' align='left'><input type='text' name='itemNm' class='item' value='one' style='width:98%'></td>"
+	+ "	<td width='30'><input type='button' value='삭제'></td>"
+	+ "</tr>"
+	+ "<tr id='1' align='center'>"
+	+ "	<td width='20'></td>"
+	+ "	<td width='20' class='itemNum'>3</td>"
+	+ "	<td width='530' align='left'><input type='text' name='itemNm' class='item' value='one' style='width:98%'></td>"
+	+ "	<td width='30'><input type='button' value='삭제'></td>"
+	+ "</tr>"
+	+ "<tr id='1' align='center'>"
+	+ "	<td width='20'></td>"
+	+ "	<td width='20' class='itemNum'>4</td>"
+	+ "	<td width='530' align='left'><input type='text' name='itemNm' class='item' value='one' style='width:98%'></td>"
+	+ "	<td width='30'><input type='button' value='삭제'></td>"
+	+ "</tr>"
+	+ "</tbody>"
+	+ "</table>";
+
+
+	$("#testWrap").append(template);
+	initDnd("tb" + tbCnt);
+
+	$("#testWrap").find(".subNum").each(function (i){
+		$(this).text( (i + 1) + ".");
+	});
+}
+
+//OX문제 생성
+function addOx(){
+	tbCnt++;
+	
+	var template = ""
+	+ "<div style='width:600px;margin-top:20px;text-align:right;' class=\"tb" + tbCnt + "\">"
+	+ "	<input type='button' value='문제삭제' onClick=\"removeSubject('tb" + tbCnt + "')\">"
+	+ "</div>"
+	+ "<table id=\"tb" + tbCnt + "\" cellspacing='0' cellpadding='2' border='0' width='600' class='border'>"
+	+ "<tbody>"
+	+ "<tr class='nodrop nodrag'>"
+	+ "	<td  width='20' align='center' class='subNum'></td>"
+	+ "	<td colspan='3'><input type='text' class='subject' style='width:98%'></td>"
+	+ "</tr>"
+	+ "<tr class='nodrop nodrag'>"
+	+ "	<td  width='20' align='center'></td>"
+	+ "	<td colspan='4'>"
+	+ "	정답 : <input type='text' class='ans' style='width:30px;' maxlength='1' onkeyup=setUpper(this)><span style='margin-right:10px'>(O, X)</span>"
+	+ "	난이도 : <input type='radio' class='level' name='level" + tbCnt + "' value='1'>상  <input type='radio' class='level' name='level" + tbCnt + "' value='2'>중  <input type='radio' class='level' name='level" + tbCnt + "' value='3'>하"
+	+" </td>"
+	+ "</tr>"
+	+ "</tbody>"
+	+ "</table>";
+
+
+	$("#testWrap").append(template);
+
+	$("#testWrap").find(".subNum").each(function (i){
+		$(this).text( (i + 1)  + ".");
+	});
+}
+
+// 문항 생성
+function addItem(tb){
+
+	var k =  $("#" + tb ).find(".item").length;
+
+	var template = ""
+	+ "<tr id='1' align='center'>"
+	+ "	<td width='20'></td>"
+	+ "	<td width='20' class='itemNum'>" + (++k) + "</td>"
+	+ "	<td width='530' align='left'><input type='text' name='itemNm' class='item' value='' style='width:98%'></td>"
+	+ "	<td width='30'><input type='button' value='삭제'></td>"
+	+ "</tr>"
+
+	$("#"+ tb + " tbody").append(template);
+	initDnd(tb);
+}
+
+// 문제 제거
+function removeSubject(tb){
+
+	if( confirm("문제를 삭제하겠습니까?") == false ) return;
+
+	if($("#testWrap" ).find(".subject").length == 1) return;
+
+	$("." + tb).remove();
+	$("#" + tb).remove();
+
+	$("#testWrap").find(".subNum").each(function (i){
+		$(this).text( (i + 1) + "." );
+	});
+}
+
+//문항 드래그
+function initDnd(tb){
+	
+	// Make a nice striped effect on the table
+	//$("#tableDnd tr:even").addClass('alt');
+
+	// Initialise the second table specifying a dragClass and an onDrop function that will display an alert
+	$("#" + tb).tableDnD({
+	    onDragClass: "myDragClass",
+	    onDrop: function(table, row) {
+            var rows = table.tBodies[0].rows;
+			var debugStr = "Text Box 값 : ";
+            for (var i=0; i<rows.length; i++) {
+               if(i != 0) debugStr += $(rows[i]).find("input[type=text]").val() + " ";
+            }
+//	        $("#debugArea").html(debugStr);
+
+			$("#" + tb).find(".itemNum").each(function (i){
+				$(this).text( (i + 1) );
+			});
+
+
+	    },
+		onDragStart: function(table, row) {
+//			$("#debugArea").html("ID 값 : "+row.id);
+		}
+	});
+
+	 $("#" + tb + " tr").hover(function() {
+          $(this.cells[0]).addClass('showDragHandle');
+    }, function() {
+          $(this.cells[0]).removeClass('showDragHandle');
+    });
+
+
+	$("#" + tb).find("input[type=button]").click(function (){
+		$(this).parent().parent().remove();
+
+		$("#" + tb).find(".itemNum").each(function (i){
+			$(this).text( (i + 1) );
+		});
+
+	});
+}
+
+
+function send(){
+	var msg = "";
+	var k = 0;
+	var params = {
+		subject : [],
+		ans : [],
+		level : [],
+		subCnt : [],
+		item : []
+	}
+
+	//문제 체크
+	$(".subject").each(function (i){
+		if( trim($(this).val())  == ""){
+			msg += (i + 1) + "번째 문제를 입력해주세요\n";
+			$(this).css("border","1px solid #3300FF");
+			$(this).focus();
+			k++;
+			return false;
+		}
+	});
+
+	//정답 체크
+	$(".ans").each(function (i){
+		if( trim($(this).val())  == ""){
+			msg += (i + 1) + "번째 문제 정답을 입력해주세요\n";
+			$(this).css("border","1px solid #3300FF");
+			$(this).focus();
+			k++;
+			return false;
+		}
+	});
+
+	//난이도 체크
+	var levelChk = 0;
+	$("#testWrap table").each(function (i){
+		 levelChk = 0;
+		 $(this).find("input[type=radio]").each(function (j){
+			if($(this).attr("checked") == false) levelChk++;
+		 });
+
+		 if(levelChk == 3){
+			msg += (i + 1) + "번째 문제 난이도를 선택해주세요\n";
+			k++;
+			return false;
+		 }
+	});
+
+	//문항 체크
+	var itemChk = 0;
+	$("#testWrap table").each(function (i){
+		 itemChk = 0;
+		 $(this).find(".item").each(function (j){
+			if(trim($(this).val()) == ""){
+				msg += (i + 1) + "번째 문제 " +(j+1)+ "문항을 입력해주세요\n";
+				$(this).css("border","1px solid #3300FF");
+				$(this).focus();
+				k++;
+				return false;
+			}
+		 });
+	});
+	
+
+	if(k > 0) {
+		alert(msg);
+		return;
+	}
+
+	$(".subject").each(function (i){
+		params.subject.push( $(this).val() )
+	});
+
+	//정답
+	$(".ans").each(function (i){
+		params.ans.push( $(this).val() )
+	});
+
+	//난이도
+	$(".level").each(function (i){
+		if( $(this).attr("checked") == true){
+			params.level.push( $(this).val() )
+		}
+	});
+
+
+	//문제별 문항개수
+	$("#testWrap table").each(function (i){
+		params.subCnt.push( $(this).find(".item").length )
+	});
+
+	//문항
+	$("#testWrap .item").each(function (i){
+		params.item.push( $(this).val() )
+	});
+
+
+	$("#debug").empty();
+	$("#debug").html( $.param(params,true).replace(/&/g,'<br>&') );
+}
+
+
+$(document).ready(function() {
+
+	tbCnt =  $("#testWrap" ).find(".subject").length;
+
+	initDnd("tb1");
+
+});
+</script>
+
+
+ </head>
+
+ <body>
+
+<div style="width:600px">
+	<div style="float:left">
+	<input type="button" value="객괸식 문제추가" onClick="addSubject()">
+	<input type="button" value="OX 문제추가" onClick="addOx()">
+	</div>
+
+	<div style="float:right">
+		<input type="button" value="저장" onClick="send()">
+	</div>
+</div>
+
+<div id="testWrap" style="margin-top:20px;width:620px;float:left">
+
+	<div style="width:600px;text-align:right" class='tb1'>
+		<input type="button" value="문제삭제" onClick="removeSubject('tb1')">
+		<input type="button" value="문항추가" onClick="addItem('tb1')">
+	</div>
+
+	<table id="tb1" border="0" cellspacing="5" cellpadding="0" width="600px" class="border">
+	<tbody>
+	<tr class="nodrop nodrag">
+		<td  width="20" align="center" class="subNum">1.</td>
+		<td colspan="3"><input type="text" class="subject" style="width:98%"></td>
+	</tr>
+	<tr class="nodrop nodrag">
+		<td  width="20" align="center"></td>
+		<td colspan="3">
+			정답 : <input type="text" class="ans" style="width:50px;margin-right:10px" onkeyup="numChk(this)">
+			난이도 : <input type="radio" class="level" name="level1" value="1">상  <input type="radio" class="level" name="level1" value="2">중  <input type="radio" class="level" name="level1" value="3">하
+		</td>
+	</tr>
+	<tr id="1" align="center">
+		<td width="20"></td>
+		<td width="20" class="itemNum">1</td>
+		<td width="530" align="left"><input type="text" name="itemNm" class='item' value="가가가" style="width:98%"></td>
+		<td width="30"><input type="button" value="삭제"></td>
+	</tr>
+	<tr id="1" align="center">
+		<td width="20"></td>
+		<td width="20" class="itemNum">2</td>
+		<td width="530" align="left"><input type="text" name="itemNm" class='item' value="나나나" style="width:98%"></td>
+		<td width="30"><input type="button" value="삭제"></td>
+	</tr>
+	<tr id="1" align="center">
+		<td width="20"></td>
+		<td width="20" class="itemNum">3</td>
+		<td width="530" align="left"><input type="text" name="itemNm" class='item' value="다다다" style="width:98%"></td>
+		<td width="30"><input type="button" value="삭제"></td>
+	</tr>
+	<tr id="1" align="center">
+		<td width="20"></td>
+		<td width="20" class="itemNum">4</td>
+		<td width="530" align="left"><input type="text" name="itemNm" class='item' value="라라라" style="width:98%"></td>
+		<td width="30"><input type="button" value="삭제"></td>
+	</tr>
+	</tbody>
+	</table>
+
+</div>
+
+
+<div id="debug"></div>
+
+  
+ </body>
+</html>

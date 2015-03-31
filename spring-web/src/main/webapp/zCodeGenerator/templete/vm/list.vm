@@ -1,0 +1,48 @@
+<html>
+<head>
+	
+<script>
+
+function search(){
+	var frm = document.frm;
+	frm.submit();
+}
+</script>
+
+</head>
+
+<body>
+
+
+Total : $search.total [  $search.p / $search.totalPage ]	}
+<table cellspacing="0" cellpadding="3" border="1" width="100%" style="border-collapse:collapse; border:1px gray solid;">
+<tr height="20">	
+#foreach($col in $cList)
+#if($velocityCount > 4) #break #end
+	<td>${col.columnName}</td>
+#end
+</tr>
+\#foreach($list in $${classAlias}List)
+<tr height="20">
+#foreach($col in $cList)
+#if($velocityCount > 4) #break #end
+#if($velocityCount == 2)
+	<td><a href="${classAlias}Read.do?p=$search.p&${link}">$\!list.${col.columnName}</a></td>
+#else
+	<td>$\!list.${col.columnName}</td>
+#end	
+#end
+</tr>	
+\#end
+</table>
+
+$paging
+
+
+<p>
+<a href="${classAlias}Form.do?p=$params.p">등록</a>
+</p>
+
+	
+</body>
+</html>

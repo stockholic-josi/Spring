@@ -1,0 +1,354 @@
+daemontools, ucspi-tcp를 먼저 설치하도록 하죠 
+daemontools는 시스템 서비스를 관리하기 위한 도구들의 모음으로 ucspi-tcp와 같이 사용하면 
+inetd/xinetd 같은 구시대 수퍼 데몬을 완전히 대체할 수 있습니다.
+
+
+
+
+=============================================================================================================================== ucspi-tcp 설치
+다운로드
+http://cr.yp.to/ucspi-tcp/install.html
+
+$ make
+$ make setup check
+
+
+=============================================================================================================================== daemontools 설치
+다운로드
+http://cr.yp.to/daemontools/install.html
+
+$ mkdir -p /package
+$ chmod 1755 /package
+$ mv daemontools-0.76.tar.gz /package
+$ cd /package 
+$ tar xzf daemontools-0.76.tar.gz
+$ cd /package/admin/daemontools-0.76/src 
+
+$ patch -l < /usr/local/source/netqmail-1.06/other-patches/daemontools-0.76.errno.patch
+패치파일 : error.h
+
+$ cd /package/admin/daemontools-0.76
+$ package/install
+
+$ vi /etc/inittab
+SV:123456:respawn:/command/svscanboot --> SV:23:respawn:/command/svscanboot < /dev/null > /dev/msglog 2>&1
+$ init q
+
+
+=============================================================================================================================== Qmail 설치
+
+다운로드
+http://qmail.owlize.net/top.html  (netqmail  --  other-patches 안에 각종 패치 파일이 있다)
+
+1. qmail이 설치될 디렉토리를 만듭니다.
+
+$ mkdir /var/qmail
+$ mkdir /var/qmail/alias
+
+(참고:디렉토리를 생성하지 않아도 자동으로 /var/qmail 안에 파일이 생성된다. 물론 make setup check가 선행되어야 한다)
+
+
+
+2. Qmail 운영을 위한 유저,그룹을 만들어 주기 위해 다음 명령을 차례로 실행합니다 
+(운영체제가 리눅스가 아니라면 소스 디렉토리 안의 INSTALL.ids 를 참조하세요).
+
+$ vi /etc/group
+---------------------------
+qmail:*:2107:
+nofiles:*:2108:
+---------------------------
+
+$vi /etc/passwd
+--------------------------------------------
+alias:*:7790:2108::/var/qmail/alias:/bin/true
+qmaild:*:7791:2108::/var/qmail:/bin/true
+qmaill:*:7792:2108::/var/qmail:/bin/true
+qmailp:*:7793:2108::/var/qmail:/bin/true
+qmailq:*:7794:2107::/var/qmail:/bin/true
+qmailr:*:7795:2107::/var/qmail:/bin/true
+qmails:*:7796:2107::/var/qmail:/bin/true
+--------------------------------------------
+
+
+3.Qmail을 컴파일/인스톨 합니다.
+
+***** make: *** [qmail-local.o] Error 1 에러시 *****
+$ wget ftp://ftp.sunfreeware.com/pub/freeware/intel/10/gcc-3.4.6-sol10-x86-local.gz 설치
+$vi conf-cc
+$vi conf-ld 
+파일에서 cc 로 되어 있는 부분을 gcc로 변경
+
+
+
+$ make
+$ make setup check
+
+
+
+4. 컴파일/설치가 끝나면 기본 control 파일들의 설정을 위해..
+
+$ ./config
+
+
+5. 이것이 정상적으로 실행 되었다면 /var/qmail/control/ 안에는 qmail이 정상적으로 작동하기 위한 설정 파일들이 생길 것입니다.
+만약 그렇지 않다면 DNS 설정에 문제가 있어 호스트 이름을 찾지 못한 것이니 다음과 같이 합니다. (ufancy.com 가 호스트 이름이라면...)
+
+$ ./config-fast ufancy.com
+
+
+=============================================================================================================================== Qmail 스크립트 만들기
+
+6. /var/qmail/rc 파일
+
+$ vi /var/qmail/rc
+-----------------------------------------------------------
+#!/bin/sh
+exec env - PATH="/var/qmail/bin:$PATH" \
+qmail-start ./Maildir/
+-----------------------------------------------------------
+
+$ chmod a+x /var/qmail/rc
+
+
+8. 다음은 큐메일 데몬을 위한 디렉토리와 파일들을 생성...
+
+$ mkdir -p /var/qmail/supervise/qmail-send/log
+$ mkdir -p /var/qmail/supervise/qmail-smtpd/log
+$ chmod +t /var/qmail/supervise/qmail-send
+$ chmod +t /var/qmail/supervise/qmail-smtpd
+
+$ vi /var/qmail/supervise/qmail-send/run
+-----------------------------------------------------------
+#!/bin/sh
+exec /var/qmail/rc
+-----------------------------------------------------------
+
+$ vi /var/qmail/supervise/qmail-send/log/run
+-----------------------------------------------------------
+#!/bin/sh
+exec /usr/local/bin/setuidgid qmaill \
+     /usr/local/bin/multilog t /var/log/qmail
+-----------------------------------------------------------
+
+$ vi /var/qmail/supervise/qmail-smtpd/run
+-----------------------------------------------------------
+#!/bin/sh
+Q_UID=`/usr/xpg4/bin/id -u qmaild`
+Q_GID=`/usr/xpg4/bin/id -g qmaild`
+exec /usr/local/bin/softlimit -m 2000000 \
+     /usr/local/bin/tcpserver -vHRl 0 -x /etc/tcp.smtp.cdb \
+     -u $Q_UID -g $Q_GID 0 25 /var/qmail/bin/qmail-smtpd 2>&1
+-----------------------------------------------------------
+
+$ vi /var/qmail/supervise/qmail-smtpd/log/run
+-----------------------------------------------------------
+#!/bin/sh
+exec /usr/local/bin/setuidgid qmaill \
+     /usr/local/bin/multilog t /var/log/qmail/smtpd
+-----------------------------------------------------------
+
+
+9. 지금 까지 만들어 놓은 파일들에 실행 권한을 줍니다.
+
+$ chmod 755 /var/qmail/supervise/qmail-send/run
+$ chmod 755 /var/qmail/supervise/qmail-send/log/run
+$ chmod 755 /var/qmail/supervise/qmail-smtpd/run
+$ chmod 755 /var/qmail/supervise/qmail-smtpd/log/run
+
+
+10. 다음은 qmail-smtpd 를 위한 로그 디렉토리 만들기
+
+$ mkdir -p /var/log/qmail/smtpd
+$ chown qmaill /var/log/qmail /var/log/qmail/smtpd
+
+
+11. 마지막으로 릴레이를 위한 파일은 /etc/tcp.smtp를 수정하는데 일단 메일 서버 자신만의 릴레이가 허용되도록 하는 파일을 만듭시다.
+서버의 ip가 192.168.0.200 이라고 한다면 다음과 같이 될것 입니다
+
+$ vi /etc/tcp.smtp
+-----------------------------------------------------------
+127.0.0.1:allow,RELAYCLIENT=""
+192.168.0.200:allow,RELAYCLIENT=""
+-----------------------------------------------------------
+
+
+12. 이렇게 tcp.smtp를 수정한 후에는 항상 cdb 형식의 파일로 바꿔줘야 합니다.
+
+$ tcprules /etc/tcp.smtp.cdb /etc/tcp.smtp.tmp < /etc/tcp.smtp
+
+
+13. sendmail 실행 파일
+
+sendmail 바이너리를 사용하는 다른 어플리케이션들을 위해 대신 qmail의 그것을 링크 해줍니다.
+-----------------------------------------------------------
+$ mv /usr/lib/sendmail /usr/lib/sendmail.old
+$ mv /usr/sbin/sendmail /usr/sbin/sendmail.old
+
+$ ln -s /var/qmail/bin/sendmail /usr/lib
+$ ln -s /var/qmail/bin/sendmail /usr/sbin
+  -----------------------------------------------------------
+
+
+
+
+14. 기본 alias 계정
+
+다음 세가지 기본 알리아스 계정은 반드시 만들어 줍니다.
+
+postmaster
+mailer-daemon
+root
+
+이 주소들로 도착하는 메일을 받아볼 일반 계정으로 알리아스를 만들어야 하는데, 만약 로컬 계정이 merong 라면 다음과 같이 만듭니다.
+
+$ echo merong > /var/qmail/alias/.qmail-root
+$ echo merong > /var/qmail/alias/.qmail-postmaster
+$ echo merong > /var/qmail/alias/.qmail-mailer-daemon
+$ cd /var/qmail/alias/
+$ chmod 644 .qmail-root .qmail-postmaster .qmail-mailer-daemon
+
+
+15. qmail 시작하기
+
+다음과 같이 daemontools 서비스 디렉토리에 링크를 걸어주면 5초 이내에 qmail MTA가 시작됩니다.
+
+$ ln -s /var/qmail/supervise/qmail-send /service/
+$ ln -s /var/qmail/supervise/qmail-smtpd /service/
+
+이렇게 한번 링크를 걸어 두면 시스템을 재부팅 하더라도 daemontools에 의해 자동으로 재시작 됩니다.
+
+
+16. 시작스크립트
+----------------------------------------------------------------------------------------------------------------------
+#!/bin/sh
+
+# description: the qmail MTA
+
+case "$1" in
+  start)
+    echo "Starting qmail"
+	 if [ -f  /service/qmail-send ] ; then
+	 	if svok /service/qmail-send ; then
+			svc -u /service/qmail-send
+		else
+			echo qmail-send supervise not running
+		fi
+	 else
+	 	ln -s /var/qmail/supervise/qmail-send /service/
+	 fi
+
+	 if [ -f   /service/qmail-smtpd ] ; then
+	 	if svok /service/qmail-smtpd ; then
+			svc -u /service/qmail-smtpd
+		else
+			echo qmail-smtpd supervise not running
+		fi
+	 else
+	 	ln -s /var/qmail/supervise/qmail-smtpd /service/
+	 fi
+	 
+    if [ -d /var/lock/subsys ]; then
+      touch /var/lock/subsys/qmail
+    fi
+    ;;
+  stop)
+    echo "Stopping qmail..."
+    echo "  qmail-smtpd"
+    svc -dx /service/qmail-smtpd /service/qmail-smtpd/log
+	 rm -f /service/qmail-smtpd
+    echo "  qmail-send"
+    svc -dx /service/qmail-send /service/qmail-send/log
+	 rm -f /service/qmail-send
+    if [ -f /var/lock/subsys/qmail ]; then
+      rm /var/lock/subsys/qmail
+    fi
+    ;;
+  stat)
+    svstat /service/qmail-send
+    svstat /service/qmail-send/log
+    svstat /service/qmail-smtpd
+    svstat /service/qmail-smtpd/log
+    qmail-qstat
+    ;;
+  doqueue|alrm|flush)
+    echo "Flushing timeout table and sending ALRM signal to qmail-send."
+    /var/qmail/bin/qmail-tcpok
+    svc -a /service/qmail-send
+    ;;
+  queue)
+    qmail-qstat
+    qmail-qread
+    ;;
+  reload|hup)
+    echo "Sending HUP signal to qmail-send."
+    svc -h /service/qmail-send
+    ;;
+  pause)
+    echo "Pausing qmail-send"
+    svc -p /service/qmail-send
+    echo "Pausing qmail-smtpd"
+    svc -p /service/qmail-smtpd
+    ;;
+  cont)
+    echo "Continuing qmail-send"
+    svc -c /service/qmail-send
+    echo "Continuing qmail-smtpd"
+    svc -c /service/qmail-smtpd
+    ;;
+  restart)
+    echo "Restarting qmail:"
+    echo "* Stopping qmail-smtpd."
+    svc -d /service/qmail-smtpd
+    echo "* Sending qmail-send SIGTERM and restarting."
+    svc -t /service/qmail-send
+    echo "* Restarting qmail-smtpd."
+    svc -u /service/qmail-smtpd
+    ;;
+  cdb)
+    tcprules /etc/tcp.smtp.cdb /etc/tcp.smtp.tmp < /etc/tcp.smtp
+    chmod 644 /etc/tcp.smtp.cdb
+    echo "Reloaded /etc/tcp.smtp."
+    ;;
+  help)
+    cat <<HELP
+   stop -- stops mail service (smtp connections refused, nothing goes out)
+  start -- starts mail service (smtp connection accepted, mail can go out)
+  pause -- temporarily stops mail service (connections accepted, nothing leaves)
+   cont -- continues paused mail service
+   stat -- displays status of mail service
+    cdb -- rebuild the tcpserver cdb file for smtp
+restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
+doqueue -- schedules queued messages for immediate delivery
+ reload -- sends qmail-send HUP, rereading locals and virtualdomains
+  queue -- shows status of queue
+   alrm -- same as doqueue
+  flush -- same as doqueue
+    hup -- same as reload
+HELP
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|doqueue|flush|reload|stat|pause|cont|cdb|queue|help}"
+    exit 1
+    ;;
+esac
+
+exit 0
+----------------------------------------------------------------------------------------------------------------------
+
+
+
+=============================================================================================================================== vpopmail 
+
+vpopmail이 제대로 작동하려면 vpopmail이 사용할 유저와 그룹을 만들어야 한다.
+
+$ groupadd vchkpw
+$ useradd -g vchkpw vpopmail
+ 
+
+이때 생성되는 vpopmail 홈 디렉토리에는 앞으로 추가할 도메인들의 모든 이메일 계정, 메일들이 저장될 곳이므로, 
+공간이 넉넉한 파티션을 고르는 것이 좋겠다. 다른 파티션을 사용할 것이라면 다음과 같이 할수 있다.
+
+$ useradd -g vchkpw -d /원하는/파티션의/디렉토리를/지정 vpopmail
+ 
+
+

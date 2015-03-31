@@ -1,0 +1,94 @@
+1. 다운로드 ftp://vsftpd.beasts.org/users/cevans/
+
+
+2. # make
+
+3. # cp vsftpd.conf /etc
+   # cp vsftpd /usr/sbin/
+   # useradd ftp
+   # mkdir -p /usr/share/empty 
+
+4. # /usr/sbin/vsftpd &
+
+5. # vi /etc/inetd.conf
+ftp stream tcp nowait root /usr/sbin/vsftpd vsftpd
+
+6. # inetconv
+
+
+---------------------------------- vsftpd.sh -----------------------------------------------
+#!/bin/sh
+
+# Set some variables
+MYSELF=`basename $0`
+
+case "$1" in
+        start)
+        /usr/sbin/vsftpd & >/dev/null 2>&1 ; echo 'vsftp start'
+        ;;
+        *)
+        echo "Usage: ${MYSELF} { start }"
+        exit 64
+        ;;
+esac
+
+-------------------------------------------------------------------------------------------
+
+------------------------------------- vsftp.conf --------------------------------------------
+# Standalone 으로 운영할 때 listen=YES. 포트 변경을 원할 경우 
+# listen=YES 
+# listen_port=21 
+
+# anonymous 사용자의 접속 허용 여부 (default = YES) 
+# 공개된 형태의 FTP 서버로 운영할 것이 아니라면 NO로 한다. 
+anonymous_enable=NO 
+# 로컬 계정 사용자의 접속 허용 여부 (default = NO) 
+local_enable=YES 
+
+# write 명령어 허용 여부 (defualt = NO) 
+write_enable=YES 
+# 로컬 계정 사용자용 umask (default = 077) 
+local_umask=022 
+
+# anonymous 사용자가 파일을 업로드 할 수 있는지 여부 (default = NO) 
+# anon_upload_enable=YES 
+# anonymous 사용자의 디렉토리 생성 허용 여부 (default = NO) 
+# anon_mkdir_write_enable=YES 
+
+# 파일 전송 로그를 남길 것인지 여부 (default = YES) 
+xferlog_enable=YES 
+# xferlog 표준 포맷으로 로그를 남길지 여부 (기본 설정파일은 YES) 
+# 아래에서 NO로 설정했을 때를 설명함 
+xferlog_std_format=YES 
+# 파일 전송 로그 파일명 
+xferlog_file=/var/log/vsftpd.log 
+
+# FTP 서버 접속할 때 로긴 메시지 (default = vsFTPd 버전번호) 
+# 한글 사용 가능 
+# ftpd_banner=Welcome to blah FTP service. 
+
+
+# wtmp에 로그 남기기 (YES로 해야만 last 명령어로 접속 여부 확인 가능) 
+session_support=YES 
+
+# 사용자가 자신의 home directory를 벗어나지 못하도록 설정 
+chroot_local_user=YES 
+
+주의할 것은 chroot_local_user=YES와 chroot_list_enable=YES를 함께 사용할 경우에는 
+/etc/vsftpd.chroot_list에 포함된 사용자 ID만 제한없이 홈디렉토리를 
+벗어날 수 있다. 즉, 반대로 작용한다. 
+
+
+
+# 전송속도 제한 (0은 제한없음, 단위는 초당 bytes) 
+anon_max_rate=0 
+local_max_rate=0 
+trans_chunk_size=0 
+
+# 최대 접속 설정 (단 xinetd를 통하지 않고 standalone으로 동작할 때 만 사용 가능) 
+# standalone을 위해서는 listen=YES 추가하고 별도로 vsftpd를 띄워야 함 
+# 
+# max_clients=최대 접속자 수, max_per_ip=IP당 접속 수 
+# max_clients=100 
+# max_per_ip=3 
+-------------------------------------------------------------------------------------------

@@ -1,0 +1,224 @@
+#parse( "home/news/_menu.vm" )
+<html>
+<head>
+<title>StockHolic 》 RSS 뉴스 》 $!newNm</title>
+
+<link rel="stylesheet" href="/js/sortable/sortable-home.css" type="text/css">
+
+
+<script>
+
+var start = 0;
+var rowCount = $!rowCount;
+var searchCount = $!searchCnt;
+
+function setMenu(itemId){
+	if($("#itemMenu").find("." + itemId).attr("checked") == true){
+		 $("#itemMenu").find("." + itemId).parent().css("color","#2B6AB9")
+	}else{
+		$("#itemMenu").find("." + itemId).parent().css("color","#B3B3B3")
+	}
+}
+
+
+function lastPost(ts,start, limit, searchString,flag) { 
+
+	var params = (searchString != "") ?  'start=' + start + '&limit=' + limit + '&searchString=' + searchString : 'start=' + start + '&limit=' + limit;
+		 params = params + "&flag=" + flag;
+	
+	 $('#newsContent div:last').remove(); 
+	 $("#newsContent").append("<div id='loading'><img src='/images/common/loading.gif'></div>");
+	 
+	 jQuery.ajax({
+		url: '/front/news/newsAllAjax.do',
+		type : 'POST',
+		data : params,
+		timeout : 5000,
+
+		error: function(){
+			modalAlert("데이터를 가져오지 못했습니다.");
+			var lastCount = searchCount - start;
+			$('#newsContent div:last').remove(); 
+			$("#newsContent").append("<div id='loading'><a onClick='addPost(this)' class='hand'>기사 더 보기</a> ... " + currency(lastCount) + "</div>");
+		},
+		success: function(data){
+			var dataVal;
+			if(searchString != "") {
+				dataVal = data;
+				var arrSearch = trim(jQuery("#searchString").val()).split(" ");
+				for(i = 0; i < arrSearch.length; i++ ){
+				
+					dataVal = replaceAll(dataVal,arrSearch[i],"<span style='background-color: #FFFF99'>" + arrSearch[i] + "</span>");
+					if(i == 4) break;
+				}
+				
+			}else{
+				dataVal = data;
+			}
+			
+			$('#newsContent div:last').remove(); 
+
+			var lastCount = searchCount - start - rowCount;
+			
+			$("#newsContent").append(dataVal);
+			if(lastCount > 0){
+				$("#newsContent").append("<div id='loading'><a onClick='addPost(this)' class='hand'>기사 더 보기</a> ... " + currency(lastCount) + "</div>");
+			}
+			
+		}
+	});
+	 
+  
+}; 
+
+function addPost(ts){
+	start = start +  rowCount;
+	lastPost(ts,start, rowCount, jQuery('#searchString').val(),'$!flag');
+}
+
+
+function search() {
+	if(trim(jQuery('#searchString').val()).length >= 2 ){
+		//document.frm.submit();
+		location.href="/rssNewsAll/$!flag/" + $('#searchString').val();
+	}
+}
+
+var fsize =  9;
+function fontSize(n){
+	if(n > 0){
+    	if(fsize >= 14) return;
+    	fsize++;
+	}
+	if(n < 0){
+    	if(fsize <= 9) return;
+    	fsize--;
+	}
+	
+	$("#newsContent").css("font-size",fsize + "pt");
+    $("#newsContent").find("div").css("font-size",fsize + "pt");
+    $("#newsContent").find("span").css("font-size",fsize + "pt");
+    $("#newsContent").find("a").css("font-size",fsize + "pt");
+}
+
+
+jQuery(document).ready(function () {
+
+	if( $("#searchString").val() != "") {
+		var arrSearch = trim($("#searchString").val()).split(" ");
+		var newsContent = $("#newsContent").html();
+		for(i = 0; i < arrSearch.length; i++ ){
+			newsContent = replaceAll(newsContent,arrSearch[i],"<span style='background-color: #FFFF99'>" + arrSearch[i] + "</span>");
+			if(i == 4) break;
+		}
+		
+		$("#newsContent").empty();
+		$("#newsContent").append(newsContent);
+	}
+	
+	$("#bottomNav").css("margin-left", $("#newsContent").width() + 5 );
+	
+	$('#bodyTop').click(function(){
+		$('html, body').animate({scrollTop:0}, 'slow');
+	});
+	
+	//toolTip
+	$(".newsTip").each(function (i){
+		getToolTip( $(this).attr("id"), $(this).attr("title") , $(this).attr("tipWidth"),'bottom' )
+	});
+	
+});
+</script>
+
+</head>
+
+<body>
+
+<div id="headerInfo" style="display:none">
+   <span class="headerNav"> 》 Rss News 》 $!newNm</span>
+</div>
+
+
+<div class="contents-box">
+	<div class="leftBar">&nbsp;</div>
+	<div class="leftMenu">
+    	<ul>
+    	#set($no = 0)
+    	#foreach($list in $menuKey)
+        	<li><a href="/rssNewsAll/$!list" #if($list == $flag)class="subNav"#end>ㆍ$menuValue.get($no)</a></li>
+    	#set($no = $no + 1)
+    	#end
+    	</ul>
+		
+		#parse( "googleRecommend.vm" )
+		
+	</div>
+
+	<div class="contents">
+    	<div id="subMenu" style="height:22px">
+		<table cellspacing="0" cellpadding="0" border="0" width="100%"> 
+    	<tr>
+			<td width="300">
+    			<form name="frm" id="frm" method="get" onSubmit="search();return false">
+    			<input type="text" name="searchString" id="searchString" value="$!searchString" class="searchBox">
+				</form>
+			</td>
+			<td>#if(!$searchString)최근 1주일#end 기사 수 : <span id="searchCnt">$number.format('integer',$searchCnt) 개</span></td>
+			<td width="100" align="center">
+				<img src="/images/icon/icon_11.png" align="absmiddle" class="newsTip hand" id="newsTip1" title="글자크게" tipWidth="50" onClick="fontSize(1)">&nbsp;
+				<img src="/images/icon/icon_12.png" align="absmiddle" class="newsTip hand" id="newsTip2" title="글자작게" tipWidth="50" onClick="fontSize(-1)">
+			</td>
+			<td align="right">
+				<!-- <button class="word2" onClick="location.href='./rssNewsAllList.do?flag=$!flag'">전체</button> -->
+				<button class="word2" onClick="location.href='/rssNews/$!flag'">메인</button>
+			</td>
+    	</tr>
+		</table>
+		</div>
+		
+		
+		<div id="newsContent">
+		<div>
+		
+    	#foreach($list in $newsList)
+            <div class="newstitle"><a href="$!list.link" target="_blank">[$!list.newsNm]  $!list.title</a>
+        		<span class="newsPubdate">
+        			$!list.pubDate
+        			
+        			#set ($timeDiff = $list.timeDiff)
+        			#if($timeDiff == 0)
+        				- <b>1 분전</b>
+        			#elseif($timeDiff > 0 &&  $timeDiff < 60)
+        				- <b>$timeDiff 분전</b>
+        			#elseif($timeDiff > 60 &&  $timeDiff < 1440)
+        				- <b>$HtmlUtil.getRoundInt($timeDiff,60)  시간전</b>
+        			#end
+        		</span>
+        	</div>
+        	<div class="newsDescription">$HtmlUtil.lineBreak($!list.description)</div>
+    	#end
+    		
+    	</div>
+		
+   	#if($searchCnt == 0)
+    	<div style="margin-bottom:50px;text-align:center;border;height:200px">데이터가 없습니다.</div>
+   	#elseif($searchCnt > $rowCount)
+		#set($lastCount = $searchCnt - $rowCount )
+    	<div id="loading"><a onClick="addPost(this)" class="hand">기사 더 보기</a> ... $number.format('integer',$lastCount)</div>
+    #end	
+	
+	</div>
+		
+	<div id="bottomNav">
+		<img src="/images/icon/icon_09.png" id="bodyTop" class="hand">
+    </div>
+	
+	</div>
+
+	<div class="clear"></div>
+</div>
+
+
+	
+</body>
+</html>

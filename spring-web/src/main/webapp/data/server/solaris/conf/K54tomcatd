@@ -1,0 +1,22 @@
+#!/bin/sh
+
+#Set some variables
+
+JAVA_HOME=/usr/java
+
+MYSEL=F`basename $0`
+
+case "$1" in
+        start)
+        /usr/local/tomcat/bin/catalina.sh start >/dev/null 2>&1 ; echo 'tomcat5 start'
+        ;;
+        stop)
+        /usr/local/tomcat/bin/catalina.sh stop >/dev/null 2>&1 ; echo 'tomcat5 stop'
+        ;;
+        *)
+        echo ""
+        echo "Usage: ${MYSELF} { start | stop }"
+        echo ""
+        exit 64
+        ;;
+esac

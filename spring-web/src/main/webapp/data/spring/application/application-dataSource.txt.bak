@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xmlns:tx="http://www.springframework.org/schema/tx"
+  xsi:schemaLocation="
+  http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+  http://www.springframework.org/schema/tx 
+  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+  http://www.springframework.org/schema/aop 
+  http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+  
+  <!--  JDBC -->  
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
+    	<property name="jndiName" value="java:/comp/env/mysql" />
+    	 <property name="resourceRef" value="false"/>
+	</bean>
+  <!--  
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"	 destroy-method="close">
+	 <property name="driverClassName" value="net.sf.log4jdbc.DriverSpy" />
+	 <property name="url" value="jdbc:log4jdbc:mysql://127.0.0.1/stock" />
+	 <property name="username" value="shkr" />
+	 <property name="password" value="Wkwkdaus" />
+	  <property name="initialSize" value="2"/>
+	 <property name="maxActive" value="8" />
+	 <property name="maxIdle" value="4" />
+	 <property name="maxWait" value="30000" />
+	</bean>
+	-->
+	
+	<!--  MyBatis  -->
+	 <!--
+	 <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configLocation"  value="/WEB-INF/config/mybatis-config.xml"/>
+		<property name="mapperLocations" value="classpath:com/stockholic/**/mapper/*.xml"/>
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	-->
+	 <bean id="sqlSessionFactory" class="com.stockholic.dao.RefreshableSqlSessionFactoryBean">
+		<property name="configLocation"  value="/WEB-INF/config/mybatis-config.xml"/>
+		<property name="mapperLocations" value="classpath:com/stockholic/dao/mapper/**/*.xml"/>
+		<property name="checkInterval" value="1000" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+	  <constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!--  Transation  -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+
+	<!--
+	* : 모든 형태의 가시성(public, protected, ..)을 가지는 메소드. 
+	com.sample : com.sample 이라는 패키지 명으로 시작하는 클래스 
+	..service : 마지막 패키지명이 service로 끝나는 클래스 
+	*Service : 클래스 명이 Service로 끝나는 클래스. 
+	*(..) : 모든 형태의 파라미터를 가지는 모든 메소드 
+	-->
+	
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+    <tx:attributes>
+      <tx:method name="get*" read-only="true"/>
+	  <tx:method name="*" propagation="REQUIRED"/>
+    </tx:attributes>
+  </tx:advice>
+  
+  <aop:config>
+		<aop:pointcut id="serviceOperation" expression="execution(* com.stockholic..service.*Service.*(..))" />
+	    <aop:advisor pointcut-ref="serviceOperation" advice-ref="txAdvice"/>
+    </aop:config>
+	
+
+</beans>

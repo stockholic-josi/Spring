@@ -1,0 +1,129 @@
+***** http://www.sunfreeware.com/index.html 에서 소프트웨어를 구할 수 있다
+
+1. 셀 변경(bash)
+------------------------------------------------
+#mkdir /root
+#vi /etc/passwd
+root:x:0:0:Super-User:/root:/bin/bash
+
+-------------- .bash_profile -------------------
+# your file creation mask
+umask 022
+
+# aliases
+alias   l='ls -AsCF'
+alias   ll='ls -laFg |less'
+alias   ls='ls -F'
+alias   dir='ls -laF | less'
+alias   h='history'
+alias   work='ps -ef | grep '
+alias   du='du -h'
+
+# environment variables
+export PATH=/usr/local/bin:/usr/sfw/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/ccs/bin
+export PS1='[\u@\h:\W]# '
+export LANG=ko_KR.UTF-8
+export LD_LIBRARY_PATH=/usr/local/xml/lib:/usr/lib:/usr/local/lib:/usr/ucblib:/usr/ccs/lib:/usr/sfw/lib
+export JAVA_HOME=/usr/java
+------------------------------------------------
+
+2. 네트워크 설정(확인)
+------------------------------------------------
+# cat /etc/hosts
+127.0.0.1       localhost       
+192.168.0.11  www     loghost
+
+# cat /etc/hostname.pcn0
+
+# cat /etc/netmasks
+192.168.0.0    255.255.255.0
+
+# cat /etc/defaultrouter
+192.168.0.1
+
+# ifconfig -a 
+lo0: flags=1000849 mtu 8232 index 1
+        inet 127.0.0.1 netmask ff000000
+pcn0: flags=1000843 mtu 1500 index 2
+        inet 192.168.0.11 netmask ffffff00 broadcast 192.168.0.255
+------------------------------------------------
+
+3. 도메인 서버 세팅
+------------------------------------------------
+nsswitch.conf파일의 hosts: 부분을 찾아 dns를 추가해준다 
+# vi /etc/nsswitch.conf
+hosts:      files	dns
+
+# vi /etc/resolv.conf
+domain xxxx.com
+nameserver 168.126.63.1
+nameserver 168.126.63.2
+------------------------------------------------
+
+
+4. 사용자를 추가해준다. 
+------------------------------------------------
+# useradd -d /export/home/merong -g staff -m  -s /bin/bash merong
+# passwd merong
+
+webconsole 서비스 종료
+# svcadm disable svc:/system/webconsole:console
+------------------------------------------------
+
+5. 시간을 맞춘다. 
+------------------------------------------------
+시간은 한국 표준과학연구원의 원자시계 타임서버에서 가져온다.
+/usr/bin/rdate time.bora.net 이 맞으나 재시작전이라 도메인으로 찾지 못하기 때문에 IP로 접속한다. 
+만약 제공받는 ISP에 타임서버 또는 NTP서버가 있다면 이를 이용하는 것이 더 좋다. 
+cron을 이용해 최소 하루에 한번정도는 실행해 시간을 맞추도록 하자. 
+# /usr/bin/rdate  203.248.240.103
+------------------------------------------------
+
+6. 재시작.
+------------------------------------------------
+# sync
+# sync
+# reboot
+------------------------------------------------
+
+8. 종료
+------------------------------------------------
+# shutdown -i5 -y -g0
+-i5 = shutdown
+-y = question answer Yes
+-g0 = wait for 0 second
+
+# intit 5
+------------------------------------------------
+
+
+9. 기타
+------------------------------------------------
+그래픽 로그인 비활성화  & X-window 비활성
+# svcadm disable svc:/application/graphical-login/cde-login:default
+
+그래픽 로그인 활성화 & X-window 활성
+# svcadm enable svc:/application/graphical-login/cde-login:default
+
+
+# svcadm disable svc:/system/webconsole:console
+
+FTP 시작
+svcadm enable svc:/network/ftp:default
+
+* #svcadm 또는 svccfg list 으로 서비스를 볼수 있다
+
+시작프로그램 등록
+ex) /etc/rc2.d/S10mysqld   /etc/rc2.d/K10mysqld
+
+# init
+0: PROM 
+1: 관리자모드 
+2: 다중유저모드 
+3: 표준운영모드 
+4: - 
+5: 셧다운 
+6: 재시작 
+S: 싱글유저모드
+
+------------------------------------------------

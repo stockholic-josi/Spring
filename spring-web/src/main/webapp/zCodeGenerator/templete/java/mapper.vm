@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="${pkgNm}">
+
+<!-- =================== List count =================== -->
+<select id="get${classNm}Count" resultType="java.lang.Integer">
+SELECT count(1) FROM ${tb.toUpperCase()}
+</select>
+
+#if($type == "mysql")
+<!-- =================== List =================== -->
+<select id="get${classNm}List" resultType="${pkgNm}.dto.${classNm}">
+SELECT
+#set($size = $tList.size())
+#foreach($list in $tList)
+	#set($cnt  = $velocityCount - 1)
+	${list.columnName} AS ${cList.get($cnt).columnName}#if($velocityCount <  $size),#end
+
+#end	
+FROM ${tb.toUpperCase()}
+LIMIT #{start},#{limit}
+</select>
+#end
+
+#if($type == "oracle")
+<!-- =================== List =================== -->
+<select id="get${classNm}List" resultType="${pkgNm}.dto.${classNm}">
+SELECT * FROM(
+	SELECT
+	 #foreach($list in $tList)
+    	#set($cnt  = $velocityCount - 1)
+    	${cList.get($cnt).columnName},
+	 #end
+		rownum AS rnum
+	FROM(
+        SELECT
+        #set($size = $tList.size())
+        #foreach($list in $tList)
+        	#set($cnt  = $velocityCount - 1)
+			${list.columnName} AS ${cList.get($cnt).columnName}#if($velocityCount <  $size),#end
+        
+        #end	
+        FROM ${tb.toUpperCase()}
+		<!-- ORDER BY -->
+	) WHERE rownum &lt;=#{limit}
+) WHERE rnum &gt;= #{start}
+</select>
+#end
+
+<!-- =================== Read =================== -->
+<select id="get${classNm}" resultType="${pkgNm}.dto.${classNm}">
+SELECT
+#set($size = $tList.size())
+#foreach($list in $tList)
+	#set($cnt  = $velocityCount - 1)
+	${list.columnName} AS ${cList.get($cnt).columnName}#if($velocityCount <  $size),#end
+
+#end	
+FROM ${tb.toUpperCase()}
+${where}
+</select>
+
+<!-- =================== Insert =================== -->
+<insert id="${classAlias}Insert">
+INSERT INTO ${tb.toUpperCase()}(
+#set($size = $tList.size())
+#foreach($list in $tList)
+	#set($cnt  = $velocityCount - 1)
+	${list.columnName}#if($velocityCount <  $size),#end
+
+#end	
+)VALUES(
+#foreach($list in $tList)
+	#set($cnt  = $velocityCount - 1)
+#if(${list.dataType.indexOf("date")} != -1)#if($type == "mysql")	sysdate()#else	sysdate#end
+#else	#{${cList.get($cnt).columnName}}#end#if($velocityCount <  $size),#end
+
+#end	
+)
+</insert>
+
+<!-- =================== Update =================== -->
+<update id="${classAlias}UPdate">
+UPDATE ${tb.toUpperCase()} SET
+#set($size = $tList.size())
+#foreach($list in $tList)
+	#set($cnt  = $velocityCount - 1)
+	${list.columnName}#if(${list.dataType.indexOf("date")} != -1)#if($type == "mysql") = sysdate()#else = sysdate#end
+#else = #{${cList.get($cnt).columnName}}#end#if($velocityCount <  $size),#end
+
+#end	
+${where}
+</update>
+
+<!-- =================== Delete =================== -->
+<delete id="${classAlias}Delete">
+DELETE FROM ${tb.toUpperCase()}
+${where}
+</delete>
+	
+</mapper>

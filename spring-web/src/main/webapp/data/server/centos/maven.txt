@@ -1,0 +1,60 @@
+------------------------------------------------------------------------------------------------------------- Ropository 변경
+
+  settings.xml에서 <localRepository>/path/to/local/repo</localRepository>  변경 --->
+
+  <localRepository>C:\01.work\webapps\maven-3.2.5\repository</localRepository>
+
+ 
+
+------------------------------------------------------------------------------------------------------------- 이클립스 내에서 Maven 설정
+  
+  1. 경로설정
+   
+   window > Preference > Maven > User Settings
+
+  2. Target 제외
+   
+   Window > Preferences > Team > Ignored Resources
+   Add Pattern 클릭
+   */target/* 추가
+
+
+------------------------------------------------------------------------------------------------------------- 이클립스 프로젝트 생성
+  
+  1.  Maven -> Maven Project
+  
+  2. maven-archetype-webapp
+
+     Group Id : 프로젝트 그룹의 식별 					com.stockholic
+     Artifact Id : Group Id 에 따른 하위 프로젝트를 구분하기 위한 ID 값	test
+     Version : Artifact 의 버전 						1.0.0
+     Package : 프로젝트 생성시 기본으로 생성되는 패키지 명을 입력합니다. 빈 문자열을 넣어도 무방
+
+  3. src > main >java 폴더 생성
+     Maven > Update Project Configuration
+
+
+------------------------------------------------------------------------------------------------------------- Maven 명령어
+jar 파일 추출    - mvn dependency:copy-dependencies -DoutputDirectory=D:\99.tmp 또는
+
+                   - eclipse 에 dependency:copy-dependencies -DoutputDirectory=src/main/webapp/WEB-INF/lib  추가 또는
+
+                   - pom.xml
+                      <plugins>
+                        <plugin>
+
+                          <artifactId>maven-dependency-plugin</artifactId>
+                          <executions>
+                            <execution>
+                              <phase>install</phase>
+                              <goals>
+                                <goal>copy-dependencies</goal>
+                              </goals>
+                              <configuration>
+                                <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                              </configuration>
+                            </execution>
+                          </executions>
+                        </plugin>
+                      </plugins>
+

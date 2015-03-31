@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+		color="#FFFFFF" width="0" height="0"
+		creationComplete="init()">
+	 <mx:Script>
+  <![CDATA[
+
+   import mx.controls.Alert;
+   import mx.events.FlexEvent;
+   
+   private var socket:Socket;
+   private var call:String;
+   
+   
+   public function init():void{
+   	
+    
+    // 현재 Flash Player가 외부 인터페이스를 제공하는 컨테이너에 있는지 여부 체크
+     // ExternalInterface.addCallback : 자바스크립트에서 호출할때 실행되는 콜백 함수를 등록할때 쓰인다.
+     // ExternalInterface.call : 자바스크립트의 함수를 콜할때 쓰인다.
+   		if (ExternalInterface.available) {
+
+	     	ExternalInterface.addCallback("closeServer", closeSocket);     //서버연결 해제
+		    ExternalInterface.addCallback("sendMsg", sendMsg);     		 //메세지 송신
+		     
+		   connectSocket();
+
+    	}
+	}
+   
+   
+   /**
+    * 서버연결
+    */
+   private function connectSocket():void {
+   	
+	    if (!socket || !socket.connected) {
+	    	
+		     socket = new Socket();
+		     
+		     //연결되었을 경우 Event.CONNECT라는 이벤트가 발생 되어 핸들러를 연결해 준다
+		     socket.addEventListener(Event.CONNECT, onConnect);
+		     socket.connect("127.0.0.1", 5599);
+		     
+	    }
+   }
+   private function onConnect(e:Event):void {
+   		Alert.show("Server Socket is onConnect");
+   	
+   		//대기실 오픈
+   		ExternalInterface.call("openWaitRoom");
+    
+	    //ProgressEvent.SOCKET_DATA  소켓에 데이터가 도착했을때 발생되는 이벤트
+	    socket.addEventListener(ProgressEvent.SOCKET_DATA, onSocketData);
+	    
+	    socket.addEventListener(Event.CLOSE, onClose);
+    
+   }
+   
+   /**
+   * 사용자 초기
+   */
+    protected function initUser(obj:Object):void {
+    	var msg:ChatMsg = new ChatMsg();
+		   msg.setCmd(2);
+		   msg.setMsg("stock");
+		     
+		   sendMsg(msg);
+    }
+   
+   
+   private function onClose(e:Event):void {
+	    //Alert.show("Server Socket is Closed");
+	    ExternalInterface.call("recvMsg","{cmd:3,msg:'<p style=\"color: #FF9900\">--------------------------------------------- 연결이 끊어졌습니다. ---------------------------------------------</p>'}");
+   }
+   
+   /**
+    * 메시지 수신
+    */
+   private function onSocketData(event:ProgressEvent):void {
+	    var obj:Object;
+	    
+	    while (socket.bytesAvailable) {
+		     obj = socket.readObject();
+		     var msg:ChatMsg = obj as ChatMsg;
+		     ExternalInterface.call("recvMsg","{cmd:" + msg.getCmd() + ",msg:" +  msg.getMsg() + "}");
+	    }
+   }
+   
+   /**
+    * 메시지 송신
+    */
+   protected function sendMsg(obj:Object):void {
+	    var msg:ChatMsg = new ChatMsg();
+	    msg.setCmd(obj.cmd);
+	    msg.setMsg(obj.msg);
+	    msg.setUserId(obj.userId);
+	    socket.writeObject(msg)
+	    socket.flush();
+   }
+   
+   /**
+    * 서버연결 종료
+    */
+   protected function closeSocket():void {
+	    if (socket && socket.connected) {
+		     socket.close();
+		     ExternalInterface.call("recvMsg","{cmd:3,msg:'<p style=\"color: #FF9900\">--------------------------------------------- 연결이 끊어졌습니다. ---------------------------------------------</p>'}");
+	    }
+   }
+   
+  ]]>
+ </mx:Script>
+</mx:Application>

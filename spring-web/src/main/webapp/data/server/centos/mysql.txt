@@ -1,0 +1,56 @@
+# yum -y install cmake
+
+# yum -y install ncurses-devel
+
+
+------------------------------ 5.5
+host> cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mysql5.5 -DWITH_INNOBASE_STORAGE_ENGINE=1 -DDEFAULT_CHARSET=utf8 -DDEFAULT_COLLATION=utf8_general_ci
+host> make;make install
+
+host> cd /usr/local/mysql5.5
+host> scripts/mysql_install_db --user=mysql
+host> cp /usr/local/mysql5.5/support-files/my-large.cnf /etc/my.cnf
+host> cp /usr/local/mysql5.5/support-files/mysql.server /etc/init.d/mysqld
+host> cd /usr/local/
+host> chown -R mysql:mysql mysql5.5
+host> cd /etc/init.d
+host> chkconfig --add mysqld
+host> vi /etc/bashrc
+export PATH=${PATH}:/usr/local/java/bin:/usr/local/mysql5.5/bin
+
+
+
+my.cnf
+ft_min_word_len = 2
+
+나중에 추가 했다면 다음 명령어로 full text 테이블을 repair 헤주어야 한다.
+
+host> repair table sk_news_stock quick
+
+
+------------------------------ 5.1
+host > ./configure --prefix=/usr/local/mysql5.1 --localstatedir=/usr/local/mysql/data --with-mysql-user=mysql  --with-innodb --with-charset=utf8
+host> make;make install
+host > /usr/local/mysql/bin/mysql_install_db  --user=mysql
+host> cp /usr/local/mysql5.1/share/mysql/my-medium.cnf /etc/my.cnf
+host> cp /usr/local/mysql5.1/share/mysql/mysql.server /usr/local/etc/rc.d/mysqld.sh
+host> cd /usr/local/
+host> chown -R mysql:mysql mysql5.1
+
+
+
+
+mysql> show variables like 'c%'; 
+mysql> update user set password = password('Wkwkdaus');
+mysql> flush privileges;
+mysql> grant all privileges on *.* to stock@localhost identified by 'Wkwkdaus'; 
+mysql> grant all privileges on *.* to stock@'192.168.0.%' identified by 'Wkwkdaus'; 
+mysql> create database stock databasename_utf8 DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;   
+
+
+
+
+error 
+-- Could NOT find Curses  (missing:  CURSES_LIBRARY CURSES_INCLUDE_PATH)
+
+# yum -y install ncurses-devel

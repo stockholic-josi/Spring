@@ -1,0 +1,33 @@
+<html>
+<head>
+	
+<script>
+function rm(param){
+	if( confirm("삭제하겠습니까?")  == false) return;
+	
+	location.href = "${classAlias}Delete.do?" + param;
+}
+</script>
+
+</head>
+
+<body>
+
+
+<table cellspacing="0" cellpadding="3" border="1" width="100%" style="border-collapse:collapse; border:1px gray solid;">
+#foreach($list in $cList)
+<tr> 
+	<td width="100">${list.columnName}</td>	
+	<td>$!${classAlias}.${list.columnName}</td>	
+</tr>
+#end
+</table>
+
+<p>
+<a href="${classAlias}List.do?p=$params.p">목록</a> &nbsp;
+<a href="${classAlias}ModifyForm.do?p=$params.p&${link}">수정</a> &nbsp;
+<a href="javascript:rm('p=$params.p&${link}')">삭제</a> &nbsp;
+</p>
+
+</body>
+</html>

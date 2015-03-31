@@ -1,0 +1,100 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	
+	<link rel="stylesheet" href="/css/global.css" type="text/css">
+	<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+	<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+	<script type="text/javascript" src="/js/common.js"></script>
+	
+
+
+<style>
+
+	#chatRoom { list-style-type: none; margin: 0; padding: 0; width: 400px }
+	#chatRoom ul { margin: 0px 0px 5px 0px; padding: 5px;  height: 20px; }
+	#chatRoom ul .r1 {float:left;width:320px;font-size: 10pt;}
+	#chatRoom ul .r2 {float:right;width:60px;font-size: 10pt;text-align:right}
+	.ui-state-list { background-color:#fff;border:1px solid #C9C9C9;height: 20px; }
+	.ui-state-highlight2 { height: 20px; background-color:#E0E0E0;border:1px solid #C9C9C9;border-style: dashed;}
+	</style>
+
+	<script>
+
+	$(document).ready(function () {
+
+
+		$( "#chatRoom" ).sortable({
+			placeholder: "ui-state-highlight2"
+		});
+		$( "#chatRoom" ).disableSelection();
+		$( "#chatRoom" ).sortable({ cursor: 'move' });
+
+		$( "button" ).button({
+			icons: {
+				primary: "ui-icon-document"
+			}
+		});
+
+		$( "#listBtn" ).button( "option", "icons", {primary:'ui-icon-wrench'} )
+
+
+		//이동상태, 버튼명 토글
+		/*
+		$("#listBtn").toggle(
+			function(){
+				$( "#chatRoom").sortable( "option", "disabled", true );
+				$(this).button( "option", "label", "목록 고정" );
+			},
+			function(){
+				$( "#chatRoom").sortable( "option", "disabled", false );
+				$(this).button( "option", "label", "목록 이동" );
+			}
+		)
+		*/
+		
+		
+		$("#listBtn").click(function(){
+	        var state = $(this).data('toggleState');
+	        if(state){
+	        	$("#chatRoom").sortable( "option", "disabled", true );
+				$(this).button( "option", "label", "목록 고정" );
+	        } else {
+	        	$("#chatRoom").sortable( "option", "disabled", false );
+				$(this).button( "option", "label", "목록 이동" );
+	        }
+	        $(this).data('toggleState', !state);
+	    });
+
+	});
+
+
+	</script>
+
+ </head>
+
+ <body>
+
+
+
+
+<li id="chatRoom">
+	<ul class="ui-state-list" id="item_1"><div class="r1">Hot 하게 놀아요</div><div class="r2">10:10</div></ul>
+	<ul class="ui-state-list" id="item_2"><div class="r1">Cool 하게 놀아요</div><div class="r2"">10:10</div></ul>
+	<ul class="ui-state-list" id="item_3"><div class="r1">Item 3</div><div class="r2"">10:10</div></ul>
+	<ul class="ui-state-list" id="item_4"><div class="r1">Item 4</div><div class="r2"">10:10</div></ul>
+	<ul class="ui-state-list" id="item_5"><div class="r1">Item 5</div><div class="r2"">10:10</div></ul>
+	<ul class="ui-state-list" id="item_6"><div class="r1">Item 6</div><div class="r2"">10:10</div></ul>
+	<ul class="ui-state-list" id="item_7"><div class="r1">Item 7</div><div class="r2"">10:10</div></ul>
+</li>
+
+<button id="listBtn">목록 이동</button>
+<button id="btn" onClick="alert( $( '#chatRoom' ).sortable( 'serialize') )">Serialize</button>
+
+ </body>
+</html>
+
+
+

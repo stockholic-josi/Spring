@@ -1,0 +1,157 @@
+package ${pkgNm}.controller;
+
+import java.util.List;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+import ${pkgNm}.dto.${classNm};
+import ${pkgNm}.service.${classNm}Service;
+
+import com.ufancy.common.util.HtmlUtil;
+
+@Controller("${pkgNm}.controller.${classNm}Controller")
+@RequestMapping("/front/${classAlias}/*.do")
+public class ${classNm}Controller{
+
+	@Resource
+	private MessageSourceAccessor message;
+	
+	@Resource
+	private ${classNm}Service ${classAlias}Service;
+	
+	/**
+	 * 목록
+	 * @param request
+	 * @param response
+	 * @param dto : ${classNm}
+	 * @return ModelAndView
+	 */
+	@RequestMapping
+	public ModelAndView ${classAlias}List(${classNm} dto) {
+		
+		ModelAndView mv = new ModelAndView("${vmNmPath}/${classAlias}List");
+		
+		if(HtmlUtil.chkNum(dto.getP()) == false) dto.setP("1");
+
+		List ${classAlias}List = this.${classAlias}Service.get${classNm}List(dto);
+		mv.addObject("${classAlias}List", ${classAlias}List);
+		mv.addObject("search", dto);
+
+		return mv;
+
+	}
+	
+	/**
+	 * 조회
+	 * @param request
+	 * @param response
+	 * @param dto : ${classNm}
+	 * @return ModelAndView
+	 */
+	@RequestMapping
+	public ModelAndView ${classAlias}Read(${classNm} dto) {
+
+		ModelAndView mv = new ModelAndView("${vmNmPath}/${classAlias}Read");
+	
+		${classNm} ${classAlias} = this.${classAlias}Service.get${classNm}(dto);	
+		if(${classAlias} == null) return null;
+		
+		mv.addObject("${classAlias}", ${classAlias});
+		
+		return mv;
+
+	}
+	
+	/**
+	 * 등록폼
+	 * @param request
+	 * @param response
+	 * @param dto : ${classNm}
+	 * @return ModelAndView
+	 */
+	@RequestMapping
+	public ModelAndView ${classAlias}Form(${classNm} dto) {
+
+		ModelAndView mv = new ModelAndView("${vmNmPath}/${classAlias}Form");
+		
+		mv.addObject("action", "${classAlias}Insert");
+		mv.addObject("${classAlias}",dto);
+		
+		return mv;
+
+	}
+	
+	/**
+	 * 등록
+	 * @param request
+	 * @param response
+	 * @param dto : ${classNm}
+	 * @return ModelAndView
+	 */
+	@RequestMapping
+	public ModelAndView ${classAlias}Insert(${classNm} dto) {
+
+		this.${classAlias}Service.${classAlias}Insert(dto);
+		
+		return new ModelAndView("redirect:./${classAlias}List.do");
+	}
+	
+	/**
+	 * 수정폼
+	 * @param request
+	 * @param response
+	 * @param dto : ${classNm}
+	 * @return ModelAndView
+	 */
+	@RequestMapping
+	public ModelAndView ${classAlias}ModifyForm(${classNm} dto) {
+		
+		ModelAndView mv = new ModelAndView("${vmNmPath}/${classAlias}Form");
+		
+		${classNm} ${classAlias} = this.${classAlias}Service.get${classNm}(dto);
+		if(${classAlias} == null){return null;}
+		
+		mv.addObject("action", "${classAlias}Update");
+		mv.addObject("${classAlias}",${classAlias});
+		
+		return mv;
+
+	}	
+	
+	/**
+	 * 수정
+	 * @param request
+	 * @param response
+	 * @param dto : ${classNm}
+	 * @return ModelAndView
+	 */
+	@RequestMapping
+	public ModelAndView ${classAlias}Modify(${classNm} dto) {
+		
+		this.${classAlias}Service.${classAlias}Update(dto);
+		
+		return new ModelAndView("redirect:./${classAlias}Read.do" #if($params != '')+ ${params}#end);
+
+	}
+	
+	/**
+	 * 삭제
+	 * @param request
+	 * @param response
+	 * @param dto : ${classNm}
+	 * @return ModelAndView
+	 */
+	@RequestMapping
+	public ModelAndView ${classAlias}Delete(${classNm} dto) {
+		
+		this.${classAlias}Service.${classAlias}Delete(dto);
+		
+		return new ModelAndView("redirect:./${classAlias}List.do?p=" + dto.getP());
+
+	}
+
+	
+}

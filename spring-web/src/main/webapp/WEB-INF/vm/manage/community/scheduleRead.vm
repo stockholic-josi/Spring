@@ -1,0 +1,164 @@
+<html>
+<head>
+
+<script language="JavaScript">
+<!--
+
+function check(){
+	if(!trim(Wform.content.value)){
+	
+		alertDialog("알림","내용을 입력해 주십시요",function(){
+			$("#dialog").dialog("close"); 
+			Wform.content.focus();
+		});
+	
+		return;
+	}
+
+	Wform.submit();
+}
+
+function delAll(Y,M,D){
+	cfDialog("확인","모두 삭제하시겠습니까",function(){
+		$("#dialog").dialog("close"); 
+		location.href = "./scheduleDelete.do?year=" + Y + "&month=" + M + "&day=" + D;
+	});
+}
+
+function del(Y,M,D,N){
+	cfDialog("확인","삭제하시겠습니까.",function(){
+		$("#dialog").dialog("close"); 
+		location.href = "./scheduleDelete.do?year=" + Y + "&month=" + M + "&day=" + D + "&seqNo="+ N;
+	});
+}
+
+function modify(Y,M,D,H,M,N,ID){
+	var cnt = document.getElementById("cnt_" + ID).innerText;
+	document.Wform.content.value = cnt;
+	
+	for(i = 0; i < Wform.hour.options.length; i++){
+		if(Wform.hour.options[i].value == H){
+			Wform.hour.options[i].selected = true;
+			break;
+		}
+	}
+	for(i = 0; i < Wform.min.options.length; i++){
+		if(Wform.min.options[i].value == M){
+			Wform.min.options[i].selected = true;
+			break;
+		}
+	}
+	
+	document.Wform.seqNo.value = N;
+		
+}
+
+$(document).ready(function () {
+	getCalendar("regDate");
+});
+//-->
+</script>
+
+
+<body>
+	
+<div id="wrapper">
+
+<table cellspacing=0 cellpadding=0 border=0 width="100%">
+<tr><td colspan="4" height="25"><font color="#808080"><b>$!params.year년 $!params.month월 $!params.day일<b></font></td></tr> 
+<tr><td colspan="4" height=2 bgcolor='#ACBDEA'></td></tr>
+#set ($color = $alternator.auto("#FFFFFF", "#FAFAFA"))
+#set($total = 0)
+#foreach($list in $scheduleList)
+<tr style="background-color:$color" height="30">	
+	<td width='40' align='center'>$velocityCount</td>
+	<td width='40' align='center'>
+		<a href="javascript:del('$!params.year','$number.format("00",$!params.month)','$number.format("00",$!params.day)','$!list.seqNo')"><img src="/images/board/memo_del.gif" border="0" align="absmiddle" alt="삭제"></a>&nbsp;
+		<a href="javascript:modify('$!params.year','$number.format("00",$!params.month)','$number.format("00",$!params.day)','$date.format('HH',$list.schDate)','$date.format('mm',$list.schDate)','$!list.seqNo','$velocityCount')">
+			<img src="/images/board/memo_mo.gif" border="0" align="absmiddle" alt="수정"></a>
+	</td>
+	<td width='80' align='center'>$date.format('HH시 mm분',$list.schDate)</td>
+	<td style="padding:10;line-height:20px" id="cnt_$velocityCount">$HtmlUtil.lineBreak($list.content)</td>
+</tr>
+<tr><td colspan="7" background="/images/board/dot2.jpg" height="1"></td></tr>
+#set($total = $total + $velocityCount)
+#end
+
+#if($total == 0)
+<tr align=center height="50">
+	<td colspan="4">자료가 없습니다.</td>
+</tr>
+<tr><td colspan="4" background="/images/board/dot2.jpg" height="1"></td></tr>
+#end
+
+<tr>
+	<td colspan="4" height="30" align="right">
+		<button class="word2" onClick="delAll('$!params.year','$number.format("00",$!params.month)','$number.format("00",$!params.day)')">삭제</button>	
+	</td>
+</tr>
+</table>
+
+<form name="Wform" id="Wform" action="./scheduleInsert.do" method="post" onSubmit="return false">
+<table cellspacing=0 cellpadding=5 border="0" width="100%">
+<tr><td colspan=2 height="20"></td></tr>
+<tr>
+	<td>
+        <div style="float:left;margin-right:5px">
+			
+			#if(!$params.year) #set($regDate = $date.get("yyyy/MM/dd"))
+            #else #set($regDate = $!params.year +"/"+ $!params.month + "/" + $!params.day)
+            #end
+			
+			<img src="/images/common/calendar.gif" align="absmiddle">
+            <input TYPE="text" id="regDate" name="regDate"  value="$!regDate" style="width:75px" class="inputBox" readOnly>
+		</div>
+
+		
+		<div style="float:left;margin-right:5px">
+		<select name="hour" id="hour">
+		#set($hour = $date.format('HH',$date))	
+		#foreach( $hh in [1..24] )
+			#set($hh = $number.format('00',$hh))
+			#if($velocityCount == 12)
+			<option value="$hh" selected>$hh</option>
+			#else
+			<option value="$hh">$hh</option>
+			#end
+		#end
+		</select>시
+		</div>
+		
+		<div style="float:left">
+		<select name="min" id="min">
+		#set($min = $date.format('mm',$date))	
+		#foreach( $mm in [0..55] )
+			#if($mm % 10 == 0)
+			#set($mm = $number.format('00',$mm))
+			<option value="$mm">$mm</option>
+			#end
+		#end
+		</select>분
+		</div>
+	</td>
+</tr>	
+<tr>
+	<td>
+		<textarea name=content rows="5"  class="boarder" style='width:99%'></textarea>
+	</td>
+</tr>	
+<tr>
+	<td  height="30">
+		<button class="word2" onClick="check()">등록</button>
+		<button class="word2" onClick="location.href='./calendar.do?year=$!params.year&month=$!params.month'">목록</button>
+	</td>
+</tr>	
+<input type="hidden" name="seqNo" id="seqNo">
+<input type="hidden" name="flag" id="flag" value="$!params.flag">
+</form>
+</table>
+	
+
+</div>
+
+</body>
+</html>

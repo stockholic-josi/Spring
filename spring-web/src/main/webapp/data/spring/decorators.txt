@@ -1,0 +1,12 @@
+<sitemesh>
+
+  <!-- Map decorators to path patterns. -->
+  <mapping path="/front/**/*.do*" decorator="/WEB-INF/layout/main.jsp" />
+  <mapping path="/user/*.do*" decorator="/WEB-INF/layout/main.jsp" />
+  <mapping path="/manage/**/*.do*" decorator="/WEB-INF/layout/main.jsp" />
+
+
+  <!-- Exclude path from decoration. -->
+  <mapping path="/user/login.do*" exclue="true"/>
+  
+</sitemesh>

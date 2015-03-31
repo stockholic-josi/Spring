@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="manage.community.schedule">
+
+
+<!-- =================== 월간 스케즐  =================== -->
+<select id="getCalendarList"  resultType="com.taxholic.manage.community.dto.ScheduleDto">
+SELECT 
+	content,DATE_FORMAT(sch_date,'%e') AS keyValue
+FROM sk_schedule
+WHERE user_id = #{userId} 
+AND DATE_FORMAT(sch_date,'%Y%m') = '${year}${month}'
+ORDER BY sch_date
+</select>
+
+<!-- =================== 날짜별 조회=================== -->
+<select id="getScheduleList"  resultType="com.taxholic.manage.community.dto.ScheduleDto">
+SELECT
+	seq_no AS seqNo,
+	content, 
+	sch_date AS schDate, 
+	reg_date AS regDate
+FROM sk_schedule
+WHERE  user_id = #{userId} 
+AND DATE_FORMAT(sch_date,'%Y%m%d') = '${year}${month}${day}'
+ORDER BY schDate
+</select>
+
+<!-- =================== 날짜별 등록=================== -->
+<insert id="scheduleInsert" >
+
+INSERT INTO sk_schedule(
+	user_id,
+	content,
+	sch_date,
+	reg_date
+)VALUES(
+	#{userId},
+	#{content},
+	'${regDate} ${hour}:${min}:00',	
+	SYSDATE()
+)
+</insert>
+
+<!-- =================== 날짜별 수정=================== -->
+<update id="scheduleUpdate" >
+UPDATE sk_schedule SET 
+	content = #{content},
+	sch_date = '${regDate} ${hour}:${min}:00'
+WHERE user_id = #{userId}  AND seq_no = #{seqNo}	
+</update>
+
+<!-- ===================개별 삭제  =================== -->
+<delete id="scheduleDelete" >
+DELETE FROM sk_schedule
+WHERE user_id = #{userId} 
+
+AND DATE_FORMAT(sch_date,'%Y%m%d') = '${year}${month}${day}'
+<if test="seqNo != null">
+AND seq_no = #{seqNo}
+</if>
+
+</delete>
+
+</mapper>

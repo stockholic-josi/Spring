@@ -1,0 +1,28 @@
+http://subversion.tigris.org/files/documents/15/47744/svn-1.4.6-setup.exe
+
+# cd G:\Repository
+
+# G:\SERVER\Subversion\bin\svnadmin create  spring
+
+# cd E:\Repository\spring\conf
+
+---------------------------------------------- svnserve.conf
+anon-access = none
+auth-access = write
+password-db = passwd
+
+
+---------------------------------------------- passwd
+merong = Wkwkdaus
+
+
+
+# G:\SERVER\Subversion\bin\svnserve -d -r  G:\Repository
+
+
+eclipse : svn://127.0.0.1/spring
+
+
+
+서비스 등록 : sc create svn binpath= "C:\Program Files\Subversion\bin\svnserve.exe --service -r D:\repository" displayname= "Subversion Server" depend= Tcpip start= auto
+서비스 해제 : sc delete svn displayname= "Subversion Server"

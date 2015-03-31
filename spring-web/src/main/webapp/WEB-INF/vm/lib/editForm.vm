@@ -1,0 +1,113 @@
+<script src="/js/edit.js" language="Javascript"></script>
+
+<style>
+	a.menuButton{								
+		top:1px;
+		height:23px;
+		width:26px;
+		background-color:#f5f5f5;
+		border-top:#f5f5f5 1px solid;
+		border-bottom:#f5f5f5 1px solid;
+		border-right:#f5f5f5 1px solid;
+		border-left:#f5f5f5 1px solid;
+	}
+
+	a.menuButton:hover {
+		background-color: transparent;
+		border-color: #f5f5f5 #808080 #808080 #f5f5f5;
+	}
+
+</style>
+
+<table cellspacing=0 cellpadding=0 border=1 bgcolor="#F5F5F5"  bordercolor="#D4D4D4" bordercolordark="#F5F5F5" width=100%><tr><td>
+<table cellspacing=0 cellpadding=0 border=0 bgcolor="#F5F5F5" width=100%>
+<tr>
+	<td width=80>
+		<select onChange="formatC('formatBlock',this[this.selectedIndex].value);this.selectedIndex=0">
+			<option class="heading" selected>헤드라인 
+			<option value="&lt;H1&gt;">Heading 1 <h1> 
+			<option value="&lt;H2&gt;">Heading 2 <h2> 
+			<option value="&lt;H3&gt;">Heading 3 <h3> 
+			<option value="&lt;H4&gt;">Heading 4 <h4> 
+			<option value="&lt;H5&gt;">Heading 5 <h5> 
+			<option value="&lt;H6&gt;">Heading 6 <h6> 
+			<option value="&lt;PRE&gt;">기본글꼴 <pre> 
+			<option value="removeFormat">원래대로 
+		</select>
+	</td>
+	<td width=90>
+		<select onChange="formatC('fontname',this[this.selectedIndex].value);this.selectedIndex=0">
+			<option value="">폰트
+			<option value=굴림>굴림
+			<option value=돋움>돋움
+			<option value=바탕>바탕
+			<option value=궁서>궁서
+			<option value=휴먼매직체>휴먼매직체
+			<option value=Arial>Arial
+			<option value=Arial Black>Arial Black
+			<option value=Arial Narrow>Arial Narrow
+			<option value=Comic Sans MS>Sans MS
+			<option value=Courier New>Courier New
+			<option value=System>System
+			<option value=Times New Roman>New Roman
+			<option value=Verdana>Verdana
+			<option value=Wingdings>Wingdings
+		</select>
+	</td>
+	<td width=70>
+		 <select onChange="formatC('fontsize',this[this.selectedIndex].value);this.selectedIndex=0">
+			<option selected>사이즈 
+			<option value="1">1 
+			<option value="2">2 
+			<option value="3">3 
+			<option value="4">4 
+			<option value="5">5 
+			<option value="6">6 
+			<option value="7">7 
+	  </select>
+	</td>
+	<td colspan=2><font color=#FFFFFF>........</font>
+		<input type="checkbox" name="switchMode"onClick="setMode(switchMode.checked)">
+		HTML 
+	</td>
+</tr>
+</table>
+<table cellspacing=0 cellpadding=0 border=0  width=100% bgcolor=#F5F5F5>
+<tr>
+	<td><a href="javascript:formatC('undo')" class="menuButton"><img src="/images/board/undo.gif" width="22" height="22" border=0 alt="실행취소 ctr+z" ></a></td>
+	<td><a href="javascript:formatC('redo')" class="menuButton"><img src="/images/board/redo.gif" width="22" height="22" border=0 alt="다시실행 ctr+y"></a></td>
+	<td><img src="/images/board/distint.gif" width="12" height="22" border=0></td>
+	<td><a href="javascript:formatC('cut')" class="menuButton"><img src="/images/board/cut.gif" width="22" height="22" border=0 alt="잘라내기 ctr+x"></a></td>
+	<td><a href="javascript:formatC('copy')" class="menuButton"><img src="/images/board/copy.gif" width="22" height="22" border=0 alt="복사 ctr+c"></a></td>
+	<td><a href="javascript:formatC('paste')" class="menuButton"><img src="/images/board/paste.gif" width="22" height="22" border=0 alt="붙여넣기 ctr+v"></a></td>
+	<td><a href="javascript:formatC('bold')" class="menuButton"><img src="/images/board/bold.gif" width="22" height="22" border=0 alt="볼드"></a></td>
+	<td><a href="javascript:formatC('italic')" class="menuButton"><img src="/images/board/italic.gif" width="22" height="22" border=0 alt="이텔릭"></a></td>
+	<td><a href="javascript:formatC('underline')" class="menuButton"><img src="/images/board/uline.gif" width="22" height="22" border=0 alt="밑줄"></a></td>
+	<td><img src="/images/board/distint.gif" width="12" height="22" border=0></td>
+	<td><a class="menuButton" href="javascript:ForegroundColor()" ><img src="/images/board/tpaint.gif" width="22" height="22" border=0 alt="텍스트 색"></a></td>
+	<td><a class="menuButton" href="javascript:BackgroundColor()" ><img src="/images/board/parea.gif" width="22" height="22" border=0 alt="배경색"></a></td>
+	<td><a class="menuButton" href="javascript:insertIMG()" ><img src="/images/board/ed_image.gif" width="22" height="22" border=0 alt="그림삽입"></a></td>
+	<td><a class="menuButton" href="javascript:insertIMGurl()" ><img src="/images/board/ed_image2.gif" width="22" height="22" border=0 alt="외부 그림삽입"></a></td>
+	<td><img src="/images/board/distint.gif" width="12" height="22" border=0></td>
+	<td><a href="javascript:formatC('justifyleft')" class="menuButton" ><img src="/images/board/aleft.gif" width="22" height="22" border=0 alt="왼쪽정렬"></a></td>
+	<td><a href="javascript:formatC('justifycenter')" class="menuButton" ><img src="/images/board/center.gif" width="22" height="22" border=0 alt="가운데정렬"></a></td>
+	<td><a href="javascript:formatC('justifyright')" class="menuButton" ><img src="/images/board/aright.gif" width="22" height="22" border=0 alt="오른쪽정렬"></a></td>
+	<td><a href="javascript:formatC('insertorderedlist')" class="menuButton" ><img src="/images/board/nlist.gif" width="22" height="22" border=0 alt="번호매기기"></a></td>
+	<td><a href="javascript:formatC('insertunorderedlist')" class="menuButton" ><img src="/images/board/blist.gif" width="22" height="22" border=0 alt="글머리기호"></a></td>
+	<td><a href="javascript:formatC('outdent')" class="menuButton" ><img src="/images/board/ileft.gif" width="22" height="22" border=0 alt="왼쪽여백줄이기"></a></td>
+	<td><a href="javascript:formatC('indent')" class="menuButton" ><img src="/images/board/iright.gif" width="22" height="22" border=0 alt="왼쪽여백늘리기"></a></td>
+	<td><img src="/images/board/distint.gif" width="12" height="22" border=0></td>
+	<td><a href="javascript:formatC('InsertHorizontalRule')" class="menuButton"><img src="/images/board/horizontal.gif" width="22" height="22" border=0 alt="수평선"></a></td>
+	<td><a href="javascript:insertTable()" class="menuButton"><img src="/images/board/table.gif" width="22" height="22" border=0 alt="테이블"></a></td>
+	<td><a href="javascript:formatC('CreateLink')" class="menuButton"><img src="/images/board/wlink.gif" width="22" height="22" border=0 alt="링크"></a></td>
+	<td width=50%></td>
+</tr>
+</table></td></tr></table>
+
+<table cellspacing=0 cellpadding=0 border=0 width=100%>
+<tr>
+	<td height=350>
+	<iframe name=Editor width="100%" id="Composition" height="100%"></iframe> 
+	</td>
+</tr>
+</table>

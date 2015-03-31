@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="front.User">
+
+<!-- =================== 로그인 정보  =================== -->
+<select id="getUserInfo" resultType="com.taxholic.core.authority.AuthDto">
+SELECT 
+	user_id AS userId,
+	passwd AS password,
+	user_nm AS userNm,
+	email,
+	receive
+FROM auth_member WHERE user_id = #{userId} AND use_yn = #{useYn}
+</select>
+
+<!-- =================== 권한 정보  =================== -->
+<select id="getUserAuthList" resultType="com.taxholic.core.authority.AuthDto">
+SELECT role_cd AS role  FROM auth_member_role WHERE user_id = #{userId}
+</select>
+
+
+<!-- =================== 아이디 검색 =================== -->
+<select id="getIdSearch" resultType="java.lang.Integer">
+SELECT count(1) FROM auth_member WHERE user_id = #{userId}
+</select>
+
+<!-- =================== 닉네임 검색 =================== -->
+<select id="getNickSearch" resultType="java.lang.Integer">
+SELECT count(1) FROM auth_member WHERE user_nm = #{userNm}
+</select>
+
+<!-- =================== 이메일 검색 =================== -->
+<select id="getEmailSearch" resultType="java.lang.Integer">
+SELECT count(1) FROM auth_member WHERE email = #{email}
+</select>
+
+<!-- =================== 회원 등록 =================== -->
+<update id="joinInsert">
+INSERT INTO auth_member(
+	user_id,
+	passwd,
+	user_nm,
+	email,
+	receive,
+	use_yn,
+	reg_date
+)VALUES(
+	#{userId},
+	#{passwd},
+	#{userNm},
+	#{email},
+	#{receive},
+	'Y',
+	/*SYSDATE()*/
+	datetime('now','localtime')
+)
+</update>
+
+<!-- =================== 회원 등록 이메일 인증=================== -->
+<update id="joinCertificate">
+UPDATE auth_member SET use_yn = 'Y'
+WHERE user_id = #{userId} AND email = #{email} AND use_yn = 'N'
+</update>
+
+<!-- =================== 회원 수정 =================== -->
+<update id="userInfoUpdate">
+UPDATE auth_member SET 
+	email = #{email},
+	receive = #{receive}
+WHERE user_id = #{userId}
+</update>
+
+<!-- =================== 비밀번호 변경 =================== -->
+<update id="userPwUpdate">
+UPDATE auth_member SET 
+	passwd = #{passwd}
+WHERE user_id = #{userId}
+</update>
+
+</mapper>
+

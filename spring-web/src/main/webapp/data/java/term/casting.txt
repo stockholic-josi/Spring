@@ -1,0 +1,41 @@
+String a = "It's" + (String) 1.25;
+
+
+
+이문장의 오류는 double 을 String 으로 casting 이 안되는 것입니다.
+
+그럼 여기서 먼저 알아야 할께. double 입니다.
+
+double, int ,float , chat , long, boolean 과 같은 것을 원시 데이터 타입이라고 합니다.
+
+이들의 실제 객체는 각각의 첫글자가 대문자인 걸로 java.lang 패키지 안에 존재합니다.
+
+Double , Int , Float , Chat, Long, Boolean 
+
+이 되겠지죠.
+
+원시 데이터 타입은 말그대로 값만 가지는 존재입니다.
+객체가 아니므로 부모나 자식을 가지거나 만들수가 없지요.
+
+한마디로 원시 테이터 타입은 casting 이 되지 않습니다.
+
+그럼 casting 에 대해서 말씀 드리면
+casting 이란  자식 객체가 부모 객체로 형을 바꾸는 것을 말합니다.
+자식은 부모의 성질을 모두 가지고 있으므로 언제나 참이죠.
+하지만 부모를 자식으로 Casting 할수는 없습니다.
+부모로 부터 받은거 말고 자식이 나름대로 만든 메소드나 변수가 있을수 있기 때문이지요.
+
+예를 들면 java.lang.Double 이란 객체는
+java.lang.Object o = (java.lang.Object)java.lang.Double
+java.lang.Number n = (java.lang.Number)java.lang.Double
+
+이런 식으로 가능 하지만 String 으로는 아무리 Double(객체)로 선언했어도
+casting 되지 않습니다.
+
+위 코드가 정확하게 어떤 의미인지는 모르겠으나.
+
+String a = "It's" + String.valueOf(1.25); 
+
+이렇게 사용하시면 에러는 없습니다.
+
+

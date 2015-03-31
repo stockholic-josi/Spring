@@ -1,0 +1,308 @@
+Java Reflection ?
+리플랙션이란 부분에서 알 수 있듯 지금 실행중인 프로그램에서 사용하는 객체를 비춰준다.
+즉, 내가 사용하고 있는 객체의 정보 가져오기, 객체의 메소드 호출 등의 작업을 할 수 있도록 해준다.
+
+친절하게도 기본 패키지에 리플랙션이 포함되어 있다. 그렇다고 너무 난무해서 사용해선 안된다. 리플랙션은 성능에 영향을 주기 때문이다. 
+직접 사용한적은 없지만 아마 여러 분야에서 도움을 받은 것이 리플랙션이 아닐까 싶다.
+
+얼마전까지 포스트 한 iBATIS를 보더라도 그렇다. XML에 등록한 패키지의 클래스는 동적으로 수행되어 java.util.List, java.util.Map등에 포함해 반환해 준다
+바로 이부분이 리플랙션을 이용해 동적으로 객체를 만들고 조작해 돌려주는 것 이다.
+
+
+
+
+
+------------------------------------------------------------------------------------------------- 1. 객체의 정보를 가져오는 방법
+
+import java.lang.reflect.*;
+public class Exam_Reflection {
+
+	public Exam_Reflection(Object object) {
+		// 클래스 기본 정보 확인
+		System.out.println("** Class information **");
+		System.out.println("=======================");
+		System.out.println(object.getClass().getPackage());
+		System.out.println("Class Name : " + object.getClass().getName());
+		System.out.println("Super Class: " + object.getClass().getSuperclass().getName());
+		System.out.println("");
+		// 접근자 확인
+		System.out.println("** Class Modifier information **");
+		System.out.println("================================");
+		System.out.println("Modifier : "+Modifier.toString(object.getClass().getModifiers()));
+		System.out.println("");
+		// 메소드 확인
+		System.out.println("** Method information **");
+		System.out.println("========================");
+		System.out.println(" << all method >> ");
+		System.out.println(getMethodInfo(object.getClass().getDeclaredMethods()));
+		System.out.println("");
+		System.out.println(" << access possible method >> ");
+		System.out.println(getMethodInfo(object.getClass().getMethods()));
+		System.out.println("");
+		// 필드 확인
+		System.out.println("** Field information **");
+		System.out.println("=======================");
+		System.out.println(" << all field >> ");
+		System.out.println(getFieldInfo(object.getClass().getDeclaredFields()));
+		System.out.println(" << access possible field >> ");
+		System.out.println(getFieldInfo(object.getClass().getFields()));
+		System.out.println("");
+		
+	}
+
+	private String getFieldInfo(Field[] fields) {
+		StringBuffer fieldInfo = new StringBuffer();
+		for (int i=0; i<fields.length;i++) {
+			StringBuffer info = new StringBuffer();
+			info.append(Modifier.toString(fields[i].getModifiers()) +" ");
+			info.append(fields[i].getType().getName() + " ");
+			info.append(fields[i].getName() + " \n");
+			fieldInfo.append(info.toString());
+		}
+		return fieldInfo.toString();
+	}
+	private String getMethodInfo(Method[] methods) {
+		
+		StringBuffer methodInfo = new StringBuffer();
+		for (int i=0; i<methods.length;i++) {
+			StringBuffer info = new StringBuffer();
+			
+			String methodName = methods[i].getName();
+			int methodModifier = methods[i].getModifiers();
+			Class methodReturnType = methods[i].getReturnType();
+			Class[] methodParamType = methods[i].getParameterTypes();
+			
+			info.append(Modifier.toString(methodModifier) +" ");
+			info.append(methodReturnType.getName() +" ");
+			info.append(methodName + "(");
+			
+			for (int j=0;j<methodParamType.length;j++) {
+				if (j != 0) info.append(", ");
+				info.append(methodParamType[j].getName());
+			}
+			info.append(")\n");
+			methodInfo.append(info.toString());
+		}
+		return methodInfo.toString();
+	}
+
+	private String getModifierInfo(Object object) {
+		StringBuffer modifier = new StringBuffer("Modifier :");
+		int modifierType = object.getClass().getModifiers();
+		if (Modifier.isAbstract(modifierType))  	modifier.append(" ABSTRACT");
+		if (Modifier.isFinal(modifierType))     	modifier.append(" FINAL");
+		if (Modifier.isInterface(modifierType)) 	modifier.append(" INTERFACE");
+		if (Modifier.isNative(modifierType))    	modifier.append(" NATIVE");
+		if (Modifier.isPrivate(modifierType))   	modifier.append(" PRIVATE");
+		if (Modifier.isProtected(modifierType)) 	modifier.append(" PROTECTED");
+		if (Modifier.isPublic(modifierType))    	modifier.append(" PUBLIC");
+		if (Modifier.isStatic(modifierType))    	modifier.append(" STATIC");
+		if (Modifier.isSynchronized(modifierType)) 	modifier.append(" SYNCHRONIZED");
+		if (Modifier.isStrict(modifierType))     	modifier.append(" STRICT");
+		if (Modifier.isVolatile(modifierType))   	modifier.append(" VOLATILE");
+		
+		return modifier.toString();
+	}
+
+	public static void main(String ar[]) {
+		new Exam_Reflection(new String());
+	}
+}
+
+
+
+정말 많이 사용하는 java.lang.String를 생성해 그 정보를 확인 했다. 코드에선 getClass(). 으로 접근했지만 아마 Class객체를 생성해 사용하는것이 바람직 할 것이다.(계속 호출하니까 ...)
+getModifierInfo(Object object) 메소드는 사용할 것을 대비해 작성했지만 .. Modifier.toString(int mod)에 넣어주면 알아서 확인해 주니 .. 사용하진 않았다.
+메소드 명이 직관적이라 큰 설명은 필요 없겠지만 메소드와 필드 목록을 가져오는 부분에서 getDeclared ... , get ...의 차이점이 궁금할 것이다. 
+실행해보면 알 수 있지만 getDeclared는 객체의 모든 정보를 가져온다. 반면 get ... 는 현재 접근이 가능한 부분만 나오게 된다. 
+따라서 private,protected는 나올 수가 없다.(상속관계라면 protected는 가능 할 것이다.)
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------- 2. 메소드 호출하기
+
+import java.lang.reflect.*;
+
+public class Exam_ReflectionInvoke {
+	public Exam_ReflectionInvoke(Object object) throws Exception {
+		Class cls = object.getClass();
+		System.out.println("before invoke .. StringBuffer value ");
+		System.out.println(" >> "+object.toString());
+		// 'append'메소드를 찾습니다.
+		// 단, 파라미터로 넘어오는 타입을 후에 기술 합니다.
+		// 아래의 방법은 JDK 5.0이상에서 사용합니다.
+		Method invokeMethod = cls.getMethod("append", new String().getClass());
+		// 메소드를 호출합니다. 파라미터는 "야호!"라는 스트링이죠.
+		invokeMethod.invoke(object, "야호!");
+		System.out.println("after invoke .. StringBuffer value ");
+		
+		// 위에서 "야호!"를 append했습니다. 따라서 출력될 것 입니다.
+		System.out.println(" >> "+object.toString());
+		
+		// 위와같이 toString메소드를 찾습니다. 파라미터는 없죠.
+		invokeMethod = cls.getMethod("toString", null);
+		System.out.println("StringBuffer value .. call toString()");
+		// toString()를 호출하고, 반환된 String를 출력 합니다.
+		System.out.println(invokeMethod.invoke(object, null));
+	}
+	
+	public static void main(String args[]) throws Exception {
+		new Exam_ReflectionInvoke(new StringBuffer());
+	}
+}
+
+직관적인 코드라 주석으로 충분한 설명이 되었을 듯 하다. 한가지 조심해야 할 사항은 위 코드는 jdk 5.0에서 사용한 코드다. 
+따라서 그 이하는 몇몇부분 문제가 발생할 수도 있다. Method invokeMethod = cls.getMethod("append", new String().getClass());부분이다. 
+이건 메소드를 찾는 부분인데 뒤에 인자가 수십개가 되면 어떻게 될까 ?
+jdk 5.0에선 수십개라면 그냥 주루룩 넣어주면된다. 프리미티브 타입이라면? 자동으로 박싱되어 랩퍼 클래스로 될 것이다.
+그리고 안에선 Object[] 로 들어가게 될 것이다.(이점에 대해 나중에 자세한 포스트로 다룰 예정이다.) 
+
+먼저 "append"라는 이름의 메소드를 찾고, 그 메소드가 가지는 인자는 어떤것들이다. 라는 조건으로 검색을 했다. 
+그러면 Method를 반환 하는데 .. 그것으로 invoke를 수행한다. invoke수행시 수행할 객체를 앞에 넣어주고, 들어갈 파라미터를 주루룩 넣어준다. 
+위와 같이 여기도 ... 방식으로 무한으로 넣어주면 된다.
+
+
+
+
+
+------------------------------------------------------------------------------------------------- 3. 필드값 수정
+
+
+public class SampleBean {
+	public String name;
+	public int age;
+	public SampleBean innerBean;
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public int getAge() {
+		return age;
+	}
+	public void setAge(int age) {
+		this.age = age;
+	}
+	public SampleBean getInnerBean() {
+		return innerBean;
+	}
+	public void setInnerBean(SampleBean innerBean) {
+		this.innerBean = innerBean;
+	}
+	
+	public String toString() {
+		return 
+		"Outter name : " + name + "\n"
+		+"Outter age  : " + age + "\n"
+		+"inner name  : " + innerBean.getName()+ "\n"
+		+"inner age   : " + innerBean.getAge() + "\n";
+	}
+}
+
+
+
+import java.lang.reflect.*;
+
+public class Exam_ReflectionField {
+	public static void main(String args[]) throws Exception {
+		// 필드를 살펴볼 빈 생성
+		SampleBean bean = new SampleBean();
+		Class cls = bean.getClass();
+		// name필드 접근 및 삽입
+		cls.getField("name").set(bean, "pupustory");
+		cls.getField("age").setInt(bean, 27);
+		
+		// 빈 안에 있는 객체(필드)에 넣을 빈 생성
+		SampleBean innerBean = new SampleBean();
+		innerBean.setName("inner puputory");
+		innerBean.setAge(17);
+		// Object타입의 필드 삽입
+		cls.getField("innerBean").set(bean, innerBean);
+
+		System.out.println(bean.toString());
+		
+		System.out.println("== get Field value !! ==");
+		// 필드값 가져오기. get은 Object이므로 String로 형변환 함
+		String name = (String)cls.getField("name").get(bean);
+		// int필드이므로 그냥 getInt를 이용함
+		int age = cls.getField("age").getInt(bean);
+		System.out.println("name [" +name+"] age ["+age+"]");
+	}
+}
+
+sampleBean의 필드를 수정한다. 내부엔 Object도 있다.(동일한 SampleBean) 보통 빈이라 함은 필드가 private이지만 public로 한 이유는 접근때문에 그렇다.
+리플랙션이라 해서 private나 final등의 접근이 예외적일 순 없다. 따라서 접근이 가능한 public로 수정한 것이다. 만약 private로 되어있다면 IllegalException이 날것이다. 이유는 '찾을 수 없어서'이다.
+
+
+프리미티브 타입은 그대로 사용할 수 있다. getInt, setInt, getFloat, setFloat .. 그렇다면 String이 없는 이유는 ? 사실 String는 당연히 클래스 이므로 그렇다. 이런경우 set(Object)를 이용하면 된다.
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------- 4. 동적 객체생성
+	
+public class SampleBean {
+	public String name;
+	public int age;
+	public SampleBean() {}
+	public SampleBean(String name, int age) {
+		this.name = name;
+		this.age = age;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public int getAge() {
+		return age;
+	}
+	public void setAge(int age) {
+		this.age = age;
+	}
+	public String toString() {
+		return 
+		"name : " + name + "\n"
+		+"age  : " + age + "\n";
+	}
+}
+
+import java.lang.reflect.*;
+
+public class Exam_ReflectionInstance {
+	
+	public static void main(String ar[]) throws Exception{
+		// 생성할 객체 클래스
+		Class dynamicInstance = SampleBean.class;
+		// 생성할 객체의 생성자. (String,int) 
+		Constructor constructor = dynamicInstance.getConstructor(String.class,int.class);
+		// 객체 생성!! 인자는 "pupustory"와 1입니다.
+		SampleBean dynamicBean = (SampleBean)constructor.newInstance("pupustory",1);
+		// 생성한 클래스의 이름.
+		System.out.println("instance name > "+dynamicBean.getClass().getName());
+		// 생성자로 값이 제대로 들어갔나 확인해 봅시다.
+		System.out.println(dynamicBean.toString());
+	}
+}
+
+필드와 메소드에서 사용했던대로 사용하면 된다. Constructor를 통해 생성자를 찾는다. 물론 인자값이 어떤게 들어가는지를 통해 찾는다. 
+생성자 모두를 배열로 가져올수도 있다. 경우에 따라선 그것으로 생성자를 찾는경우도 있을지 모르겠다
+
+.newInstance()로 인자를 넣어 생성한다. 어렵지 않겠지만 궁금한것은 .class일 것이다.
+Class cls = String.class 라고 하면 이런방식이라고 알아두면 된다.
+
+
+
+ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+Class cls = classLoader.loadClass("java.lang.String");
+
+클래스 로더를 통해 클래스를 가져오는 방법이다
+

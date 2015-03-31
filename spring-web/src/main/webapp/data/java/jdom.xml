@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<itemlist>
+	<title style="font:14pt 돋움;font-weight:bold ">File xml Sample</title>
+	<item>
+		<itemCode style="font:9pt;color: #FF6600">1</itemCode>
+		<itemName style="font:9pt;color: #0066CC">현대증권</itemName>
+	</item>
+	<item>
+		<itemCode style="font:9pt;color: #FF6600">1</itemCode>
+		<itemName style="font:9pt;color: #0066CC">현대중공업</itemName>
+	</item>
+	<item>
+		<itemCode style="font:9pt;color: #FF6600">1</itemCode>
+		<itemName style="font:9pt;color: #0066CC">삼성중공업</itemName>
+	</item>
+	<item>
+		<itemCode style="font:9pt;color: #FF6600">1</itemCode>
+		<itemName style="font:9pt;color: #0066CC">삼성전자</itemName>
+	</item>
+	
+	<item01>
+		<item02>
+			<itemCode style="font:9pt;">2</itemCode>
+			<itemName style="font:9pt;">삼성1</itemName>
+		</item02>
+		<item02>
+			<itemCode style="font:9pt;">2</itemCode>
+			<itemName style="font:9pt;">삼성2</itemName>
+		</item02>
+	</item01>
+</itemlist>	

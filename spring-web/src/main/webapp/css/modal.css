@@ -1,0 +1,51 @@
+.jqmOverlay { background-color: #CCCCCC; }
+
+/* Fixed posistioning emulation for IE6
+     Star selector used to hide definition from browsers other than IE6
+     For valid CSS, use a conditional include instead */
+* html .jqmWindow {
+     position: absolute;
+     top: expression((document.documentElement.scrollTop || document.body.scrollTop) + Math.round(17 * (document.documentElement.offsetHeight || document.body.clientHeight) / 100) + 'px');
+}
+
+.winModal {
+    display: none;
+    position: fixed;
+    background-color: #FFFFFF;
+    color: #333;
+    padding: 0px;
+
+}
+#modalView .modalHeader {height:22px;background-color: #DFE8F6;cursor:move}
+#modalView .modalTitle {float:left;height:22px;margin:2px 0px 0px 10px;color:#2B6AB9;font-weight:bold}
+#modalView .modalClose {float:right;height:22px;margin:2px 5px 0px 0px}
+#modalView .modalTarget {clear:both}
+
+#modalView .shadow2,
+#modalView .shadow3,
+#modalView .container {
+	position: relative;
+	left: -1px;
+	top: -1px;
+}
+ 
+#modalView .shadow1 {
+	background: #F1F0F1;
+	height: 100%
+}
+
+#modalView .shadow2 {
+	background: #DBDADB;
+	height: 100%
+}
+
+#modalView .shadow3 {
+	background: #B8B6B8;
+	height: 100%
+}
+
+#modalView .container {
+	background: #ffffff;
+	border: 1px solid #848284;
+	padding: 5px;
+}

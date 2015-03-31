@@ -1,0 +1,94 @@
+<html>
+<head>
+	
+<script type='text/javascript' src='/dwr/interface/Schedule.js'></script>
+<script type='text/javascript' src='/dwr/engine.js'></script>
+	
+
+<script>
+var year = $!{year};
+var month = $!{month};
+var width = 100;
+var height = 90;
+
+function schPrev(){
+	if(month == 1){
+		year = year - 1;
+		month = 12;
+	}else{
+		month = month -1;
+	}
+	search(year,month,width,height);
+}
+
+function schNext(){
+	if(month == 12){
+		year = year + 1;
+		month = 1;
+	}else{
+		month = month + 1;
+	}
+	search(year,month,width,height);
+}
+
+function viewSchedule(year,month,day){
+	location.href =  "./scheduleRead.do?year=" + year + "&month=" + month + "&day=" + day;
+}
+
+
+function search(year,month,width,height){
+	$("#year").text(year);
+	$("#month").text(month);
+	Schedule.getCalendar(year,month,width,height,function(data) {
+		$("#calendar").html(data);
+ 	 });
+}
+
+$(document).ready(function () {
+	$("#year").text(year);
+	$("#month").text(month);
+});
+</script>
+
+<style>
+#schWraper { border-collapse:collapse }
+#schWraper .schDay{ border:1px solid #DFE8F6;}
+#schWraper .schBody {cursor:pointer;padding:0px 5px 0px 5px}
+
+.scFirst{
+	color:#2B6AB9;
+	font-weight:bold;
+	border-left:1px solid #B1C8E9;
+	border-right:1px solid #B1C8E9;
+	border-top:1px solid #B1C8E9;
+}
+.scHeader{
+	color:#2B6AB9;
+	font-weight:bold;
+	border-right:1px solid #B1C8E9;
+	border-top:1px solid #B1C8E9;
+}
+</style>
+</head>
+
+
+<body>
+	
+<div id="wrapper">
+	<div class="title">HOME > Community > Schedule</div>
+
+	<div id="nav" style="width:715px;height:30px;	text-align:center;">
+		<img src="/images/icon/icon_07.png" align="absmiddle" onClick="schPrev()" class="hand">
+        <font style="color:#2B6AB9;font-size:11pt;font-weight:bold"><span id="year"></span>년 <span id="month"></span>월</font>
+		<img src="/images/icon/icon_06.png" align="absmiddle" onClick="schNext()" class="hand">
+	</div>
+	
+	<div id="calendar">
+	$calendar
+	</div>
+
+</div>
+
+
+</body>
+</html>

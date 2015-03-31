@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<HTML >
+<HEAD>
+<TITLE> Javascript </TITLE>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/css/global.css" type="text/css">
+<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+
+<script language="javascript" type="text/javascript" src="/js/kospiSuggest.js"></script>
+
+</HEAD>
+
+<script>
+
+
+var kospiXmlData = null;
+
+function getItem(){
+
+   $.ajax({
+    	url: '/lib/itemList.json',
+    	type : 'POST',
+		dataType: 'JSON', 
+    	timeout : 5000,
+		error: function(){
+        	modalAlert('JSON 로드 실패');
+    	},
+		success: function(data){
+			kospiXmlData = data.dataList ;
+			kospiInitField(document.frm.codeNm);
+		}
+    });
+}
+
+function search() {
+	
+	
+	if($("#codeNm").val()) {
+		alert( $("#codeCd").val() );
+	}
+
+}
+
+$(document).ready(function () {
+	
+	
+	//코스피 서제스트
+	getItem();
+	document.body.onclick= outField;
+	
+
+	$( "button" ).button({
+		icons: {
+			primary: "ui-icon-document"
+		}
+	});
+
+})
+
+</script>
+
+</head>
+
+
+<body>
+
+<form name="frm" onSubmit="return false">
+KOSPI 종목 : <input type="text" name="codeNm"  id="codeNm" onClick="this.select()" onKeypress="if(event.keyCode == 13){search()}"  style="width:180px;ime-mode:active" class="inputBox">
+<input type="hidden" name='codeCd'  id="codeCd" >
+</form>
+
+
+</body>
+
+</html>

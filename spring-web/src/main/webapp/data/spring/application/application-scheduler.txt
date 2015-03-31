@@ -1,0 +1,97 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/task 
+        http://www.springframework.org/schema/task/spring-task.xsd">		
+        
+	<!-- Cron Expression
+	
+	1 Seconds 			(0–59)
+	2 Minutes 			(0–59)
+	3 Hours 				(0–23)
+	4 Day of month 	(1–31)
+	5 Month 			(1–12 or JAN–DEC)
+	6 Day of week 	(1–7 or SUN–SAT)
+	7 Year 				(1970–2099)
+	
+	*는 all, ?는 설정않함.
+	examples..
+	
+	0 0 10 * * ?
+	매일 오전 10시에 실행
+	
+	0 0 10 1 * ?
+	매월 1일 오전 10시에 실행
+	
+	0 0 10 ? ? 1 ?
+	매주 일요일 오전 10시에 실행
+	
+	0/5 * * * * ?
+	5초마다 실행
+	
+	
+	필드 허용범위 허용문자
+	초 0-59 , – * / 
+	분 0-59 , – * / 
+	시 0-23 , – * / 
+	일 1-31 , – * ? / L W
+	월 1-12 or JAN-DEC , – * / 
+	요일 1-7 or SUN-SAT , – * ? / L # 
+	년(옵션) 1970-2099 , – * / 
+	
+	* 모든 값
+	? 특정 값 없음
+	- 범위 지정에 사용
+	, 여러 값 지정 구분에 사용
+	/ 초기값과 증가치 설정에 사용
+	L 지정할 수 있는 범위의 마지막 값
+	W 월~금요일 또는 가장 가까운 월/금요일
+	# 몇 번째 무슨 요일 2#1 => 첫 번째 월요일
+	
+	예제) 
+	Expression Meaning 
+	초분시일월주(년)
+	0 0 12 * * ? 				아무 요일, 매월, 매일 12:00:00
+	0 15 10 ? * * 				모든 요일, 매월, 아무 날이나 10:15:00 
+	0 15 10 * * ? 				아무 요일, 매월, 매일 10:15:00 
+	0 15 10 * * ? * 			모든 연도, 아무 요일, 매월, 매일 10:15 
+	0 15 10 * * ? 				2005″ 2005년 아무 요일이나 매월, 매일 10:15 
+	0 * 14 * * ? 				아무 요일, 매월, 매일, 14시 매분 0초 
+	0 0/5 14 * * ? 			아무 요일, 매월, 매일, 14시 매 5분마다 0초 
+	0 0/5 14,18 * * ? 		아무 요일, 매월, 매일, 14시, 18시 매 5분마다 0초 
+	0 0-5 14 * * ? 			아무 요일, 매월, 매일, 14:00 부터 매 14:05까지 매 분 0초 
+	0 10,44 14 ? 3 WED 	3월의 매 주 수요일, 아무 날짜나 14:10:00, 14:44:00 
+	0 15 10 ? * MON-FRI 	월~금, 매월, 아무 날이나 10:15:00 
+	0 15 10 15 * ? 			아무 요일, 매월 15일 10:15:00 
+	0 15 10 L * ? 				아무 요일, 매월 마지막 날 10:15:00 
+	0 15 10 ? * 6L 				매월 마지막 금요일 아무 날이나 10:15:00 
+	0 15 10 ? * 6L 2002-2005		2002년부터 2005년까지 매월 마지막 금요일 아무 날이나 10:15:00 
+	0 15 10 ? * 6#3	 		매월 3번째 금요일 아무 날이나 10:15:00
+	0 0/5 9-14 * * ?			9 ~14시사이에 5분마다 수행
+	
+	“?”와 “*”의 차이를 구분하기가 어렵습니다. 그냥 “?”는 한 개만 사용하는 것으로 생각하시면 됩니다.
+
+	-->
+        
+        
+     <!--  Pool Size를 기반으로 ThreadPoolTaskScheduler 인스턴스가 생성, Thread Pool Size default :1) 를 결정--> 
+	<task:scheduler id="scheduler" pool-size="5"/>
+        
+	<bean id="schedulerService" class="com.stockholic.manage.system.scheduler.service.SchedulerService" />
+	
+	<!-- 
+	<task:scheduled-tasks scheduler="scheduler">   
+		News Scheduling 
+		<task:scheduled ref="schedulerService" method="quartzNewsRss" cron="0 0/10 8-18 ? * 2-6" />
+		<task:scheduled ref="schedulerService" method="quartzNewsRss" cron="0 0/30 19-23 ? * 2-6" />
+		<task:scheduled ref="schedulerService" method="quartzNewsRss" cron="0 0/50 0-7 ? * 2-6" />
+		<task:scheduled ref="schedulerService" method="quartzNewsRss" cron="0 0 0/2 ? * 1,7" />
+		
+		 StockChart Scheduling
+		<task:scheduled ref="schedulerService" method="quartzStockChart" cron="0 0 0/6 * * ?" />
+	</task:scheduled-tasks>
+	 -->
+
+</beans>

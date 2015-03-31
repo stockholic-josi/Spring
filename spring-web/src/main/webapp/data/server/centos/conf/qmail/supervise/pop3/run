@@ -1,0 +1,13 @@
+#!/bin/sh
+
+VPOP_UID=`id -u vpopmail`
+VPOP_GID=`id -g vpopmail`
+
+HOSTNAME=`hostname -f`
+
+exec /usr/local/bin/softlimit -m 48000000 \
+        /usr/local/bin/tcpserver -vRHl0 \
+        -u ${VPOP_UID} -g ${VPOP_GID} 0 110 \
+        /var/qmail/bin/qmail-popup ${HOSTNAME} \
+        /home/vpopmail/bin/vchkpw \
+        /var/qmail/bin/qmail-pop3d Maildir 2>&1

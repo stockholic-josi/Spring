@@ -1,0 +1,13 @@
+#set ($no = 0)
+#set ($menuKey = ["01","02","03","04","99"])
+#set ($menuValue = ["기술적분석 > 매매기법","기술적분석 > 주식강좌","기술적분석 > 주식용어","기술적분석 > HTS 검색식","신세계 I&C"])
+#set($subTitle = "")
+
+#if(!$params.flag) #set($flag = "01")
+#else #set($flag = $params.flag)
+#end
+
+#foreach($key in $menuKey)
+    #if($key == $params.flag)  #set($subTitle = $menuValue.get($no))   #end 
+	#set( $no = $no + 1 )
+#end

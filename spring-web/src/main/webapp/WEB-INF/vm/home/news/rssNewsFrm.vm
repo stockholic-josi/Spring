@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+
+<script type="text/javascript" src="/js/sortable/jquery-sortable.js"></script>
+<script type="text/javascript" src="/js/sortable/jquery.cookies.js"></script>
+<script type="text/javascript" src="/js/sortable/interface.js"></script>
+<script type="text/javascript" src="/js/sortable/iautoscroller.js"></script>
+<script type="text/javascript" src="/js/sortable/sortable.js"></script>	
+
+<link rel="stylesheet" href="/css/home.css" type="text/css">
+<link rel="stylesheet" href="/js/sortable/sortable-home.css" type="text/css">
+	
+<script>
+
+var newsData = $!{newsData};
+
+function initNews(){
+	sortable.reSetIem();
+	location.reload();
+}
+
+jQuery(document).ready(function () {
+
+	sortable.initItemList('$!flag');
+	sortable.initSortable();
+
+	//Add Item
+	$("#itemMenu").find("input").click(function() {
+		sortable.setItem(jQuery(this).attr("class"))
+	});
+	
+});
+
+</script>
+
+
+</head>
+
+#parse( "home/news/_menu.vm" )
+
+<body>
+
+<div id="headerInfo" style="display:none">
+   <span class="headerNav"> 》 Rss News 》 $!newNm</span>
+</div>
+
+
+<div class="contents-box"> 
+
+	<div class="contents">
+    	<div id="subMenu" style="height:35px">
+    		<div id="itemMenu"></div>
+    		<div id="menuInit">
+    			 <a href="javascript:initNews()" >초기화</a><br>
+    			 <a href="/rssNewsAll/$!flag" target="_top">전체보기</a>
+    		</div>
+    	</div>
+	
+    	<div style="margin-top:10px;height:600px">
+            <div id="sort1" class="groupWrapper"></div>
+            <div id="sort2" class="groupWrapper"></div>
+            <div id="sort3" class="groupWrapper"></div>
+    	</div>
+	</div>
+
+	<div class="clear"></div>
+</div>
+
+</body>
+</html>
+				
+						
+

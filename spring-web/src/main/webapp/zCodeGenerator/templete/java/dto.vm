@@ -1,0 +1,65 @@
+package ${pkgNm}.dto;
+
+/**
+ * $!{tb}
+ */
+public class ${classNm}{
+
+#foreach($list in $cList)
+	private ${list.dataType} ${list.columnName};			//${list.columnComment}	
+#end
+
+	private int num;					//번호
+	private String p;					//페이지
+	private int totalPage; 			//총페이지
+	private int total;					//총 로우수
+	private int start = 0;				//시작 로우
+	private int limit;					//마지막 로우
+	
+#foreach($list in $cList)
+	public ${list.dataType} get${list.columnName.substring(0,1).toUpperCase()}${list.columnName.substring(1)}() {
+		return ${list.columnName};
+	}
+	public void set${list.columnName.substring(0,1).toUpperCase()}${list.columnName.substring(1)}(${list.dataType} ${list.columnName}) {
+		this.${list.columnName} = ${list.columnName};
+	}
+#end
+
+	public int getNum() {
+		return num;
+	}
+	public void setNum(int num) {
+		this.num = num;
+	}
+	public String getP() {
+		return p;
+	}
+	public void setP(String p) {
+		this.p = p;
+	}
+	public int getTotalPage() {
+		return totalPage;
+	}
+	public void setTotalPage(int totalPage) {
+		this.totalPage = totalPage;
+	}
+	public int getTotal() {
+		return total;
+	}
+	public void setTotal(int total) {
+		this.total = total;
+	}
+	public int getStart() {
+		return start;
+	}
+	public void setStart(int start) {
+		this.start = start;
+	}
+	public int getLimit() {
+		return limit;
+	}
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
+
+}	

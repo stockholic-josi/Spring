@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- Error RollingFileAppender -->
+    <appender name="FILE_LOG_ERROR" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${webapp.root}/WEB-INF/logs/error.log"/>
+         <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="30MB" />
+        <param name="MaxBackupIndex" value="5" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d] %5p [%t] %C{1}.%M():%L - %m%n"/>
+        </layout>
+    </appender>
+
+	<!-- APP RollingFileAppender -->
+	<appender name="FILE_LOG_APP" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${webapp.root}/WEB-INF/logs/app.log"/>
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="30MB" />
+        <param name="MaxBackupIndex" value="5" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d] %5p [%t] %C{1}.%M():%L - %m%n"/>
+        </layout>
+    </appender>
+
+
+	<!-- DAO RollingFileAppender -->
+    <appender name="FILE_LOG_DAO" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${webapp.root}/WEB-INF/logs/dao.log"/>
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="30MB" />
+        <param name="MaxBackupIndex" value="5" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d] %5p [%t] %C{1}.%M():%L - %m%n"/>
+        </layout>
+    </appender>
+    
+    <!-- VELOCITY RollingFileAppender -->
+    <appender name="FILE_LOG_VELOCITY" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${webapp.root}/WEB-INF/logs/velocity.log"/>
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="30MB" />
+        <param name="MaxBackupIndex" value="5" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d] %5p [%t] %C{1}.%M():%L - %m%n"/>
+        </layout>
+    </appender>
+    
+    <!-- QUARTZ RollingFileAppender -->
+    <appender name="FILE_LOG_QUARTZ" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${webapp.root}/WEB-INF/logs/quartz.log"/>
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="30MB" />
+        <param name="MaxBackupIndex" value="5" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d] %5p [%t] %C{1}.%M():%L - %m%n"/>
+        </layout>
+    </appender>
+    
+    
+     <!-- Access RollingFileAppender -->
+    <appender name="FILE_LOG_ACCESS" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${webapp.root}/WEB-INF/logs/access.log"/>
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="30MB" />
+        <param name="MaxBackupIndex" value="5" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d] %5p [%t] %C{1}.%M():%L - %m%n"/>
+        </layout>
+    </appender>
+    
+	<!-- Console Appender -->
+    <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d{HH:mm:ss}] %5p [%t] %C{1}.%M():%L - %m%n"/>
+        </layout>
+    </appender>
+	
+	<category name="org.springframework" additivity="false">
+      <priority value="INFO"/>
+      <appender-ref ref="STDOUT"/>
+       <appender-ref ref="FILE_LOG_APP" />
+    </category>   
+    
+	<category name="appLog" additivity="false">
+      <priority value="INFO"/>
+     <appender-ref ref="FILE_LOG_APP" />
+      <!-- <appender-ref ref="STDOUT"/> -->
+    </category>
+    
+     <category name="java.sql.Connection" additivity="false">
+      <priority value="DEBUG"/>
+      <appender-ref ref="STDOUT" />
+    </category>
+     <category name="java.sql.PreparedStatement" additivity="false">
+      <priority value="DEBUG"/>
+      <appender-ref ref="STDOUT" />
+    </category>
+      
+      <category name="jdbc.sqlonly" additivity="false">
+		<priority value="INFO"/>
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE_LOG_DAO" />
+    </category>
+    
+	<!-- 
+     <category name="jdbc.resultsettable" additivity="false">
+	      <priority value="INFO"/>
+	      <<appender-ref ref="STDOUT" />
+	      <appender-ref ref="FILE_LOG_DAO" />
+    </category>
+     -->
+    
+    <category name="scheduling.quartz" additivity="false">
+      <priority value="INFO"/>
+      	<appender-ref ref="FILE_LOG_QUARTZ" />
+    </category>   
+    
+    <category name="accessLogging" additivity="false">
+      <priority value="INFO"/>
+      	<appender-ref ref="FILE_LOG_ACCESS" />
+    </category>   
+    
+     <category name="org.apache.velocity" additivity="false">
+      <priority value="INFO"/>
+      <appender-ref ref="FILE_LOG_VELOCITY"/>
+    </category>
+    
+       <category name="com.taxholic.common.dao" additivity="false">
+		<priority value="INFO"/>
+		<appender-ref ref="STDOUT" />
+    </category>
+    
+    <category name="com.taxholic" additivity="false">
+      <priority value="error"/>
+       <appender-ref ref="FILE_LOG_ERROR"/>
+    </category>
+    
+    
+	<root>
+      <priority value ="warn" />
+      <appender-ref ref="FILE_LOG_ERROR" />
+      <!-- <appender-ref ref="STDOUT"/> -->
+    </root>
+
+
+</log4j:configuration>

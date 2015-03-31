@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="front.rssNews">
+
+
+<!-- =================== RSS 뉴스 목록  =================== -->
+<select id="getRssNewsList" resultType="com.taxholic.manage.system.code.dto.NewsRss">
+SELECT 
+	DATE_FORMAT(pub_date,'%Y/%m/%d %H:%i:%s') AS pubDate,
+	TIMESTAMPDIFF(MINUTE, pub_date, now())  AS timeDiff,
+	title,
+	link,
+	description
+FROM  sk_news_${flag}
+
+<if test="refNo != null">
+WHERE  ref_no = #{refNo}
+</if>
+
+ORDER BY pub_date DESC
+LIMIT 6
+
+</select>
+
+<!-- =================== RSS 뉴스 목록 수(전체)  =================== -->
+<select id="getRssNewsAllCount" resultType="java.lang.Integer">
+SELECT
+ count(1)
+FROM sk_news_${flag} t1
+
+<if test="searchString == null">
+WHERE t1.pub_date >= DATE_ADD(CURDATE(), INTERVAL - 7 DAY)
+</if>
+<if test="searchString != null">
+WHERE MATCH(title,description)  AGAINST (${searchString} IN BOOLEAN MODE) 
+</if>
+
+</select>
+
+<!-- =================== RSS 뉴스 목록(전체)  =================== -->
+<select id="getRssNewsAllList" resultType="com.taxholic.manage.system.code.dto.NewsRss">
+SELECT
+ (select news_nm from sk_news where seq_no = t1.ref_no) AS newsNm,
+	t1.title,
+	t1.link,
+	t1.description,
+	DATE_FORMAT(t1.pub_date,'%Y/%m/%d %H:%i') AS pubDate,
+	TIMESTAMPDIFF(MINUTE, pub_date, now())  AS timeDiff
+FROM sk_news_${flag} t1
+
+<if test="searchString == null">
+WHERE t1.pub_date >= DATE_ADD(CURDATE(), INTERVAL - 7 DAY)
+</if>
+<if test="searchString != null">
+WHERE MATCH(title,description)  AGAINST (${searchString} IN BOOLEAN MODE) 
+</if>
+
+ORDER BY pub_date DESC
+LIMIT #{start},#{limit}      
+</select>
+
+
+</mapper> 

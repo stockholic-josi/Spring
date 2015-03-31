@@ -1,0 +1,235 @@
+솔라리스(Solaris) 10 에서는 기존과 다르게 서비스를 /etc/rc.* 으로 제어하지 않고, 대부분의 서비스를 svc 라는 것으로 제어한다.
+
+아마도 Windows 의 영향을 받은거 같은데, 사용하기가 귀찮아서 별로 좋지는 않다. 
+그래도 기존의 /etc/init.d 의 실행스크립트보다 이녀석을 사용해야 하기때문에 사용하는 법을 알아두도록 하죠.
+
+우선 사용하는 프로그램의 종류를 살펴보자.
+
+0. Utilties for facility control
+svcs : (svc status)현재 서비스들(데몬서비스)의 상태를 보게 해준다.
+svcadm : svc 들을 제어한다. 재시작, 설정변경들이 가능하다.
+svccfg : svcadm 의 interactive 버전이라고 생각하면 된다.
+inetadm : inetd.conf 를 대신하여 inet 관련 서비스들을 제어한다. 당연히 데몬서비스중에 network 관련들만 제어가능하다.
+
+
+1. svcs
+우선 svcs 는 실행해보면 다음과 같은 메시지가 나온다.
+
+# svcs
+STATE          STIME       FMRI
+lagacy_run     12:51:42    lrc:/etc/rcS_d/S50sk98sol
+... (생략)
+online         12:51:49    svc:/network/inetd:default
+
+
+
+
+여기서 FMRI (Fault Managed Resource Identifier) 라는 것이 등장한다. 이것은 서비스이름이 주소형식으로 되어있어서 이를 제어하는데 사용되는 URI 이름을 의미한다. 
+아마도 앞으로 웹주소와 통합하여 브라우저에서 제어하게 해줄것도 같다.
+
+즉 위에서 FMRI 중 svc:/network/inetd:default 를 예를 들면 svc 는 서비스데몬이라는 것을 의미하고 /network/inetd 는 카테고리가 network 분류에 있는 inetd 라는 데몬이라는 것이다.
+그리고 끝의 default 는 inetd 의 기본설정에 의한 서비스라는 것이다. 이것은 설정을 여러개 만들어놓고 선택적으로 사용할 수 있게 해주는것 같은데, 귀찮아서 해보지는 않았다.
+
+자 그러면 이제 svc 를 이용해서 한번 ftp 를 보도록 하겠다.
+
+# svcs | grep ftp
+online                  12:51:49       svc:/network/ftp:default
+# svcs -l ftp
+fmri     svc:/network/ftp:default
+이름    FTP server
+사용    참
+상태    online
+...
+# svcs -x
+svc:/application/print/server:default (LP print server)
+상태: disabled(2005년 10월 17일 월요일 오후 12시 51분 36초 이후)
+이유: 관리자가 비활성화했습니다.
+   참조: http://sun.com/msg/SMF-8000-05
+   참조: lpsched(1M)
+영향: 2개의 종속 서비스가실행되지 않습니다.  (목록을 보려면 -v 사용)
+
+
+
+
+몇몇 예인데, svcs 에 대해서는 맨페이지를 참고하고, svcs -x 를 해보면 뭔가 이상한 점이 있다면 보고를 자세하게 설명해준다.
+
+이제 svcadm 을 보자.
+
+
+
+2. svcadm
+
+# svcadm
+사용법: svcadm [-v] [cmd [args ... ]}
+
+        svcadm enable [-rst] <서비스> ...	- 서비스를 활성화하고 온라인으로 설정함
+        svcadm disable [-st] <서비스> ...	- 서비스를 비활성화하고 오프라인으로 설정함
+        svcadm restart <서비스> ...			- 지정한 서비스를 다시 시작함
+        svcadm refresh <서비스> ...			- 서비스 구성을 다시 읽음
+        svcadm mark [-It] <상태> <서비스> ...  - 유지 보수 상태로 설정함
+        svcadm clear <서비스> ...			- 유지 보수 상태를 해제함
+        svcadm milestone [-d] <이정표>		- 서비스 이정표로 진행함
+
+        서비스는 FMRI, 약어 또는 fnmatch(5) 패턴을 사용하여 지정할 수 있습니다.
+        svc:/network/smtp:sendmail에 대한 다음 예를 참조하십시오.
+
+        svcadm <cmd> svc:/network/smtp:sendmail
+        svcadm <cmd> network/smtp:sendmail
+        svcadm <cmd> network/*mail
+        svcadm <cmd> network/smtp
+        svcadm <cmd> smtp:sendmail
+        svcadm <cmd> smtp
+        svcadm <cmd> sendmail
+
+
+
+
+간단하게 사용법이 나온다.
+
+종종 mark, clear 를 사용할 이유가 생기는데 서비스를 구성하고, 작동시키기 전까지는 mark 로 해두고 작업하는게 좋다.
+그런뒤에 작업이 끝나면 clear 시켜주면 된다. enable/disable 이야 당연히 알테고...
+
+그러면 간단한 예를 보자.
+
+# svcadm restart svc:/network/ftp:default
+
+
+
+
+이건 default 설정으로 되어있는 ftp 를 재시작한다. 시작이 안되어있으면 시작할테고.
+
+
+
+3. svccfg
+그러면 svccfg 도 보자.
+
+svccfg 는 실행하면 바로 interactive 모드로 작동한다.
+
+# svccfg list
+
+# svccfg
+svc:> list
+system/console-login
+...
+network/rpc-100068_2-5/rpc_udp
+network/ftp/tcp
+svc:> select ftp
+:properties
+default
+svc:/network/ftp> listprop
+general                        framework
+general/entity_stability       astring  Unstable
+general/restarter              fmri     svc:/network/inetd:default
+inetd                          framework
+svc:/network/ftp> editprop
+...
+svc:/network/ftp> select default
+svc:/network/ftp:default> listprop
+general                    framework
+general/enabled            boolean  true
+inetd_start                framework
+inetd_start/exec           astring  "/usr/sbin/in.ftpd -l"
+svc:/network/ftp:default> end
+
+
+
+
+간단하게 list 는 현재 위치에서 하위 URI를 보여주고, select 는 검색해서 같은 이름을 가지는 URI로 이동한다.
+URI 의 이동은 현재 위치가 우선순위가 있고 현재위치에 없으면 하위로 가다가 그래도 없으면 다시 위로 간다.
+listprop 는 property를 보여주고, editprop 는 에디터를 띄워서 설정을 파일로 에디팅할 수 있게 한다.
+crontab -e 와 비슷하다고 생각하면 된다. editprop 시에는 모두 # 로 comment 처리 되어있는데
+바꾸고자 하는 부분은 uncomment 한뒤에 저장하고 나오면 업데이트 된다.
+
+
+
+4. inetadm
+inetadm 은 svcadm 에서 inet 부분만 축소해놓은 것 같은 인상을 주는데 기능은 비슷하거나 조금 많다.
+inetadm 도 실행하면 svcs 처럼 서비스 리스트가 주룩 나온다.
+
+# inetadm
+ENABLED   STATE          FMRI
+enabled   online         svc:/network/rpc/mdcomm:default
+...(생략)...
+enabled   online         svc:/network/rpc-100068_2-5/rpc_udp:default
+disabled  disabled       svc:/network/ftp/tcp:default
+# inetadm -?
+사용법:
+  inetadm
+  inetadm -?
+  inetadm -p
+  inetadm -l {FMRI | 패턴}...
+  inetadm -e {FMRI | 패턴}...
+  inetadm -d {FMRI | 패턴}...
+  inetadm -m {FMRI | 패턴}... {name=value}...
+  inetadm -M {name=value}...
+
+
+옵션을 지정하지 않으면 inetadm은 inetd의 관리 대상 서비스를 모두 나열합니다.
+
+옵션:
+  -?    도움말을 인쇄합니다.
+  -p    기본 inetd 등록 정보 값을 모두 나열합니다.
+  -l    inet 서비스에 대한 inetd 등록 정보 값을 모두나열합니다.
+  -e    inet 서비스를 활성화합니다.
+  -d    inet 서비스를 비활성화합니다.
+  -m    inet 서비스 inetd 등록 정보 값을 수정합니다.
+  -M    기본 inetd 등록 정보 값을 수정합니다.
+
+
+사용하기 엄청 쉽지 않은가? 
+list 를 보고자 하면 inetadm -l svc:/network/ftp:default 로 속성을 보고서비스를 활성화할려면 svc:/network/ftp:default 를 enable 시키기 위해서
+inetadm -e svc:/network/ftp:default 라고 해주면 된다. 
+앞의 -l 로 본 속성값중에 max_copies 를 바꾸고 싶다면
+inetadm -m svc:/network/ftp:default max_copies=20 라고 해주면 된다.
+
+# inetadm -l svc:/network/ftp:default
+SCOPE    NAME=VALUE
+         name="ftp"
+         endpoint_type="stream"
+         proto="tcp"
+         isrpc=FALSE
+         wait=FALSE
+         exec="/usr/sbin/in.ftpd -l"
+         user="root"
+default  bind_addr=""
+default  bind_fail_max=-1
+default  bind_fail_interval=-1
+default  max_con_rate=-1
+default  max_copies=-1
+default  con_rate_offline=-1
+default  failrate_cnt=40
+default  failrate_interval=60
+default  inherit_env=TRUE
+default  tcp_trace=FALSE
+default  tcp_wrappers=FALSE
+# inetadm -m svc:/network/ftp:default max_copies=20
+# inetadm -l svc:/network/ftp:default
+SCOPE    NAME=VALUE
+         name="ftp"
+         endpoint_type="stream"
+         proto="tcp"
+         isrpc=FALSE
+         wait=FALSE
+         exec="/usr/sbin/in.ftpd -l"
+         user="root"
+default  bind_addr=""
+default  bind_fail_max=-1
+default  bind_fail_interval=-1
+default  max_con_rate=-1
+         max_copies=20
+default  con_rate_offline=-1
+default  failrate_cnt=40
+default  failrate_interval=60
+default  inherit_env=TRUE
+default  tcp_trace=FALSE
+default  tcp_wrappers=FALSE
+
+****** inetd 서비스 동기화 명령 *******
+/etc/inetd.conf 수정후 동기하 시킨다
+# inetconv
+
+
+참고) http://www.sun.com/bigadmin/content/selfheal/smf-quickstart.html
+
+출처 : http://www.sunyzero.com/zboard/view.php?id=sunycomputer&page=1&sn1=&divpage=1&sn=off&ss=on&sc=on&select_arrange=headnum&desc=asc&no=163
+

@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>::: StockHolic :::</title>
+
+<script type="text/javascript" src="/js/common.js"></script>
+<script type="text/javascript" src="/js/jquery-1.4.3.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.8.22.custom.min.js"></script>
+<script type="text/javascript" src="./js/jquery.flash.js"></script>
+<script type="text/javascript" src="./js/jquery.externalinterface.js"></script>
+<link rel="stylesheet" href="/css/global.css" type="text/css" />
+<link type="text/css" href="/css/redmond/jquery-ui-1.8.22.custom.css" rel="stylesheet" />	
+	
+<script type="text/javascript">
+
+function recvMsg(msg){
+	alertDialog("알림",msg,function(){
+		$("#dialog").dialog("close"); 
+	});
+}
+
+
+var fileNmArr = [];
+var fileSizeArr = [];
+
+function setFileList(){
+	fileNmArr = [];
+	
+	fileNmArr.push("http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.29/bin");
+	fileNmArr.push("apache-tomcat-7.0.29.zip");
+	fileNmArr.push("apache-tomcat-7.0.29.exe");
+	fileNmArr.push("apache-tomcat-7.0.29-windows-x86.zip");
+	fileNmArr.push("apache-tomcat-7.0.29-windows-x64.zip");
+	fileNmArr.push("apache-tomcat-7.0.29-windows-i64.zip");
+	
+	
+}
+
+function setFileSize(){
+	fileSizeArr = [];
+	
+	fileSizeArr.push("");
+	fileSizeArr.push("10");
+	fileSizeArr.push("20");
+	fileSizeArr.push("30");
+	fileSizeArr.push("40");
+	fileSizeArr.push("50");
+}
+
+function sendFileList(){
+	setFileList();
+	setFileSize();
+	
+	
+	var fileNm = "";
+	for(i = 0; i < fileNmArr.length; i++){
+		fileNm +=(i ==0) ? fileNmArr[i] : "<@>" + fileNmArr[i] ;
+	}
+	
+	var fileSize = "";
+	for(i = 0; i < fileSizeArr.length; i++){
+		fileSize +=(i ==0) ? fileSizeArr[i] : "<@>" + fileSizeArr[i] ;
+	}
+	
+	
+	if(fileNmArr.length > 0){
+		$("#zFileDownLoad").externalInterface({
+			method : 'setFileList',
+			args : {
+				fileNm : fileNm,
+				fileSize : fileSize
+			}
+		});
+	}
+}
+
+
+function setUpApp(){
+
+	$("#fileFrame").attr("src","./fileDownLoadInstall.html");
+
+	regDialog("fileUpload","파일다운로드 매니저 설치",300,200,function(){
+		document.location.reload();
+		
+	})
+
+}
+
+
+$(document).ready(function(){
+
+	$('#downFile').flash({
+		src : 'zFileLauncher.swf',
+		id : 'zFileDownLoad',
+		width : '75',
+		height : '22',
+		bgcolor : '#ffffff',
+		allowScriptAccess : 'always'
+	});
+	
+});
+
+</script>
+
+
+
+
+</head>
+
+
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+	
+<div id="downFile"></div>
+
+<p><button onClick="sendFileList()">Data Set</button></p>
+
+<div id='fileUpload' style="display: none">
+<iframe   id="fileFrame" scrolling="no" frameborder="0" style="width:100%;height:100px"></iframe>
+</div>
+
+
+</body>
+</html>

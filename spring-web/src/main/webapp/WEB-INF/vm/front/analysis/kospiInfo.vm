@@ -1,0 +1,111 @@
+<html>
+<head>	
+	
+<style>
+.infoHead{
+	font-size:10pt;
+	color:#4C4C4C;
+	font-weight:bold;
+	text-align:center;
+	height:30px;
+	cursor:pointer
+}
+
+.infoHead td{
+	border-top:2px solid #99BBE8;
+	border-bottom:1px solid #99BBE8;
+}
+	
+.infoBox{display:none}
+.infoList{	border-bottom:1px solid #E7E7E7;}
+.toolTip{cursor:pointer}
+</style>
+
+<script type="text/javascript" src="/js/table-sort.js"></script>
+
+<script>
+
+function getInfo(id){
+	var arrSearch = trim("${searchString}").split(" ");
+	var infoVal =  $("#info" + id).html();		
+	for(i = 0; i < arrSearch.length; i++ ){
+		 infoVal = replaceAll(infoVal,arrSearch[i],"<span style='background-color: #FFFF99'>" + arrSearch[i] + "</span>");
+		if(i == 4) break;
+	}
+	
+	$("#info" + id).html(infoVal)
+
+	return infoVal;
+}
+
+$(document).ready(function() {
+	
+	$(".list").mouseover(function(){
+		$(this).css("background-color","#F5F5F5")
+	})
+	
+	$(".list").mouseout(function(){
+		$(this).css("background-color","#ffffff")
+	})
+
+	$(".toolTip").each(function (i){
+		getToolTip( $(this).attr("id"), getInfo( $(this).attr("id") ), 450 );
+	});
+})
+
+</script>
+	
+</head>
+
+<body>
+	
+<div id="wrapper">
+
+<p style="height:30px">본정보는 수집기(crawler)에 의해 자동으로 수집된 정보입니다.
+<font color="#4C4C4C">출처 : <a href="http://www.fnguide.com" target="_blank"><font color="#2B6AB9">http://www.fnguide.com</font></a></p>
+
+
+<table cellspacing="0" cellpadding="0" border="0" id="tblSort">
+<thead>
+<tr class="infoHead">
+    <td width="120" id="th1" onclick="sortTable(this,'tblSort', 0)">코드</td>
+    <td width="200" id="th2" onclick="sortTable(this,'tblSort', 1)">종목</td>
+    <td width="120" id="th3" onclick="sortTable(this,'tblSort', 2,'int')">현재가</td>
+    <td colspan="2" id="th4" width="160" onclick="sortTable(this,'tblSort', 4,'rate')">등락</td>
+    <td width="100" id="th5" onclick="sortTable(this,'tblSort', 5)">구분</td>
+</tr>
+</thead>
+
+#set( $count = 0)
+#foreach($list in $infoList)
+#set( $count = $velocityCount)
+#set($font-color = "#FF0000")
+#if($!list.fluctuate.indexOf('-') == -1) #set($font-color = "#FF0000") #else #set($font-color = "#3300FF") #end
+<tr height="25" class="list">
+    <td width="120" align="center" class="infoList">$!list.codeCd</td>
+    <td width="200" class="infoList"><a class="toolTip" id="$velocityCount">$!list.codeNm</a></td>
+    <td width="120" align="right" class="infoList">$!list.price</td>
+    <td width="100" align="right" class="infoList" style="color:$font-color">
+		#if($!list.fluctuate.indexOf('-') == -1) ▲ $!list.fluctuate #else ▼ $!list.fluctuate #end
+	</td>
+	 <td width="60" align="right" class="infoList" style="color:$font-color">
+		#if($!list.fluctuate.indexOf('-') == -1)$!list.rate#else-$!list.rate#end
+	</td>
+	 <td width="100" align="center" class="infoList">
+		#if($!list.flag == "01") <font color='#990000'>코스피</font>#else 코스닥 #end
+	 </td>
+</tr>
+
+<div  class="infoBox" id="info$velocityCount">$!list.info</div>
+#end	
+
+#if($count == 0)
+<tr>
+    <td colspan="6" height="100" align="center">자료가 없습니다.</td>
+</tr>
+</table>
+#end
+
+</body>
+	
+</html>

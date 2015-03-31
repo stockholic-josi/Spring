@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="front.Cxf">
+
+
+<select id="getSoapRoleList" resultType="com.taxholic.cxf.dto.Soap">
+SELECT 
+	role_cd AS roleCd,
+	role_nm AS roleNm
+FROM auth_master 
+ORDER BY role_stp
+</select>
+
+<select id="getRestRoleList" resultType="com.taxholic.cxf.dto.Rest">
+SELECT 
+	role_cd AS roleCd,
+	role_nm AS roleNm
+FROM auth_master 
+ORDER BY role_stp
+</select>
+
+
+</mapper>

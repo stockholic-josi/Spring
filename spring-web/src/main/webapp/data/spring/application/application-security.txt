@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:sec="http://www.springframework.org/schema/security"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+	<sec:http pattern="/" security="none" />
+	<sec:http pattern="/**/*.html" security="none" />
+	<sec:http pattern="/images/**" security="none" />
+	<sec:http pattern="/**/*.js" security="none" />
+	<sec:http pattern="/**/*.css" security="none" />
+	<sec:http pattern="/**/*.swf" security="none" />
+	<sec:http pattern="/extjs/**" security="none" />
+	<sec:http pattern="/favicon.ico" security="none"/>
+	<sec:http pattern="/data/board/**" security="none"/>
+	<sec:http pattern="/zFileUpload/**" security="none"/>
+	<sec:http pattern="/zFileDownLoad/**" security="none"/>
+	<sec:http pattern="/front/grid/**" security="none"/>
+
+	<sec:http auto-config="true" >
+	
+		<sec:intercept-url pattern="/user/login.do*" access="ROLE_ANONYMOUS,ROLE_USR" />
+		
+		<sec:intercept-url pattern="/**/*.jsp" access="ROLE_USR" />
+		<sec:intercept-url pattern="/main.do*" access="ROLE_USR" />
+		<sec:intercept-url pattern="/front/**" access="ROLE_USR"/>
+		<sec:intercept-url pattern="/data/**" access="ROLE_USR"/>
+		<sec:intercept-url pattern="/manage/system/**" access="ROLE_ADM,ROLE_SYS"/>
+		<sec:intercept-url pattern="/manage/**" access="ROLE_USR"/>
+		<sec:intercept-url pattern="/dwr/**" access="ROLE_ADM,ROLE_SYS"/>
+		
+      	<sec:form-login 
+      		login-page='/user/login.do' 
+      		login-processing-url="/login" 
+      		authentication-failure-url="/user/login.do?error=true" 
+      		default-target-url="/index.do"
+      		always-use-default-target="false"
+      	    username-parameter="userNm"
+      	    password-parameter="passwd"
+      	    authentication-success-handler-ref="authenticationSuccessHandler"
+      	/>
+      	
+		<sec:logout logout-url="/logout" logout-success-url="/" />
+		
+		
+		 <sec:session-management>
+		 	<!-- 첫번째 로그인 사용자는 로그아웃, 두번째 사용자 로그인 session-registry-alias : 접속자 정보보기 -->
+		 	<sec:concurrency-control max-sessions="2" expired-url="/error000.html" session-registry-alias="sessionRegistry" />
+		 	
+		 	<!-- 두번째 사용자 로그인 원천봉쇄, 로그인 못한다. -->
+		 	<!-- 
+            <sec:concurrency-control max-sessions="1" error-if-maximum-exceeded="true" expired-url="/error000.html"  session-registry-alias="sessionRegistry"/>
+             -->
+        </sec:session-management>
+        
+        
+       
+	</sec:http>
+	
+	<sec:authentication-manager>
+     <sec:authentication-provider user-service-ref="authService" >
+     <sec:password-encoder hash="md5"/>
+     
+     </sec:authentication-provider>
+     
+   <!-- 
+      <sec:authentication-provider>
+      <sec:user-service>
+        <sec:user name="aaa" password="1111" authorities="ROLE_USR, ROLE_ADM" />
+        <sec:user name="bbb" password="1111" authorities="ROLE_USR" />
+      </sec:user-service>
+    </sec:authentication-provider>
+      -->
+     
+   </sec:authentication-manager>
+    
+   	<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
+		<property name="providers" ref="daoAuthenticationProvider" />
+	</bean>
+          
+	<bean id="daoAuthenticationProvider" class="com.stockholic.authority.DaoAuthenticationProvider">
+		<property name="userDetailsService" ref="authService"/>
+	</bean>
+	<bean id="authService" class="com.stockholic.authority.AuthService">	</bean>
+	
+	<bean id="authenticationSuccessHandler" class="com.stockholic.authority.UserAuthenticationSuccessHandler" />
+	
+	<!--  접속자 세션을 이용한 정보보기 -->
+	<bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl" />	
+</beans>

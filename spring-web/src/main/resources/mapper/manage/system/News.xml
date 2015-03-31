@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="manage.system.news">
+
+<!-- =================== 뉴스제공사 목록  =================== -->
+<select id="getNewsList" resultType="com.taxholic.manage.system.code.dto.News">
+SELECT
+	seq_no AS seqNo,
+	item_group AS itemGroup,
+	item_nm AS itemNm,
+	news_nm AS newsNm,
+	news_link AS newsLink,
+	charset,
+	stp,
+	flag,
+	use_yn AS useYn,
+	'U' AS editCd
+FROM sk_news
+WHERE 1 = 1
+<if test="flag != '' and flag != null" >
+AND  flag= #{flag}
+</if>
+<if test="newsNm != null and newsNm !=''">
+AND news_nm LIKE '%' #{newsNm} '%'
+</if>
+<if test="useYn != null">
+AND use_yn= #{useYn}
+</if>
+
+ORDER BY flag,item_group,stp
+</select>
+
+<!-- =================== 뉴스제공사 등록  =================== -->
+<insert id="newsInsert">
+INSERT INTO sk_news(
+	item_group,
+	item_nm,
+	news_nm,
+	news_link,
+	charset,
+	use_yn,
+	stp,
+	flag
+)VALUES(
+	#{itemGroup},
+	(SELECT CONCAT('NC',LPAD(IFNULL(MAX(SUBSTRING(item_nm,3)) + 1,1),4,'0000') )FROM sk_news A),
+	#{newsNm},
+	#{newsLink},
+	#{charset},
+	#{useYn},
+	#{stp},
+	#{flag}
+)
+</insert>
+
+<!-- =================== 뉴스제공사 수정  =================== -->
+<update id="newsUpdate">
+UPDATE sk_news SET
+	item_group = #{itemGroup},
+	news_nm = #{newsNm},
+	news_link = #{newsLink},
+	charset = #{charset},
+	use_yn = #{useYn},
+	stp = #{stp}
+WHERE seq_no = #{seqNo}
+</update>
+
+<!-- =================== 뉴스제공사 삭제  =================== -->
+<delete id="newsDelete">
+DELETE FROM sk_news WHERE seq_no = #{seqNo}
+</delete>
+
+
+</mapper>

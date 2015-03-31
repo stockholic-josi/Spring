@@ -1,0 +1,112 @@
+@charset "utf-8";
+
+*{
+	font-style: nomal;
+	font-size:9pt;
+    font-family: 맑은 고딕,굴림,돋움, Dotum, Gulim, Arial, sans-serif, Verdana, Helvetica, geneva;
+}
+
+.border{border:1px solid #AFAFAF;}
+.inputBox{border:1px solid #AFAFAF;height:18px}
+.lineHeight {  line-height: 20px}
+.hand {cursor:pointer}
+
+.whiteBox{border:1px solid #AFAFAF;background-color:#ffffff;padding:5px;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;}
+.grayBox{border:1px solid #CACACA;background-color:#F2F2F2;padding:5px;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;}
+
+#suggestList {
+	position: absolute;
+	background-color: #FFFFFF;
+	border: 1px solid #d2d2d2;
+	padding: 0px 0px 0px 2px;
+	cursor: pointer;
+	line-height:18px;
+
+	scrollbar-3dlight-color:#E8E8E8;
+	scrollbar-arrow-color:#5993D9;
+	scrollbar-track-color:#F5F5F5;
+	scrollbar-darkshadow-color:#FFFFFF;
+	scrollbar-face-color:#F0F0F0;
+	scrollbar-highlight-color:#F0F0F0;
+	scrollbar-shadow-color:#A7A7A7;
+}
+
+#wrapper {padding:10px}
+#wrapper .title{color:#2B6AB9;font-weight:bold;font-size:10pt;padding:0px 0px 10px 15px;background-image:url(/images/common/navi.gif); background-position:0px 5px; background-repeat:no-repeat;}
+#wrapper .searchBox{border:1px solid #CACACA;background-color:#F2F2F2;	margin-bottom:10px;padding:5px;	-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;}
+#wrapper #contents{width:1500px}
+
+
+A:link			{text-decoration:none;color:#000}
+A:visited		{text-decoration:none; color:#0066CF;}
+A:hover		{text-decoration:underline; color:#0066CF;}
+A:active		{text-decoration:none; color:#666;}
+
+
+img, fieldset {
+    border: none;
+}
+
+hr, legend {
+    display：none;
+}
+
+button{
+	height:25px;
+}
+
+button span{
+	margin-top:-2px;
+}
+
+
+#board .listRow 	{
+	height:50px;
+	line-height:20px;
+	border-bottom:1px dashed #D1D1D1;
+}
+#board .readRow 	{
+	height:25px;
+	color:#1364BC;
+	font-weight:bold;
+	border-bottom:1px dashed #D1D1D1;
+}
+#board .replyRow	{
+	height:40px;
+	padding:5px;
+	border-top:1px dashed #D1D1D1;
+}
+
+#board .colsTitle 	{
+	height:28px;
+	width:120px;
+	text-align:center;
+	background-color:#F9F9F9;
+	border-bottom:1px solid #D1D1D1;
+}
+
+#board .colsField 	{
+	border-bottom:1px solid #D1D1D1;
+	padding-left:10px;
+}
+
+#board .contentWrap{
+	padding:5px;
+	line-height:18px;
+}
+
+#board .userNm	{color:#999999;color:#1364BC;font-weight:bold}
+#board .remark	{color:#999999;}
+#board .info{color:#6A6A6A;	font-weight:bold;}
+#board  A 	{text-decoration:none;color:#1364BC;font-weight:bold}
+#board  A:visited	{text-decoration:none; color:#1364BC;}
+#board  A:hover		{text-decoration:underline; color:#0066CF;}
+
+/*페이징*/
+#paging {font-size:10pt;margin-top:20px;text-align:center}
+#paging a {border:1px solid #B3B3B3;height:23px;text-decoration:none;}
+#paging a:hover {border:1px solid #0066CF;color:#6671ff;}
+#paging .current{border:1px solid #0066CF;color:#0066CF;font-weight:bold;height:23px;padding:0px 5px 2px 5px;}
+#paging .page {color:#000;font-weight:bold;padding:0px 5px 2px 5px}
+#paging .prev {color:#000;padding:0px 5px 2px 5px;margin-right:4px}
+#paging .next {color:#000;padding:0px 5px 2px 5px;margin-left:4px}

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="manage.community.poll">
+
+<!-- =================== 목록 개수 =================== -->
+<select id="getPollCount"  resultType="java.lang.Integer">
+SELECT count(1) FROM sk_poll
+
+<if test="searchString != null">
+	WHERE title LIKE '%' #{searchString} '%' OR content LIKE '%' #{searchString} '%'
+</if>
+
+</select>
+
+<!-- =================== 목록 =================== -->
+<select id="getPollList"  resultType="com.taxholic.manage.community.dto.Poll">
+SELECT
+	seq_no AS seqNo,
+	title,
+	content,
+	DATE_FORMAT(start_date,'%Y.%m.%d')  AS startDate,
+	DATE_FORMAT(end_date,'%Y.%m.%d')  AS endDate,
+	CASE
+	  WHEN DATE(SYSDATE()) &lt; DATE(start_date) THEN '0'
+	  WHEN DATE(start_date) &lt;= DATE(SYSDATE()) AND DATE(SYSDATE()) &lt;= DATE(end_date) THEN '1'
+	  WHEN DATE(SYSDATE()) &gt; DATE(end_date) THEN '2'
+	END AS pollStatus,
+	reg_date AS regDate,
+	(select sum(hit) from sk_poll_data where seq_no = A.seq_no) AS hit
+FROM sk_poll A
+
+<if test="searchString != null">
+	WHERE title LIKE '%' #{searchString} '%' OR content LIKE '%' #{searchString} '%'
+</if>
+
+ORDER BY seq_no DESC
+LIMIT #{start},#{limit}
+</select>
+
+<!-- =================== 조회 =================== -->
+<select id="getPoll"  resultType="com.taxholic.manage.community.dto.Poll">
+SELECT
+	seq_no AS seqNo,
+	title,
+	content,
+	DATE_FORMAT(start_date,'%Y/%m/%d')  AS startDate,
+	DATE_FORMAT(end_date,'%Y/%m/%d')  AS endDate,
+	CASE
+	  WHEN DATE(SYSDATE()) &lt; DATE(start_date) THEN '0'
+	  WHEN DATE(start_date) &lt;= DATE(SYSDATE()) AND DATE(SYSDATE()) &lt;= DATE(end_date) THEN '1'
+	  WHEN DATE(SYSDATE()) &gt; DATE(end_date) THEN '2'
+	END AS   pollStatus,
+	reg_date AS regDate
+FROM sk_poll
+WHERE seq_no = #{seqNo}
+</select>
+<!-- =================== 설문 참여 수 =================== -->
+<select id="getPollQuestionCount"  resultType="java.lang.Integer">
+SELECT IFNULL( sum(hit),0) FROM sk_poll_data WHERE seq_no=#{seqNo}
+</select>
+<!-- =================== 설문 항목 목록 =================== -->
+<select id="getPollQuestionList"  resultType="com.taxholic.manage.community.dto.Poll">
+SELECT
+	idx,
+	seq_no AS seqNo,
+	question AS title,
+	hit
+FROM sk_poll_data
+WHERE seq_no=#{seqNo}
+ORDER BY idx ASC
+</select>
+
+<!-- =================== 조회(메인) =================== -->
+<select id="getPollMain" resultType="com.taxholic.manage.community.dto.Poll">
+SELECT
+	seq_no AS seqNo,
+	title,
+	DATE_FORMAT(start_date,'%Y.%m.%d')  AS startDate,
+	DATE_FORMAT(end_date,'%Y.%m.%d')  AS endDate,
+	CASE
+	  WHEN DATE(SYSDATE()) &lt; DATE(start_date) THEN '0'
+	  WHEN DATE(start_date) &lt;= DATE(SYSDATE()) AND DATE(SYSDATE()) &lt;= DATE(end_date) THEN '1'
+	  WHEN DATE(SYSDATE()) &gt; DATE(end_date) THEN '2'
+	END AS   pollStatus
+FROM sk_poll
+ORDER BY seq_no DESC
+LIMIT 1
+</select>
+
+
+
+<!-- =================== 등록 =================== -->
+<insert id="pollInsert" >
+
+<selectKey resultType="java.lang.String"  keyProperty="seqNo"  order="BEFORE">
+ SELECT IFNULL(MAX(seq_no)+1,1) AS seqNo FROM sk_poll
+</selectKey>
+
+INSERT INTO sk_poll(
+	seq_no,
+	title,
+	content,
+	start_date,
+	end_date,
+	reg_date
+)VALUES(
+	#{seqNo},
+	#{title},
+	#{content},
+	#{startDate},
+	#{endDate},
+	SYSDATE()
+)
+</insert>
+
+<!-- =================== 항목 등록 =================== -->
+<insert id="QuestionInsert" >
+INSERT INTO sk_poll_data(
+	seq_no,
+	question,
+	hit
+)VALUES(
+	#{seqNo},
+	#{title},
+	#{hit}
+)
+</insert>
+
+<!-- =================== 투표하기  =================== -->
+<update id="pollProc">
+UPDATE sk_poll_data SET hit = hit + 1 WHERE idx=#{idx} AND seq_no=#{seqNo}
+</update>
+
+<!-- =================== 수정  =================== -->
+<update id="pollUpdate" >
+UPDATE sk_poll SET 
+	title = #{title},
+	content = #{content},
+	start_date = #{startDate},
+	end_date = #{endDate}
+WHERE seq_no=#{seqNo}
+</update>
+<!-- =================== 설문 항목 수정 =================== -->
+<update id="pollQuestionUpdate" >
+UPDATE sk_poll_data SET question=#{title}  WHERE idx=#{idx}
+</update>
+<!-- =================== 설문 항목 삭제 =================== -->
+<delete id="pollQuestionDelete" >
+DELETE FROM sk_poll_data WHERE seq_no=#{seqNo}
+</delete>
+
+<!-- =================== 삭제 =================== -->
+<delete id="pollDelete">
+DELETE FROM sk_poll WHERE seq_no=#{seqNo}
+</delete>
+
+</mapper>

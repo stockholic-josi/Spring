@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<HTML >
+<HEAD>
+<TITLE> Javascript </TITLE>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/css/global.css" type="text/css">
+<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+
+<script type="text/javascript" src="/js/tree/jquery.cookie.js"></script>
+<script type="text/javascript" src="/js/tree/jquery.hotkeys.js"></script>
+<script type="text/javascript" src="/js/tree/jquery.jstree.js"></script>
+<script type="text/javascript" src="/js/JSON.js"></script>
+
+</HEAD>
+
+<script>
+
+$(function () {
+	$("#treeContent").jstree({ 
+		"json_data" : {
+			"data" : [{"data":"루트","attr":{"id":"root","class":" ","rel":"drive"},"state":"open","children":[{"data":"증권","attr":{"rel":"folder"},"state":"open","children":[{"data":"한국경제","attr":{"id":"http:\/\/rss.hankyung.com\/stock.xml","rel":"default"}},{"data":"매일경제","attr":{"id":"http:\/\/news.mk.co.kr\/rss\/stock.xml","class":" ","rel":"default"}}]},{"data":"경제","attr":{"rel":"folder"}},{"data":"스포츠","attr":{"class":" ","rel":"folder"}}]}]
+		},
+
+			"types" : {
+				"max_depth" : -2,
+				"max_children" : -2,
+				"valid_children" : [ "drive" ],
+				"types" : {
+					// The default type
+					"default" : {
+						"valid_children" : "none",
+						"icon" : {
+							"image" : "/js/tree/file.png"
+						}
+					},
+					// The `folder` type
+					"folder" : {
+						"valid_children" : [ "default", "folder" ],
+						"icon" : {
+							"image" : "/js/tree/folder.png"
+						}
+					},
+					// The `drive` nodes 
+					"drive" : {
+						"valid_children" : [ "default", "folder" ],
+						"icon" : {
+							"image" : "/js/tree/root.png"
+						},
+						// those options prevent the functions with the same name to be used on the `drive` type nodes
+						// internally the `before` event is used
+						"start_drag" : false,
+						"move_node" : false,
+						"delete_node" : false,
+						"remove" : false
+					}
+				}
+			},
+
+		"crrm" : { 
+			"move" : {
+				"check_move" : function (m) { 
+					var p = this._get_parent(m.o);
+					if(!p) return false;
+					p = p == -1 ? this.get_container() : p;
+					if(p === m.np) return true;
+					if(p[0] && m.np[0] && p[0] === m.np[0]) return true;
+					return false;
+				}
+			}
+		},
+		"dnd" : {
+			"drop_target" : false,
+			"drag_target" : false
+		},
+
+		"themes" : { 
+				"theme" : "classic", 
+				"dots" : true, 
+				"icons" : true },
+
+		"plugins" : [ "themes", "json_data","dnd","ui","crrm","contextmenu","types","hotkeys" ]
+	})
+	.bind("create.jstree", function (e, data) {
+/*
+		alert( data.rslt.obj.children("a:eq(0)").attr("href") );
+		alert( data.rslt.parent.attr("id") );
+		data.rslt.obj.attr("id",LPad(data.rslt.position + "",2,"0"));
+		alert(data.rslt.obj.attr("id"));
+		alert(data.rslt.obj.attr("rel"));
+*/
+	})
+	.bind("select_node.jstree", function (e, data) { 
+
+		var url = data.rslt.obj.attr("id"); 
+		
+		if(data.rslt.obj.attr("rel") == 'default' && url ){
+			window.open(url,"","width=1200,height=800")
+		}
+
+	 }) ;
+	
+	$( "button" ).button({
+		icons: {
+			primary: "ui-icon-document"
+		}
+	});
+	
+});
+
+
+
+
+function save(){
+
+	var data = $("#treeContent").jstree("json_data").get_json(-1); 
+	$("#jsonResult").text(JSON.encode(data))
+
+}
+
+</script>
+
+</head>
+
+
+<body>
+
+<table>
+<tr>
+	<td colspan="2" height="40"><button onClick="save()">저장</button></td>
+</tr>
+<tr>
+	<td width="200" valign="top"><div id="treeContent"></div></td>
+	<td valign="top" style="padding-left:20px"><div id="jsonResult" class="border" style="width:600px;padding:5px"></div></td>
+</tr>
+</table>
+
+<body>
+
+
+	
+
+
+</body>
+
+</html>

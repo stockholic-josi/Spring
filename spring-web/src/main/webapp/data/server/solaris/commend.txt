@@ -1,0 +1,259 @@
+CPU 정보 확인 
+-------------------------------------------------------------------
+/usr/sbin/psrinfo -v 
+
+
+Status of processor 6 as of: 05/20/03 09:56:03
+
+  Processor has been on-line since 05/14/03 10:43:05.
+
+  The sparcv9 processor operates at 400 MHz,
+
+        and has a sparcv9 floating point processor.
+
+Status of processor 7 as of: 05/20/03 09:56:03
+
+  Processor has been on-line since 05/14/03 10:43:09.
+
+  The sparcv9 processor operates at 400 MHz,
+
+        and has a sparcv9 floating point processor.
+
+Status of processor 10 as of: 05/20/03 09:56:03
+
+  Processor has been on-line since 05/14/03 10:43:09.
+
+  The sparcv9 processor operates at 400 MHz,
+
+        and has a sparcv9 floating point processor.
+
+Status of processor 11 as of: 05/20/03 09:56:03
+
+  Processor has been on-line since 05/14/03 10:43:09.
+
+  The sparcv9 processor operates at 400 MHz,
+
+        and has a sparcv9 floating point processor.                   
+-------------------------------------------------------------------
+
+
+메모리 정보 확인 
+-------------------------------------------------------------------
+/usr/platform/sun4u/sbin/prtdiag 
+
+CPU , Memory ,I/O CARD 조회가능 
+
+/usr/sbin/prtconf 
+
+
+System Configuration:  Sun Microsystems  sun4u
+
+Memory size: 14336 Megabytes
+
+System Peripherals (Software Nodes): ……….계속 화면출력
+-------------------------------------------------------------------
+
+
+프로세스 메모리 확인 
+-------------------------------------------------------------------
+/usr/ucb/ps -aux 
+
+
+USER   PID %CPU %MEM   SZ  RSS TT  S START  TIME COMMAND
+
+ohzzam 23410  5.0   0.1   7928 4280 pts/23 R 23:47:52 533:39 deq
+
+    …………                 
+
+                    SZ : swap space(RAM 과 disk swap을 더하여)를 kilobytes로 보여준다. 
+
+RSS : RAM memory 사용량을 kilobytes로 보여준다. 
+
+%MEM : RAM memory의 사용량을 %로 보여준다. 
+
+/usr/bin/ps -elf 
+
+
+F S  UID  PID  PPID  C PRI NI  ADDR  SZ  WCHAN  STIME TTY  TIME 
+
+8 S ohzzam 12669  1   0 41 20     ?   158214   ?     5월 16일    4:28                      
+
+                    SZ : swap space(RAM 과 disk swap을 더하여)를 page 단위로 보여준다. 
+
+한 page 단위는 4KB 또는 8KB 이며, 시스템에 따라 다르다. 
+
+정확한 page 단위는 "pagesize"이란 명령으로 확인할 수 있다. 
+
+% pagesize 
+
+8192
+-------------------------------------------------------------------
+
+
+시스템 메모리 확인 
+-------------------------------------------------------------------
+% prtmem 
+
+
+Total memory:                 13918 Megabytes
+
+Kernel Memory:                  462 Megabytes
+
+Application:                   2938 Megabytes
+
+Executable & libs:          534 Megabytes
+
+File Cache:                    9613 Megabytes
+
+Free, file cache:               360 Megabytes
+
+Free, free:                       9 Megabytes                    
+
+% memps 
+
+
+PID     Size Resident   Shared  Private  Process              
+
+1161    2656k    2536k    2120k     416k  -bash                    
+
+%memps -m (file cache로 올라가 있는 file 확인) 
+
+
+……….
+
+8k      0k F   / (inode  1577003)
+
+8k      0k F   /user4 (inode  1023008)
+
+8k      0k F   /user3 (inode  3779292)
+
+8k      0k F   /user5 (inode  2551416)
+
+8k      0k F   /user3 (inode  2399564)
+
+8k      0k F   /user4 (inode   986633)
+
+8k      0k F   /user3 (inode  2495086)
+
+8k      0k F   /user3 (inode  3919991)
+
+……….                    
+
+                    %vmstat -p 1 10 
+
+
+Usage: vmstat [-cisS] [disk ...] [interval [count]]                    
+
+                    %vmstat 1 1 
+
+
+pprocs     memory            page          disk        faults      cpu
+
+r b w   swap  free   re mf  pi po fr  de sr s6 sd sd sd  in  sy   cs  us  sy  id
+
+0 0 0  44048  2936  3 959 44 34 43  0 1  0  2  2 1  867 6994 3662 18  9  72                   
+-------------------------------------------------------------------
+
+LOG 확인 
+-------------------------------------------------------------------
+vi /var/adm/messages 
+
+
+…….
+
+May 20 10:50:15 testserver unix: NOTICE: alloc: /user3: file system full
+
+May 20 10:56:49 testserver last message repeated 78 times
+
+May 20 10:56:53 testserver unix: NOTICE: alloc: /user3: file system full
+
+…….                    
+-------------------------------------------------------------------
+
+운영체제 버전 확인 
+-------------------------------------------------------------------
+uname -sr 또는 uname -a 
+
+SunOS 5.7 
+-------------------------------------------------------------------
+
+
+32/64-비트 커널로 운영 중인지 확인하는 방법 
+-------------------------------------------------------------------
+isainfo -kv 
+
+64-bit sparcv9 kernel modules
+
+또는 
+
+32-bit sparc kernel modules
+-------------------------------------------------------------------
+
+
+패치 번호 확인 
+-------------------------------------------------------------------
+showrev { -a : hostname, hostid, Release 등 전체확인, -p : patch 번호만 확인 } 
+
+
+% showrev -a
+
+Hostname: testserver
+
+Hostid: 82adj3ae
+
+Release: 5.7
+
+Kernel architecture: sun4u
+
+Application architecture: sparc
+
+Hardware provider: Sun_Microsystems
+
+Domain: 
+
+Kernel version: SunOS 5.7 Generic 106541-19 November 2001
+
+
+
+OpenWindows version: 
+
+OpenWindows Version 3.6.1  2 September 1999
+
+Patch: 107063-01 Obsoletes:  Requires:  Incompatibles:  Packages: SUNWtleux
+
+Patch: 107437-03 Obsoletes:  Requires:  Incompatibles:  Packages: SUNWtiu8x, SUNWtiu8
+
+Patch: 107316-01 Obsoletes:  Requires:  Incompatibles:  Packages: SUNWploc, SUNWplcx                
+-------------------------------------------------------------------
+
+pkginfo (Install 되어있는 Package를 확인한다.) 
+-------------------------------------------------------------------
+system      SUNWGtkr       GTK - The GIMP Toolkit (Root)
+
+system      SUNWGtku       GTK - The GIMP Toolkit (Usr)
+
+system      SUNWab2m       Solaris Documentation Server Lookup
+
+system      SUNWaccr       System Accounting, (Root)
+
+system      SUNWaccu       System Accounting, (Usr)
+
+system      SUNWadmap      System administration applications                    
+-------------------------------------------------------------------
+
+
+디스크 I/O 정보 
+-------------------------------------------------------------------
+iostat 
+
+Usage : iostat [ -s ] [ -a ] [ -d | -t ] [ PhysicalVolume ... ] [ Interval [ Count ] 
+
+
+% iostat 3 1
+
+tty         sd0          sd1         sd2         sd3         cpu 
+
+tin  tout  kps tps serv kps tps serv  kps tps serv  kps tps serv  us sy wt id
+
+1  1153   0  0   0  0   0   0    2  0  115   0  0   0   5  1  0 93                    
+-------------------------------------------------------------------

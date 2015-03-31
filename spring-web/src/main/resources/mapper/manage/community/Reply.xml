@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="manage.community.reply">
+
+<!-- =================== 댓글 목록 =================== -->
+<select id="getReplyList" resultType="com.taxholic.manage.community.dto.Reply">
+SELECT
+	idx,
+	seq_no AS seqNo,
+	user_id AS userId,
+	(select user_nm from auth_member where user_id = A.user_id) AS userNm,
+	content,
+	DATE_FORMAT(reg_date,'%Y.%m.%d') AS regDate
+FROM sk_common_reply A
+WHERE flag = #{flag} AND seq_no = #{seqNo} 
+ORDER BY idx desc
+</select>
+
+<!-- =================== 댓글 등록  =================== -->
+<insert id="replyInsert">
+INSERT INTO sk_common_reply(
+	seq_no,
+	user_id,
+	content,
+	ip,
+	flag,
+	reg_date
+)VALUES(
+	#{seqNo},
+	#{userId},
+	#{content},
+	#{ip},
+	#{flag},
+	SYSDATE()
+)
+</insert>
+
+<!-- =================== 댓글 수정  =================== -->
+<update id="replyUpdate">
+UPDATE sk_common_reply SET 
+	content = #{content},
+	ip = #{ip}
+WHERE idx=#{idx} AND user_id = #{userId}
+</update>
+
+<!-- =================== 댓글 삭제 ALL =================== -->
+<delete id="replyAllDelete">
+DELETE FROM sk_common_reply  WHERE flag = #{flag} AND seq_no=#{seqNo}
+</delete>
+
+
+<!-- =================== 댓글 삭제 =================== -->
+<delete id="replyDelete">
+DELETE FROM  sk_common_reply  WHERE idx=#{idx} AND user_id = #{userId}
+</delete>
+
+
+
+</mapper>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html >
+<head>
+<title> rowspan </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/css/global.css" type="text/css">
+<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+
+</HEAD>
+
+<script>
+
+
+$.fn.rowspan = function(colIdx, isStats) {       
+    return this.each(function(){      
+        var that;     
+        $('tr', this).each(function(row) {      
+            $('td:eq('+colIdx+')', this).filter(':visible').each(function(col) {
+                 
+                if ($(this).html() == $(that).html()
+                    && (!isStats 
+                            || isStats && $(this).prev().html() == $(that).prev().html()
+                            )
+                    ) {            
+                    rowspan = $(that).attr("rowspan") || 1;
+                    rowspan = Number(rowspan)+1;
+ 
+                    $(that).attr("rowspan",rowspan);
+                     
+                    // do your action for the colspan cell here            
+                    $(this).hide();
+                     
+                    //$(this).remove(); 
+                    // do your action for the old cell here
+                     
+                } else {            
+                    that = this;         
+                }          
+                 
+                // set the that if not already set
+                that = (that == null) ? this : that;      
+            });     
+        });    
+    });  
+}; 
+$(document).ready(function () {
+
+	$("#tList").rowspan(1)
+	$("#tList").rowspan(0)
+
+
+});
+
+</script>
+
+<BODY>
+
+<br><br><br><br>
+<table width="300" cellpadding="5" cellspacing="0" border="1" align="center"  id="tList" style="border-collapse:collapse; border:1px gray solid;">
+<tr>
+	<td>AA</td>
+	<td>BB</td>
+	<td>CC</td>
+</tr>
+<tr>
+	<td>aaaaaaa</td>
+	<td>1</td>
+	<td>www</td>
+</tr>
+<tr>
+	<td>aaaaaaa</td>
+	<td>1</td>
+	<td>www</td>
+</tr>
+<tr>
+	<td>aaaaaaa</td>
+	<td>2</td>
+	<td>www</td>
+</tr>
+<tr>
+	<td>bbbbbbb</td>
+	<td>2</td>
+	<td>www</td>
+</tr>
+<tr>
+	<td>ccccccc</td>
+	<td>2</td>
+	<td>www</td>
+</tr>
+</table>
+</BODY>
+</HTML>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="manage.system.kospi">
+
+<!-- =================== 종목수   =================== -->
+<select id="getKospiCount" resultType="java.lang.Integer">
+SELECT 
+	count(*) cnt
+FROM sk_kospi
+WHERE flag = #{flag}
+
+ <if test="searchKey == 'codeCd'">
+ AND  code_cd LIKE '%' #{searchValue} '%'
+ </if>
+  <if test="searchKey == 'codeNm'">
+ AND  ccode_nm LIKE '%' #{searchValue} '%'
+ </if>
+
+</select>
+
+<!-- =================== 종목 목록  =================== -->
+<select id="getKospiList" resultType="com.taxholic.manage.system.code.dto.Kospi">
+SELECT 
+	code_cd AS codeCd,
+	code_nm AS codeNm,
+	price,
+	flag,
+	DATE_FORMAT(reg_date,'%Y/%m/%d %H:%i') AS regDate
+FROM sk_kospi
+WHERE 1 =1
+
+<if test="flag != null">
+AND  flag = #{flag}
+</if>
+<if test="searchKey == 'codeCd'">
+ AND  code_cd LIKE '%' #{searchValue} '%'
+</if>
+ <if test="searchKey == 'codeNm'">
+AND  ccode_nm LIKE '%' #{searchValue} '%'
+</if>
+
+<if test="sort != null">
+ORDER BY ${sort} ${dir}
+</if>
+limit #{start}, #{limit}
+ <if test="limit == '0'">
+</if>
+
+</select>
+
+<!-- =================== 종목 등록  =================== -->
+<insert id="kospiInsert">
+REPLACE INTO sk_kospi(
+	code_cd,
+	code_nm,
+	price,
+	fluctuate,
+	rate,
+	flag,
+	reg_date
+)VALUES(
+	#{codeCd},
+	#{codeNm},
+	#{price},
+	#{fluctuate},
+	#{rate},
+	#{flag},
+	SYSDATE()
+)
+</insert>
+
+<!-- =================== 종목 삭제  =================== -->
+<delete id="kospiDelete">
+  DELETE FROM sk_kospi
+  <if test="arrCodeCd != null">
+  WHERE code_cd IN
+  <foreach collection="array" item="kospi" separator="," open="(" close=")">
+  ${kospi.arrCodeCd}
+  </foreach>
+  </if>
+
+</delete>
+
+
+<!-- =================== 기업정보 등록  =================== -->
+<insert id="kospiInfoInsert">
+REPLACE INTO sk_kospi_info(
+	code_cd,
+	info,
+	reg_date
+)VALUES(
+	#{codeCd},
+	#{info},
+	SYSDATE()
+)
+</insert>
+
+
+<!-- =================== 기업정보 목록  =================== -->
+<select id="getKospiInfo" resultType="com.taxholic.manage.system.code.dto.Kospi">
+SELECT 
+	t1.code_cd AS codeCd,
+	t2.code_nm AS codeNm,
+	FORMAT(CAST(t2.price AS unsigned),0) AS price,
+	 REPLACE(t2.fluctuate,'↓','-') AS fluctuate,
+	t2.rate,
+	t1.info,
+	t2.flag
+FROM sk_kospi_info t1, sk_kospi t2
+WHERE t1.code_cd = t2.code_cd $searchString$
+ORDER BY t2.code_nm
+</select>
+
+
+</mapper>

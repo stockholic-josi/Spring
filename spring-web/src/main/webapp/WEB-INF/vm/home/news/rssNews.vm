@@ -1,0 +1,54 @@
+#parse( "home/news/_menu.vm" )
+<html>
+<head>
+<title>StockHolic 》 RSS 뉴스 》 $!newNm</title>
+<script>
+
+function wizetResize(){
+	$("#wizet").css("height", ($("#container").height() ) - 125 + "px" ) 
+}
+
+$(document).ready(function(){
+	wizetResize();
+	$( window ).resize( wizetResize ); 
+});
+
+</script>
+
+
+</head>
+
+<body>
+
+<div id="headerInfo" style="display:none">
+   <span class="headerNav"> 》 Rss News 》 $!newNm</span>
+</div>
+
+
+<div class="contents-box">
+	<div class="leftBar">&nbsp;</div>
+	<div class="leftMenu">
+    	<ul>
+    	#set($no = 0)
+    	#foreach($list in $menuKey)
+        	<li><a href="/rssNews/$!list" #if($list == $flag)class="subNav"#end>ㆍ$menuValue.get($no)</a></li>
+    	#set($no = $no + 1)
+    	#end
+    	</ul>
+		
+		#parse( "googleRecommend.vm" )
+		
+	</div>
+
+	<div class="contents">
+    	<iframe name="wizet" id="wizet" width="100%"  src="/home/news/rssNewsJson.do?flag=$!flag" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	</div>
+
+	<div class="clear"></div>
+</div>
+
+</body>
+</html>
+				
+						
+

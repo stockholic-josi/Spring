@@ -1,0 +1,68 @@
+<table cellspacing=0 cellpadding=0 border=0 width="100%">
+	<tr height=20>
+		<td width="50%">이름 : $board.userId</td>
+		<td width="50%" align=right>
+			날짜  : $board.regDate&nbsp;&nbsp;&nbsp;
+			조 회 : $board.readCnt
+		</td>
+	</tr>
+
+	<tr><td height=2 colspan=2 bgcolor='#ACBDEA'></td></tr>
+	<tr height=28>
+		<td colspan=2 style="padding:0 0 0 5"><font color=#8C8C8C><b>$board.title </b></font></td>
+	</tr>
+	<tr><td colspan=2 height=1 bgcolor='#D2D2D2'></td></tr>
+	<tr>
+		<td colspan=2 align="right" style="line-height:20px;padding:5">
+			파일
+		</td>
+	</tr>
+	<tr>
+		<td colspan=2 height=200 style="line-height:20px;padding:5" valign="top">
+		#if($board.html == 'N')	$HtmlUtil.lineBreak($board.content)
+		#else	 $board.content #end
+		</td>
+	</tr>
+	<tr><td colspan=2 height=2 bgcolor=#D2D2D2></td></tr>
+	<tr>
+		<td height=40 colspan=2>
+			<img src="/images/board/close.gif" border="0" align="absmiddle" onClick="$('#ajaxView').jqmHide()" class="hand">
+		</td>
+	</tr>
+	
+	<tr>
+		<td colspan=2>
+			
+		<table cellspacing=0 cellpadding=0 border=0 width=100%>
+		
+		#foreach($list in $readList)
+		<tr><td colspan=2 height=2 bgcolor=#E3E3E3></td></tr>
+
+		#if($velocityCount == 1)	
+		<tr>	
+			<td width=100 bgcolor=#F9F9F9 height=28 align=center><font color=#616161><b>이전글</b></font></td>
+			<td bgcolor=#FFFFFF>&nbsp;&nbsp;
+				<a href="./read.do?no=$!list.no&flag=$!params.flag&$men=$!params.men">$!list.title</a>
+			</td>
+		</tr>	
+		<tr><td colspan=2 height=1 bgcolor=#E3E3E3></td></tr>
+		#end
+		
+		#if($velocityCount == 2)
+		<tr>	
+			<td width=100 bgcolor=#F9F9F9 height=28 align=center><font color=#616161><b>다음글</b></font></td>
+			<td bgcolor=#FFFFFF>&nbsp;&nbsp;
+				<a href="./read.do?no=$!list.no&flag=$!params.flag&men=$!params.men">$!list.title</a>
+			</td>
+		</tr>	
+		#end
+
+		<tr><td colspan=2 height=2 bgcolor=#E3E3E3></td></tr>
+		#end
+		</table>
+		
+		</td>
+		
+	</tr>
+		
+</table>

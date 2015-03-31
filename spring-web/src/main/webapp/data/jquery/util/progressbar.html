@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>progress</title>
+
+<link rel="stylesheet" href="/css/global.css" type="text/css" />
+<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+<script type="text/javascript" src="/js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="./js/progressbar.js"></script>
+
+<style>
+/* progress bar container */
+#progressbar{        
+	border:1px solid #6A6A6A;        
+	width:200px;        
+	height:16px;        
+	line-height:16px;
+	font-size:9pt;
+	position:relative;        
+	color:black;
+}
+/* color bar */
+#progressbar div.progress{
+	position:absolute;        
+	width:0;        
+	height:100%;        
+	overflow:hidden;        
+	background-color:#3366FF;
+}
+/* text on bar */
+#progressbar div.progress .text{        
+	position:absolute;        
+	text-align:center;        
+	color:white;
+	font-size:9pt;
+}
+/* text off bar */
+#progressbar div.text{        
+	position:absolute;        
+	width:100%;        
+	height:100%;        
+	text-align:center;
+	font-size:9pt;
+}
+
+</style>
+
+
+</head>
+
+
+
+<script>
+
+var pct=0;
+var handle=0;
+
+function update(){
+        $("#progressbar").reportprogress(++pct);
+        if(pct==100){
+                clearInterval(handle);
+                $("#run").val("start");
+                pct=0;
+        }
+}
+
+$(document).ready(function () {
+
+
+	$("#run").click(function(){
+        if(this.value=="start"){
+            handle=setInterval("update()",100);
+            this.value="stop";
+        }else{
+            clearInterval(handle);
+            this.value="start";
+        }
+	});
+	$("#reset").click(function(){
+	        pct=0;
+	        $("#progressbar").reportprogress(0);
+	});
+
+
+
+	$("#progressbar").reportprogress(0);
+	
+	$( "input:button" ).button({
+		icons: {
+			primary: "ui-icon-document"
+		}
+	});
+
+});
+
+
+
+
+</script>
+
+
+<body>
+
+<table align="center"" height="400">
+<tr>
+	<td>
+		<div id="progressbar"></div>
+		
+			<input type="button" value="start" id="run">
+			<input type="button" value="reset" id="reset">
+	</td>
+</tr>
+</table>
+
+
+
+
+
+</body>
+</html>

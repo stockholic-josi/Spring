@@ -1,0 +1,113 @@
+--------------------------- apache
+
+# ./configure --prefix=/usr/local/apache --enable-module=so --enable-so --enable-rewrite
+
+# make ; make install
+
+
+---------------------------  mod_jk
+
+# cd native
+
+# ./configure --with-apxs=/usr/local/apache/bin/apxs
+
+# make ; make install
+
+
+
+------------------------- workers.properties -------------------------
+worker.list=ajp13 
+worker.ajp13.port=8009 
+worker.ajp13.host=localhost 
+worker.ajp13.type=ajp13 
+worker.ajp13.lbfactor=1 
+---------------------------------------------------------------------
+ 
+------------------------- http.conf -----------------------------------
+LoadModule jk_module    modules/mod_jk.so
+
+JkWorkersFile /usr/local/apache/conf/workers.properties 
+
+
+JkMount /*.jsp ajp13
+JkMount /servlet/ ajp13
+
+
+
+---------------------------  cronolog
+# cd /usr/local/src
+# wget http://cronolog.org/download/cronolog-1.6.2.tar.gz
+# tar xvfz cronolog-1.6.2.tar.gz
+# cd cronolog-1.6.2
+# ./configure
+# make;make install
+
+
+---------------------------  tomcat.sh
+#!/bin/sh
+#chkconfig: 35 81 80
+#description: tomcat 7.X
+
+# Set some variables
+MYSELF=`basename $0`
+
+case "$1" in
+        start)
+        echo -n ' '
+        su - tomcat -c "exec /usr/local/tomcat7/bin/catalina.sh start" >/dev/null 2>&1 ; echo 'tomcat7 start'
+        ;;
+        stop)
+        echo -n ' '
+        su - tomcat -c "exec /usr/local/tomcat7/bin/catalina.sh stop" >/dev/null 2>&1 ; echo 'tomcat7 stop'
+        ;;
+        *)
+        echo ""
+        echo "Usage: ${MYSELF} { start | stop }"
+        echo ""
+        exit 64
+        ;;
+esac
+
+
+/usr/local/tomcat7/conf/logging.properties  에서 아래와 같이하고 모두 주석처리
+--------------------------- 
+handlers = 1catalina.org.apache.juli.FileHandler
+
+1catalina.org.apache.juli.FileHandler.level = INFO
+1catalina.org.apache.juli.FileHandler.directory = ${catalina.base}/logs
+1catalina.org.apache.juli.FileHandler.prefix = catalina.
+--------------------------- 
+
+
+
+---------------------------------------------------------------------------------- webalizer
+
+# yum install zlib-devel libpng-devel gd-devel
+ 
+http://www.webalizer.org/download.html
+ 
+
+# wget ftp://ftp.mrunix.net/pub/webalizer/webalizer-2.23-05-src.tgz
+ 
+ 
+# ./configure --prefix=/usr/local/webalizer -with-language=korean
+ 
+# make; make install
+ 
+#   cp /usr/local/webalizer/etc/webalizer.conf.sample 도메인.com.conf
+ 
+ 
+LogFile			분석할 로그파일 위치
+OutputDir			분석결과 저장위치
+HistoryName		stockholic.hist
+Incremental			yes
+IncrementalName		stockholic.current
+HostName			www.stockholic.kr
+  
+ 
+-------------------------------
+#!/bin/bash
+#usage: webalizer [option] [log file]
+date = `date -d "1 days ago" +%Y/%m/%d`
+/usr/local/webalizer/bin/webalizer -c /usr/local/webalizer/etc/www.stockholic.kr.conf /usr/local/apache/logs/$date/www.stockholic.kr-access_log
+-------------------------------

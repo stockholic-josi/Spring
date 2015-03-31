@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mansge.system.scheduler">
+
+<!-- =================== RSS 뉴스 등록  =================== -->
+<insert id="rssNewsInsert">
+REPLACE INTO sk_news_${flag} (
+	ref_no,
+	pub_date,
+	title,
+	link,
+	description,
+	reg_date
+)VALUES (
+	#{refNo},
+	#{pubDate},
+	#{title},
+	#{link},
+	#{description}, 
+	sysdate() 
+)
+</insert>
+
+
+<!-- =================== 종목 가격 수정  =================== -->
+<update id="kospiUpdate">
+UPDATE  sk_kospi SET  
+	price = #{price},
+	fluctuate = #{fluctuate},
+	rate = #{rate},
+	reg_date = SYSDATE() 
+	WHERE code_cd = #{codeCd}  
+</update>
+
+
+
+</mapper>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<HTML >
+<HEAD>
+<TITLE> JQuery </TITLE>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/css/global.css" type="text/css">
+<link type="text/css" href="/css/redmond/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />	
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+</HEAD>
+
+<script>
+function addItem(){
+	var template = "<div>"
+					+ "<span style='margin-right:5px'></span>"
+					+ "<input type='text' name='item' class='border'>"
+					+ " <button  onClick='$(this).parent().remove();sortNum()'>삭제</button>"
+					+ "</div>";
+	$("#itemWrapper").append(template);
+
+
+	$( "#itemWrapper button" ).button({
+		icons: {
+			primary: "ui-icon-document"
+		}
+	});
+
+	sortNum();
+	
+}
+
+function sortNum(){
+	$("#itemWrapper").find("div").each(function (i){
+		$(this).find("span").text( (i + 1) );
+	});
+}
+
+function send(){
+	$("#itemWrapper").find("div").each(function (i) {
+
+		if( $(this).find("input[type=text]").val() == ''){
+			alertDialog("입력", (i + 1)  + " 번째 입력 !!",function(){
+				$("#dialog").dialog("close"); 
+			});
+			$(this).find("input[type=text]").css({border:"1px solid #FF9900"});
+			$(this).find("input[type=text]").focus();
+			return false;
+		}else{
+			$(this).find("input[type=text]").css({border:"1px solid #7D7D7D"});
+		}
+	});
+}
+
+
+$(document).ready(function () {
+
+	$( "button" ).button({
+		icons: {
+			primary: "ui-icon-document"
+		}
+	});
+
+});
+
+</script>
+
+</head>
+<body>
+
+	<div>
+		<button onClick="addItem()">추가</button>
+		<button onClick="send()">전송</button>
+	</div><br>
+
+	<div id="itemWrapper"></div>
+
+</body>
+
+</html>

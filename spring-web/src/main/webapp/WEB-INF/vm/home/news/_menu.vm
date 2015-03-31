@@ -1,0 +1,11 @@
+#if(!$flag) #set($flag = "stock") #end
+
+#set($no = 0)
+#set ($menuKey = ["stock","economy","society","culture","nation","sports","entertain"])
+#set ($menuValue = ["증권","경제","사회","문화","국제","스포츠","연예"])
+#foreach($key in $menuKey)
+	#if($key == $flag)
+		#set($newNm = $menuValue.get($no))
+	#end
+	#set($no = $no + 1)
+#end

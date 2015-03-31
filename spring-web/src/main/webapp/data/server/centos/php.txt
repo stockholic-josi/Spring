@@ -1,0 +1,110 @@
+http://www.php.net/downloads.php
+
+
+[root@localhost]# yum -y install libxml2-devel
+[root@localhost]# yum -y install libjpeg-devel
+[root@localhost]# yum -y install libpng-devel
+[root@localhost]# yum -y install freetype-devel
+[root@localhost]# yum -y install libmcrypt-devel
+
+[root@localhost]# 
+./configure \
+--prefix=/usr/local/php5 \
+--with-apxs2=/usr/local/apache/bin/apxs \
+--with-config-file-path=/usr/local/apache/conf \
+--with-mysql=/usr/local/mysql5.5 \
+--disable-debug \
+--enable-safe-mode \
+--enable-mod-charset \
+--enable-sysvsem=yes \
+--enable-sysvshm=yes \
+--enable-sigchild 
+
+
+./configure \
+--prefix=/usr/local/php5 \
+--with-apxs2=/usr/local/apache/bin/apxs \
+--with-config-file-path=/usr/local/apache/conf \
+--with-mysql=/usr/local/mysql5.5 \
+--disable-debug \
+--enable-safe-mode \
+--enable-sockets \
+--enable-mod-charset \
+--enable-sysvsem=yes \
+--enable-sysvshm=yes \
+--enable-ftp \
+--enable-magic-quotes \
+--enable-gd-native-ttf \
+--enable-inline-optimization \
+--enable-bcmath \
+--with-zlib \
+--with-jpeg-dir=/usr/lib \
+--with-png-dir=/usr/lib \
+--with-freetype-dir=/usr/include/freetype2 \
+--with-libxml-dir=/usr/lib \
+--enable-exif \
+--with-gd \
+--with-gettext \
+--with-mcrypt \
+--enable-sigchild \
+--enable-mbstring
+
+
+[root@localhost]# make;make install
+
+
+[root@localhost]# cp php.ini-production /usr/local/apache/conf/php.ini
+
+
+[root@localhost]# vi /usr/local/apache/conf/httpd.conf
+------------------------------------------------------------
+#
+# DirectoryIndex: sets the file that Apache will serve if a directory
+# is requested.
+#
+<IfModule dir_module>
+    DirectoryIndex index.html index.php
+</IfModule>
+
+<IfModule mime_module>
+	~~~
+
+    AddType application/x-httpd-php .php
+    AddType application/x-httpd-php-source .phps
+
+	~~~
+</IfModule>
+-------------------------------------------------------------
+
+
+[root@localhost]# vi /usr/local/apache/conf/php.ini
+
+
+
+http://www.zend.com/
+---------------------------------------------------------------------------
+#php5.3.x 부터 ZendOptimizer ==> ZendGuardLoader(변경)
+zend_extension = /usr/local/apache/modules/ZendGuardLoader.so
+
+register_globals = Off   -->  On
+post_max_size = 8M   -->  30M
+upload_max_filesize = 2M   -->   30MB
+---------------------------------------------------------------------------
+
+
+
+
+
+--------------------------------------------------------------------------- http://www.squirrelmail.org/
+./configure
+
+Language preferences
+1.  Default Language       : ko_KR
+2.  Default Charset        : euc-KR
+
+언어팩 설치 http://www.squirrelmail.org/download.php
+different languages. 클릭 파일받은 후  ko_KR 폴더 위치 복사
+
+confing/config.php	$disable_security_tokens = true;		해야 로그 안쌓임 ㅅㅂ
+
+

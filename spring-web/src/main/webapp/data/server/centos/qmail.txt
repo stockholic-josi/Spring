@@ -1,0 +1,772 @@
+이 문서는 knetqmail-1.06(qmail.kldp.net)을 기준으로 제작된 문서
+http://coffeenix.net/board_view.php?bd_code=1712
+
+
+02. ------------------------------------------------------------------------------------- ucspi-tcp 0.88 
+
+http://cr.yp.to/ucspi-tcp/install.html
+
+ucspi-tcp는 tcpserver와 tcpclient 전송제어 프로토콜(TCP client-server)을 구축하는데 좀더 편리하게 사용할 수 있도록 제작된 command-line 툴 입니다.
+
+[root@localhost]#  cd /usr/local/source
+[root@localhost]#  wget http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz
+[root@localhost]#  wget http://djbware.csi.hu/patches/ucspi-tcp-0.88.errno.patch
+[root@localhost]#  tar xfz ucspi-tcp-0.88.tar.gz
+[root@localhost]#  cd ucspi-tcp-0.88
+[root@localhost]#  patch -p1 < ../ucspi-tcp-0.88.errno.patch
+[root@localhost]#  echo "/usr/local" > conf-home
+[root@localhost]#  make;make setup check
+
+
+02. ------------------------------------------------------------------------------------- daemontools 0.76
+http://cr.yp.to/daemontools/install.html
+
+[root@localhost]#  cd /usr/local/source
+[root@localhost]#  wget http://cr.yp.to/daemontools/daemontools-0.76.tar.gz
+[root@localhost]#  wget http://djbware.csi.hu/patches/daemontools-0.76.errno.patch
+[root@localhost]#  tar xfz daemontools-0.76.tar.gz
+[root@localhost]#  cd admin/daemontools-0.76
+[root@localhost]#  patch -p1 < ../../daemontools-0.76.errno.patch
+[root@localhost]#  package/install
+
+
+※  centOS 6
+[root@localhost]# vi /etc/init/svscan.conf
+-------------------------------------------------
+start on runlevel [345]
+respawn
+exec /command/svscanboot
+-------------------------------------------------
+
+[root@localhost]# initctl reload-configuration
+[root@localhost]# initctl start svscan
+
+
+
+03. ------------------------------------------------------------------------------------ qmail, vpopmail 에서 사용할 계정과 그룹 생성
+[root@localhost]#  groupadd -r nofiles
+[root@localhost]#  groupadd -r qmail
+[root@localhost]#  groupadd -r vchkpw
+
+[root@localhost]#  useradd -r -M -d /var/qmail/alias -s /sbin/nologin -c "qmail alias" -g qmail alias
+[root@localhost]#  useradd -r -M -d /var/qmail -s /sbin/nologin -c "qmail daemon" -g qmail qmaild
+[root@localhost]#  useradd -r -M -d /var/qmail -s /sbin/nologin -c "qmail logger" -g qmail qmaill
+[root@localhost]#  useradd -r -M -d /var/qmail -s /sbin/nologin -c "qmail passwd" -g qmail qmailp
+[root@localhost]#  useradd -r -M -d /var/qmail -s /sbin/nologin -c "qmail queue" -g qmail qmailq
+[root@localhost]#  useradd -r -M -d /var/qmail -s /sbin/nologin -c "qmail remote" -g qmail qmailr
+[root@localhost]#  useradd -r -M -d /var/qmail -s /sbin/nologin -c "qmail send" -g qmail qmails
+[root@localhost]#  useradd -r -M -d /usr/local/vpopmail -s /sbin/nologin -c "Vpopmail User" -g vchkpw vpopmail
+
+
+
+04. ------------------------------------------------------------------------------------ vpopmail 
+http://sourceforge.net/projects/vpopmail/
+
+※ 큐메일의 chkuser 패치로 인하여 컴파일시 vpopmail의 라이브러리를 필요로 하게 됐습니다. 따라서 큐메일보다 vpopmail을 먼저 설치하도록 합니다.
+
+※ vpopmail의 환경설정을 할때 qmail 디렉토리 및 몇몇 바이너리 위치(locate)를 필요로 합니다. 따라서 큐메일이 설치된 것처럼 속이기 위하여, fake 파일을 생성해 주도록 합니다.
+ (단순히 큐메일의 위치만 설정 하기 때문에, fake 파일로 속이더라도 전혀 문제가 없습니다)
+
+[root@localhost]#  mkdir -p /var/qmail/bin
+[root@localhost]#  touch /var/qmail/bin/qmail-newu
+[root@localhost]#  touch /var/qmail/bin/qmail-inject
+[root@localhost]#  touch /var/qmail/bin/qmail-newmrh
+
+
+[root@localhost]#  cd /usr/local/source
+[root@localhost]#  wget http://cdnetworks-kr-2.dl.sourceforge.net/project/vpopmail/vpopmail-stable/5.4.32/vpopmail-5.4.32.tar.gz
+[root@localhost]#  tar xfz vpopmail-5.4.32.tar.gz
+[root@localhost]#  cd vpopmail-5.4.32
+
+[root@localhost]#  ./configure \
+--prefix=/usr/local/vpopmail \
+--enable-vpopuser=vpopmail \
+--enable-vpopgroup=vchkpw \
+--enable-tcprules-prog=/usr/local/bin/tcprules \
+--enable-tcpserver-file=/etc/tcprules.d/tcp.smtp \
+--disable-users-big-dir \
+--enable-qmail-ext \
+--enable-domainquotas \
+--enable-logging=v \
+--enable-log-name=vpopmail \
+--enable-valias \
+--disable-many-domains \
+--enable-auth-module=mysql \
+--enable-incdir=/usr/local/mysql5.5/include \
+--enable-libdir=/usr/local/mysql5.5/lib \
+--disable-clear-passwd
+
+
+
+
+※ --disable-clear-passwd 해주면 dovocot 에서 clear_passwd 필드를 찾는다 도메인별로 필드(mysql : vpopmail : domain : pw_clear_passwd )를 만들어준다.
+
+[root@localhost]# make; make install-strip
+
+※ /usr/bin/ld: cannot find -lz 에러나면
+[root@localhost]#  yum install -y zlib-devel
+
+
+[root@localhost]#  vi /usr/local/vpopmail/etc/vpopmail.mysql
+-------------------------------------------
+localhost|0|DB_USER|PASSWORD|DB_NAME
+-------------------------------------------
+
+[root@localhost]# vi /usr/local/vpopmail/etc/defaultdomain
+-------------------------------------------
+stockholic.kr
+-------------------------------------------
+
+[root@localhost]# chown vpopmail:vchkpw /usr/local/vpopmail/etc/defaultdomain
+[root@localhost]# chmod 640 /usr/local/vpopmail/etc/defaultdomain
+
+
+※ fake 파일 삭제
+[root@localhost]#  rm -rf /var/qmail
+
+
+4. 도메인, 메일 계정 추가하기
+ --------------------------------------------------------------------
+vadddomain	가상 도메인을 추가한다. postmaster 암호를 물어보는데 
+			이것은 다음에 설치할 qmailadmin 웹 인터페이스에서 로그인 할때 물어볼 암호이다. 형식은 vadddomain 도메인명 
+			주 도메인도 vpopmail이 관리하기로 했다면 /var/qmail/control/locals 파일의 내용은 localhost 만이 있어야 정상이다. 
+			- qmail smtpd가 이 서버의 것이라고 인식하며 메일을 수신할 도메인들은 다음과 같이 rcpthosts 에 저장될 것이다.
+			- rcpthosts 여기에 쓰여진 도메인으로 오는 메일은다 받겠다는 뜻
+
+vdeldomain		가상 도메인과 모든 유저를 삭제한다. vdeldomain 도메인명 
+vadduser		메일 유저 계정을 만든다. vadduser merong@ufancy.com
+vdeluser		pop 메일 유저 삭제. vdeluser merong@ufancy.com
+vpasswd		메일 유저의 암호 바꾸기. vpasswd merong@ufancy.com
+vsetuserquota	각 유저 별로 quota 설정을 할수 있다. vsetuserquota merong@ufancy.com 51200 (단위는 byte 이다). 
+vpopbull		서버에 설정되어 있는 모든 유저들에게 한번에 메일을 보낼때 유용하게 사용할수 있다. 
+vpopbull -f		이메일_파일명 가상_도메인
+vpopbull -f		메일_파일명 -e 안보낼_주소_파일명 가상_도메인 
+--------------------------------------------------------------------
+
+
+
+
+05. ------------------------------------------------------------------------------------ libdomainkeys 0.69 
+http://sourceforge.net/projects/domainkeys/
+
+root@localhost]# yum install openssl-devel
+
+[root@localhost]#  cd /usr/local/source
+[root@localhost]#  wget http://cdnetworks-kr-2.dl.sourceforge.net/project/domainkeys/libdomainkeys/0.69/libdomainkeys-0.69.tar.gz
+[root@localhost]#  tar xfz libdomainkeys-0.69.tar.gz
+[root@localhost]#  mv libdomainkeys-0.69 libdomainkeys
+[root@localhost]#  cd libdomainkeys
+[root@localhost]#  echo "-lresolv" > dns.lib
+[root@localhost]#  make
+
+
+
+06 - 01. ------------------------------------------------------------------------------------ knetqmail 1.06
+
+http://qmail.kldp.net/
+
+※ centOS 6 
+[root@localhost]# chkconfig --list | grep postfix
+[root@localhost]# chkconfig --del postfix
+
+[root@localhost]# yum install openssl-devel
+
+[root@localhost]#  cd /usr/local/source
+[root@localhost]#  wget http://.../knetqmail-1.06-20110908.tar.gz
+[root@localhost]#  wget http://jeremy.kister.net/code/qmail-dk-0.54-auth.patch
+[root@localhost]#  tar xfz knetqmail-1.06-20110908.tar.gz
+[root@localhost]#  cd knetqmail-1.06-20110908
+[root@localhost]#  patch -p0 < ../qmail-dk-0.54-auth.patch
+
+[root@localhost]#  echo "gcc -O2 -g -DTLS=20070408 -I/usr/include/openssl -I/usr/local/vpopmail/include" > conf-cc
+[root@localhost]#  echo "gcc -s -O2 -g" > conf-ld
+
+[root@localhost]#  ln -s /usr/local/vpopmail /home/vpopmail
+[root@localhost]#  make; make setup check
+
+[root@localhost]#  cp -pv spfquery /var/qmail/bin
+[root@localhost]#  cp -pv ../libdomainkeys/dknewkey /var/qmail/bin
+[root@localhost]#  chown root:qmail /var/qmail/bin/spfquery /var/qmail/bin/dknewkey
+[root@localhost]#  chmod 755 /var/qmail/bin/spfquery /var/qmail/bin/dknewkey
+
+※ 만약 openssl의 설치 경로가 다르신 분은, 설치과정 중간에 나오는 openssl 경로 부분을 변경해주시면 됩니다.
+
+
+06 - 02. ------------------------------------------------------------------------------------ knetqmail 1.06 설정 파일 생성
+※ 큐메일 운영에 필요한 설정 파일을 생성하도록 하겠습니다.
+　 원래 큐메일 소스에서 config script를 제공하고 있지만, 아주 기본적인 파일만 생성해주므로
+　 필자는 필요한 파일을 직접 생성해주는 방법을 사용하도록 하겠습니다.
+
+[root@localhost]#  cd /var/qmail/control
+[root@localhost]#  touch rcpthosts smtproutes
+[root@localhost]#  echo "localhost"       > locals
+[root@localhost]#  echo "www.stockholic.kr" > me
+[root@localhost]#  echo "www.stockholic.kr" > defaultdomain
+[root@localhost]#  echo "www.stockholic.kr" > defaulthost
+[root@localhost]#  echo "www.stockholic.kr" > plusdomain
+[root@localhost]#  echo "60" > concurrencyremote
+[root@localhost]#  echo "100" > concurrencyincoming
+[root@localhost]#  echo "86400" > queuelifetime
+[root@localhost]#  echo "1" > spfbehavior
+[root@localhost]#  echo "Welcome to Qmail SMTP Server" > smtpgreeting
+[root@localhost]#  echo "./Maildir/" > defaultdelivery
+[root@localhost]#  chmod 644 *
+
+[root@localhost]#  cd /var/qmail/users
+[root@localhost]#  touch cdb
+[root@localhost]#  echo "." > assign
+[root@localhost]#  chmod 644 *
+
+
+06 - 03. ------------------------------------------------------------------------------------ knetqmail 1.06 큐메일 데몬을 위한 디렉토리 및 스크립트 생성
+[root@localhost]#  mkdir -p /var/qmail/supervise
+[root@localhost]#  for i in send smtp pop3 submission; do mkdir -p /var/qmail/supervise/$i/log; done
+
+[root@localhost]#  vi /var/qmail/rc
+-----------------------------------------------------------
+#!/bin/sh
+
+exec env - PATH="/var/qmail/bin:$PATH" \
+        qmail-start "`cat /var/qmail/control/defaultdelivery`"	 
+-----------------------------------------------------------
+
+
+[root@localhost]#  vi /var/qmail/supervise/send/run
+-----------------------------------------------------------
+#!/bin/sh
+exec /var/qmail/rc
+-----------------------------------------------------------
+
+
+[root@localhost]#  vi /var/qmail/supervise/send/log/run
+-----------------------------------------------------------
+#!/bin/sh
+
+exec /usr/local/bin/setuidgid qmaill \
+        /usr/local/bin/multilog t /var/log/qmail/send 2>&1
+-----------------------------------------------------------
+
+
+[root@localhost]#  vi /var/qmail/supervise/smtp/run
+-----------------------------------------------------------
+#!/bin/sh
+
+VPOP_UID=`id -u vpopmail`
+VPOP_GID=`id -g vpopmail`
+
+MAXSMTPD=`cat /var/qmail/control/concurrencyincoming`
+
+exec /usr/local/bin/softlimit -m 64000000 \
+        /usr/local/bin/tcpserver -vRHl0 \
+        -x /etc/tcprules.d/tcp.smtp.cdb \
+        -c ${MAXSMTPD} \
+        -u ${VPOP_UID} -g ${VPOP_GID} 0 25 \
+        /var/qmail/bin/qmail-smtpd \
+        /usr/local/vpopmail/bin/vchkpw /bin/true 2>&1
+-----------------------------------------------------------
+
+
+[root@localhost]#  vi /var/qmail/supervise/smtp/log/run
+-----------------------------------------------------------
+#!/bin/sh
+
+exec /usr/local/bin/setuidgid qmaill \
+        /usr/local/bin/multilog t /var/log/qmail/smtp 2>&1
+-----------------------------------------------------------
+
+
+[root@localhost]#  vi /var/qmail/supervise/pop3/run
+-----------------------------------------------------------
+#!/bin/sh
+
+VPOP_UID=`id -u vpopmail`
+VPOP_GID=`id -g vpopmail`
+
+HOSTNAME=`hostname -f`
+
+exec /usr/local/bin/softlimit -m 48000000 \
+        /usr/local/bin/tcpserver -vRHl0 \
+        -u ${VPOP_UID} -g ${VPOP_GID} 0 110 \
+        /var/qmail/bin/qmail-popup ${HOSTNAME} \
+        /usr/local/vpopmail/bin/vchkpw \
+        /var/qmail/bin/qmail-pop3d Maildir 2>&1
+-----------------------------------------------------------
+
+
+
+[root@localhost]#  vi /var/qmail/supervise/pop3/log/run
+-----------------------------------------------------------
+#!/bin/sh
+
+exec /usr/local/bin/setuidgid qmaill \
+        /usr/local/bin/multilog t /var/log/qmail/pop3 2>&1
+-----------------------------------------------------------
+
+
+[root@localhost]#  vi /var/qmail/supervise/submission/run
+-----------------------------------------------------------
+#!/bin/sh
+
+VPOP_UID=`id -u vpopmail`
+VPOP_GID=`id -g vpopmail`
+
+MAXSMTPD=`cat /var/qmail/control/concurrencyincoming`
+
+exec /usr/local/bin/softlimit -m 48000000 \
+        /usr/local/bin/tcpserver -vRHl0 \
+        -x /etc/tcprules.d/tcp.smtp.cdb \
+        -c ${MAXSMTPD} \
+        -u ${VPOP_UID} -g ${VPOP_GID} 0 587 \
+        /var/qmail/bin/qmail-smtpd \
+        /usr/local/vpopmail/bin/vchkpw /bin/true 2>&1
+-----------------------------------------------------------
+
+
+
+[root@localhost]#  vi /var/qmail/supervise/submission/log/run
+-----------------------------------------------------------
+#!/bin/sh
+
+exec /usr/local/bin/setuidgid qmaill \
+        /usr/local/bin/multilog t /var/log/qmail/submission 2>&1
+-----------------------------------------------------------
+
+
+[root@localhost]#  chmod 755 /var/qmail/rc
+[root@localhost]#  chown root:qmail /var/qmail/rc
+
+[root@localhost]#  chmod 700 /var/qmail/supervise
+[root@localhost]#  chown -R qmaill:qmail /var/qmail/supervise
+[root@localhost]#  for i in send smtp pop3 submission; do chmod 1700 /var/qmail/supervise/$i; done
+[root@localhost]#  for i in send smtp pop3 submission; do chmod 700 /var/qmail/supervise/$i/log; done
+[root@localhost]#  for i in send smtp pop3 submission; do chmod 751 /var/qmail/supervise/$i/run; done
+[root@localhost]#  for i in send smtp pop3 submission; do chmod 751 /var/qmail/supervise/$i/log/run; done
+
+
+06 - 04. ------------------------------------------------------------------------------------ knetqmail 1.06 tcp.smtp 설정
+[root@localhost]#  mkdir -p /etc/tcprules.d
+[root@localhost]#  vi /etc/tcprules.d/tcp.smtp
+-----------------------------------------------------------
+127.0.0.1:allow,RELAYCLIENT="",CHKUSER_RCPTLIMIT="50",CHKUSER_WRONGRCPTLIMIT="10"
+192.168.0.:allow,RELAYCLIENT="",CHKUSER_RCPTLIMIT="50",CHKUSER_WRONGRCPTLIMIT="10"
+:allow,CHKUSER_RCPTLIMIT="50",CHKUSER_WRONGRCPTLIMIT="10"
+-----------------------------------------------------------
+
+[root@localhost]#  tcprules /etc/tcprules.d/tcp.smtp.cdb /etc/tcprules.d/tcp.smtp.tmp < /etc/tcprules.d/tcp.smtp
+
+
+
+06 - 05. ------------------------------------------------------------------------------------ knetqmail 1.06 qmail log 디렉토리 생성
+[root@localhost]#  for i in send smtp pop3 submission; do mkdir -p /var/log/qmail/$i; done
+[root@localhost]#  chmod -R 750 /var/log/qmail
+[root@localhost]#  chown -R qmaill:qmail /var/log/qmail
+
+
+06 - 06. ------------------------------------------------------------------------------------ knetqmail 1.06 qmail 구동 스크립트 생성
+[root@localhost]#  vi /etc/init.d/qmaild
+
+-----------------------------------------------------------
+
+#!/bin/sh
+#
+# qmaild       This shell script takes care of starting and stopping
+#              the qmail system.
+#
+# chkconfig: - 30 80
+# description: qmail is a small, fast, secure replacement for the sendmail package, which is
+#              the program that actually receives, routes, and delivers electronic mail.
+
+export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/var/qmail/bin"
+svclist="send smtp pop3 submission"
+
+case "$1" in
+    start)
+        echo "Starting qmail"
+
+        for svc in $svclist; do
+            if [ -e /service/${svc} ]; then
+                if svok /service/${svc}; then
+                    svc -u /service/${svc}
+                else
+                    echo "${svc} supervise not running"
+                fi
+            else
+                ln -s /var/qmail/supervise/${svc} /service/
+            fi
+        done
+
+        if [ -d /var/lock/subsys ]; then
+            touch /var/lock/subsys/qmail
+        fi
+        ;;
+    stop)
+        echo "Stopping qmail..."
+
+        for svc in $svclist; do
+            if [ -e /service/${svc} ]; then
+                echo "  ${svc}"
+                svc -dx /service/${svc} /service/${svc}/log
+                rm -f /service/${svc}
+            fi
+        done
+
+        if [ -f /var/lock/subsys/qmail ]; then
+            rm -f /var/lock/subsys/qmail
+        fi
+        ;;
+    stat)
+        for svc in $svclist; do
+            if [ -e /service/${svc} ]; then
+                svstat /service/${svc}
+                svstat /service/${svc}/log
+            fi
+        done
+        qmail-qstat
+        ;;
+    doqueue|alrm|flush)
+        if [ -e /service/send ]; then
+            echo "Flushing timeout table and sending ALRM signal to send."
+            /var/qmail/bin/qmail-tcpok
+            svc -a /service/send
+        fi
+        ;;
+    queue)
+        qmail-qstat
+        qmail-qread
+        ;;
+    reload|hup)
+        if [ -e /service/send ]; then
+            echo "Sending HUP signal to send."
+            svc -h /service/send
+        fi
+        ;;
+    pause)
+        for svc in $svclist; do
+            if [ -e /service/${svc} ]; then
+                echo "Pausing ${svc}"
+                svc -p /service/${svc}
+            fi
+        done
+        ;;
+    cont)
+        for svc in $svclist; do
+            if [ -e /service/${svc} ]; then
+                echo "Continuing ${svc}"
+                svc -c /service/${svc}
+            fi
+        done
+        ;;
+    restart)
+        echo "Restarting qmail:"
+        for svc in $svclist; do
+            if [ -e /service/${svc} ]; then
+                if [ "${svc}" != "send" ]; then
+                    echo "* Stopping ${svc}."
+                    svc -d /service/${svc}
+                fi
+            fi
+        done
+
+        if [ -e /service/send ]; then
+            echo "* Sending send SIGTERM and restarting."
+            svc -t /service/send
+        fi
+
+        for svc in $svclist; do
+            if [ -e /service/${svc} ]; then
+                if [ "${svc}" != "send" ]; then
+                    echo "* Restarting ${svc}."
+                    svc -u /service/${svc}
+                fi
+            fi
+        done
+        ;;
+    cdb)
+        if [ -z "`grep '\#define POP_AUTH_OPEN_RELAY 1' /usr/local/vpopmail/include/config.h 2>/dev/null`" ]; then
+            tcprules /etc/tcprules.d/tcp.smtp.cdb /etc/tcprules.d/tcp.smtp.tmp < /etc/tcprules.d/tcp.smtp
+        else
+            /usr/local/vpopmail/bin/clearopensmtp
+        fi
+
+        echo "Reloaded /etc/tcprules.d/tcp.smtp."
+        ;;
+    help)
+cat <        stop -- stops mail service (smtp connections refused, nothing goes out)
+      start -- starts mail service (smtp connection accepted, mail can go out)
+      pause -- temporarily stops mail service (connections accepted, nothing leaves)
+       cont -- continues paused mail service
+       stat -- displays status of mail service
+        cdb -- rebuild the tcpserver cdb file for smtp
+    restart -- stops and restarts smtp, sends send a TERM & restarts it
+    doqueue -- schedules queued messages for immediate delivery
+     reload -- sends send HUP, rereading locals and virtualdomains
+      queue -- shows status of queue
+       alrm -- same as doqueue
+      flush -- same as doqueue
+        hup -- same as reload
+HELP
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|doqueue|flush|reload|stat|pause|cont|cdb|queue|help}"
+        exit 1
+        ;;
+esac
+
+exit 0
+
+-----------------------------------------------------------
+
+[root@localhost]#  chmod 755 /etc/init.d/qmaild
+[root@localhost]#  chkconfig --add qmaild
+[root@localhost]#  chkconfig --level 35 qmaild on
+
+
+06 - 07. ------------------------------------------------------------------------------------ knetqmail 1.06 qmail 시작
+[root@localhost]#  /etc/init.d/qmaild start
+
+
+
+07. ------------------------------------------------------------------------------------ dovecot
+
+http://www.dovecot.org/
+
+openssl 설치
+# yum install openssl openssl-devel
+ 
+rpm 설치된 dovecot 제거
+# yum -y remove dovecot
+
+
+[root@localhost]# ./configure --prefix=/usr/local/dovecot --with-vpopmail --with-ssl=openssl
+
+[root@localhost]# make;make install
+
+설정파일 복사
+[root@localhost]# cp -r  doc/example-config/* /usr/local/dovecot/etc/dovecot
+
+[root@localhost]# cd /usr/local/dovecot/etc/dovecot
+
+[root@localhost]# # vi dovecot.conf
+-----------------------------------------------------------
+protocols = imap
+listen = *, ::
+login_greeting = Dovecot ready.
+-----------------------------------------------------------
+
+[root@localhost]# vi conf.d/10-auth.conf
+-----------------------------------------------------------
+disable_plaintext_auth = no
+auth_mechanisms = plain
+!include auth-vpopmail.conf.ext     
+-----------------------------------------------------------
+
+※ vpopmail 사용시
+!include auth-vpopmail.conf.ext     만 주석풀고 나머지 다 주석처리
+
+
+[root@localhost]# # vi  conf.d/auth-vpopmail.conf.ext
+-----------------------------------------------------------
+passdb {
+  driver = vpopmail
+}
+userdb {
+  driver = vpopmail
+  args = quota_template=quota_rule=*:backend=%q
+}
+-----------------------------------------------------------
+
+[root@localhost]# id -u vpopmail
+490
+[root@localhost]# id -g vpopmail
+494
+[root@localhost]# vi  conf.d/10-mail.conf
+-----------------------------------------------------------
+mail_location = maildir:%h/Maildir
+ 
+mail_uid = 490
+mail_gid = 494
+ 
+first_valid_uid = 490
+last_valid_uid = 490
+
+first_valid_gid = 494
+last_valid_gid = 494
+
+auth_socket_path = /var/run/dovecot/auth-userdb
+-----------------------------------------------------------
+
+[root@localhost]# vi conf.d/10-master.conf
+-----------------------------------------------------------
+default_login_user = vpopmail
+default_internal_user = vpopmail
+
+service imap-login {
+  inet_listener imap {
+    port = 143
+  }
+  inet_listener imaps {
+    port = 993
+    ssl = yes
+  }
+}
+service pop3-login {
+  inet_listener pop3 {
+    port = 110
+  }
+  inet_listener pop3s {
+    port = 995
+    ssl = yes
+  }
+}
+
+service lmtp {
+  unix_listener lmtp {
+    #mode = 0666
+  }
+}
+service imap {
+}
+
+service pop3 {
+}
+service auth {
+  unix_listener auth-userdb {
+    mode = 0600
+    user = root
+ }
+
+ user = $default_internal_user
+}
+
+service auth-worker {
+  user = $default_internal_user
+}
+
+service dict {
+  unix_listener dict {}
+}
+
+
+//------------------------------------ Plugins Start
+http://wiki2.dovecot.org/Plugins/
+
+
+[root@localhost]# vi conf.d/20-imap.conf
+ protocol imap {
+  mail_plugins = $mail_plugins autocreate quota
+}
+
+[root@localhost]# vi conf.d/90-plugin.conf
+plugin {
+   autocreate  = INBOX.Draft
+   autocreate2 = INBOX.Sent
+   autocreate3 = INBOX.Spam
+   autocreate5 = INBOX.Junk
+   autocreate4 = INBOX.Trash
+}
+
+protocol imap {
+  mail_plugins = expire
+}
+
+
+it specifies that mails saved in INBOX, Trash and Spam are to be expired after 15 days
+
+plugin {
+  expire = Trash 15 Spam 15 INBOX 15
+}
+
+//------------------------------------ Plugins End
+
+
+
+[root@localhost]# vi conf.d/10-ssl.conf
+-----------------------------------------------------------
+ssl = no
+ssl_cert = </etc/ssl/certs/dovecot.pem
+ssl_key = </etc/ssl/private/dovecot.pem
+-----------------------------------------------------------
+이후 /usr/local/source/dovecot-2.0.17/doc 에 있는 mkcert.sh를 실행해서 ssl 인증서를 만듦
+도메인 이름 및 도시등의 정보 수정은 dovecot-openssl.cnf에서 수정
+
+
+[root@localhost]# vi /etc/init.d/dovecot
+----------------------------------------------------------
+
+#!/bin/bash
+#
+#       /etc/rc.d/init.d/dovecot
+#
+# Starts the dovecot daemon
+#
+# chkconfig: - 65 35
+# description: Dovecot Imap Server
+# processname: dovecot
+# Source function library.
+. /etc/init.d/functions
+test -x /usr/local/dovecot/sbin/dovecot || exit 0
+RETVAL=0
+prog="Dovecot Imap"
+start() {
+        echo -n $"Starting $prog: "
+        daemon /usr/local/dovecot/sbin/dovecot
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/dovecot
+        echo
+}
+stop() {
+        echo -n $"Stopping $prog: "
+        killproc /usr/local/dovecot/sbin/dovecot
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/dovecot
+        echo
+}
+#
+#       See how we were called.
+#
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  reload|restart)
+        stop
+        start
+        RETVAL=$?
+        ;;
+  condrestart)
+        if [ -f /var/lock/subsys/dovecot ]; then
+            stop
+            start
+        fi
+        ;;
+  status)
+        status /usr/local/dovecot/sbin/dovecot
+        RETVAL=$?
+        ;;
+  *)
+        echo $"Usage: $0 {condrestart|start|stop| restart|reload|status}"
+        exit 1
+esac
+exit $RETVAL
+
+----------------------------------------------------------
+
+
+
+[root@localhost]# chmod 755 /etc/init.d/dovecot 
+[root@localhost]# chkconfig --add dovecot
+[root@localhost]# chkconfig --level 345 dovecot on
+[root@localhost]# /etc/rc.d/init.d/dovecot start
+
+
+
+
+
+
+rpm -qa kernel_ppp_mppe
+
+pppd call j2cns
+

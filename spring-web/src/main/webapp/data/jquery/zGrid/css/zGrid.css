@@ -1,0 +1,122 @@
+@charset "utf-8";
+
+#zGridWrap, #zGridFixWrap{
+	height:100%
+	width: 100%;
+	font-size:9pt;
+	font-family:맑은 고딕;
+	
+}
+
+ #topWrap .title{
+	color:#4d4d4d;
+	font-weight:bold;
+	float:left;
+}
+
+#zGridWrap #headerWrap ,#zGridFixWrap #headerFixWrap{
+	background-color: #f2f2f2;
+	border-top:2px solid #a6c9e2;
+	border-bottom:1px solid #e6e6e6;
+	height:24px;
+	line-height:24px;
+}
+
+#zGridWrap #headerWrap .column, #zGridFixWrap #headerFixWrap .column{
+	float: left;
+	height:100%;
+}
+
+#zGridWrap #headerWrap .column .header, #zGridFixWrap #headerFixWrap .column .header{
+	color:#4d4d4d;
+	font-weight:bold;
+	text-align:center;
+    text-overflow: ellipsis; 
+    overflow:hidden;
+    white-space : nowrap;
+}
+
+#zGridWrap .dragbar, #zGridFixWrap .dragbar{
+   background-color:#c6c6c6;
+   height:10px;
+   margin-top:14px;
+   float: right;
+   width: 2px;
+   cursor: col-resize;
+}
+
+#zGridWrap #dataWrap{
+ overflow:auto;
+ border-bottom:1px solid #a6c9e2;
+}
+
+#zGridFixWrap #dataFixWrap{
+	overflow-y:hidden;
+	border-bottom:1px solid #a6c9e2;
+}
+
+#zGridWrap #dataWrap .column,#zGridFixWrap #dataFixWrap .column{
+	float:left;
+}
+
+#zGridWrap .cell, #zGridFixWrap .cell{
+	line-height: 24px;
+	padding-left:5px;
+	padding-right:5px;
+	text-overflow: ellipsis; 
+	overflow:hidden;
+	white-space : nowrap;
+	border-bottom:1px solid #e6e6e6;
+}
+
+#zGridWrap .header .sort, #zGridFixWrap .header .sort{
+	font-size:9px;
+	display :inline-block
+}
+
+#zGridWrap #zGridFin, #zGridWrap #zGridFinFix{
+	background-image : url(/data/jquery/zGrid/image/pin_01.png);
+	background-repeat:no-repeat;
+	height:24px;
+	width : 24px;
+	position:absolute;
+	display : none;
+	cursor: pointer; 
+}
+
+#paging{
+	text-align:left;
+	width:500px;
+	font-size:9pt;
+	font-family:맑은 고딕;
+	font-weight:bold;
+	color:#4d4d4d;
+	margin-top:10px;
+	position:absolute;
+}
+
+#paging .total{
+	width:120px;
+	float:left;
+}
+
+
+#paging  span {border:1px solid #fff;height:23px;text-decoration:none;}
+#paging  a {border:1px solid #fff;height:23px;text-decoration:none;}
+#paging  a:hover {border:1px solid #0066CF;color:#6671ff;}
+#paging  .current{border:1px solid #0066CF;color:#0066CF;font-weight:bold;height:23px;padding:0px 5px 2px 5px;}
+#paging  .page {color:#000;font-weight:bold;padding:0px 5px 2px 5px}
+#paging  .prev {color:#000;padding:0px 5px 2px 5px;margin-right:4px}
+#paging  .next {color:#000;padding:0px 5px 2px 5px;margin-left:4px}
+
+
+#ghostbar{
+    width:1px;
+    background-color:#919191;
+    opacity:0.5;
+    position:absolute;
+    cursor: col-resize;
+    z-index:999
+}
+
+

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> grid </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="./js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="./js/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="./js/zGrid-core.js"></script>
+<script type="text/javascript" src="./js/zGrid-util.js"></script>
+
+<link rel="stylesheet" href="./css/zGrid.css" type="text/css" />
+
+<script>
+
+function fileImg(value){
+	return (value) ? "<img src='./image/" + value + "'>" : "";
+}
+
+function currency(value){
+	return (value < 0) ? "<font color='#FF3300'>" + zGrid.util.currency(value) + "</font>" :  zGrid.util.currency(value);
+}
+
+function addRow(){
+	var obj = {properzty : "align", type : "String", comment:"새로추가", num : -2500000};
+	zGrid.addStore(obj);
+}
+
+
+
+//그리드 데이터
+var store ={
+	totalCount : 200,
+	dataList : [
+		{idx:"1", property : "컬럼 속성", type : "Object", comment:"컬럼 헤더를 정의한다." ,file:"file.gif", dumy : "dumy1", checked : true},
+		{idx:"2", property : "columnId", type : "String", comment:"컬럼 아이디", num : 1000000, file:"file.gif", dumy : "dumy2"},
+		{idx:"3", property : "columnNm", type : "String", comment:"컬럼 명", num : -1000000, file:"file.gif", dumy : "dumy3"},
+		{idx:"4", property : "width", type : "Number", comment:"컬럼 너비", num : 2000000, file:"file.gif", dumy : "dumy4"},
+		{idx:"5", properzty : "align", type : "String", comment:"컬럼 정렬 [left, right, center]", num : -2500000, file:"file.gif", dumy : "dumy5",checked : true},
+		{idx:"6", property : "color", type : "String", comment:"컬럼 Text 색", num : -2500000, file:"file.gif", dumy : "dumy6"},
+		{idx:"7", property : "sortable", type : "Boolean", comment:"쇼팅 여부 [true, false]", num : 5000000,file:"file.gif", dumy : "dumy7"},
+		{idx:"8", property : "editable", type : "Boolean", comment:"에디트 여부 [true, false]", num : 3500000, file:"file.gif", dumy : "dumy8"},
+		{idx:"9", property : "grpColumn", type : "Object", comment:"그리드 헤더를 그룹화한다. ex) grpColumn : {columnNm: '변동폭'}", num : -1000000,file:"file.gif", dumy : "dumy9"},
+		{idx:"10", property : "subColumn", type : "Array", comment:"그룹화 헤더의 서브 헤더 ex)  subColumn : [{},{}]", num : 8500000,file:"file.gif", dumy : "dumy10"},
+		{idx:"11", property : "renderer", type : "String", comment:"렌더링 함수 [number : 통화, date : 날짜, link : URL link, checkbox : 체크박스]", num : 10000000,file:"file.gif", dumy : "dumy11"},
+		{idx:"12", property : "데이터 속성", type : "Object", comment:"컬럼속성 'columnId' 값을 key로 하는 Object 형식 자료를 만든다.",file:"file.gif", dumy : "dumy12"},
+		{idx:"13", property : "idx", type : "String", comment:"키값을 설정한다. 수정, 삭제, 체크박스 키값을 가져 올 때 사용한다.",file:"file.gif", dumy : "dumy13"}
+
+]};
+
+
+$(window).load(function(){
+    			
+
+	$("#grid").zGrid({
+		columns : [
+			{columnId : "idx", columnNm: "번호", width: 50, align:"center", type : "int", sortable : true},
+			{columnId : "property", columnNm: "속성", width: 100, align:"center", sortable : true},
+			{columnId : "type", columnNm: "타입", width: 100, align:"center", sortable : true},
+			{columnId : "comment", columnNm: "설명", width: 300, align:"left", sortable : true},
+			{columnId : "num", columnNm: "금액", width: 100, align:"center", sortable : true, renderer : currency},
+			{columnId : "file", columnNm: "파일", width: 50, align:"center",renderer : fileImg},
+			{columnId : "dumy", columnNm: "더미1", width: 80, align:"center"},
+			{columnId : "dumy", columnNm: "더미2", width: 80, align:"center"},
+			{columnId : "dumy", columnNm: "더미3", width: 80, align:"center"},
+			{columnId : "dumy", columnNm: "더미4", width: 80, align:"center"},
+			{columnId : "dumy", columnNm: "더미5", width: 80, align:"center"}
+		],
+		gridHeight : 300,						//그리드 높이
+		rowHeight :25,						//row 높이
+		autoColumn : false,					//컬럼 너비 자동 조정
+		stripeRows : true,						//로우구분 컬로 표시
+		store : store,
+		params :$("#frm").serializeObject(),
+		paging : { limit : 0 ,pageSize : 10},		//paging, limit : 0 이면 로컬 쇼팅 & 페이지징 없음
+		page : 1,											//첫페이지
+		checkbox : { width:40, align : "center" }				//check box 
+	}) ;
+
+});
+
+
+
+</script>
+
+</head>
+
+<body>
+
+
+<div style="width:750px;" id="grid"></div>
+
+<div style="margin-top:30px">
+<button onClick="zGrid.util.console(zGrid.removeRow('idx'))">삭제</button>
+<button onClick="addRow()">추가</button>
+</div>
+
+
+<form id="frm">
+	<input type="hidden" name="flag" value="01">
+	<input type="hidden" name="searchKey" value="">
+	<input type="hidden" name="searchString" value="">
+</form>
+
+</body>
+
+</html>
