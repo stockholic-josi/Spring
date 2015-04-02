@@ -18,7 +18,7 @@
 <%
 
 GetMethod mGet = null;
-String output = ""; 
+String output = ""; //이거슨 내가올림 ㅋㅋㅋㅋ
 
 try{
 	
