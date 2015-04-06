@@ -128,7 +128,7 @@
       <appender-ref ref="FILE_LOG_VELOCITY"/>
     </category>
     
-       <category name="com.taxholic.common.dao" additivity="false">
+       <category name="com.taxholic.core.dao" additivity="false">
 		<priority value="INFO"/>
 		<appender-ref ref="STDOUT" />
     </category>
