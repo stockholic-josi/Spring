@@ -5,6 +5,13 @@
      
     
 <configuration>
+
+	<settings>
+		<setting name="cacheEnabled" value="true" />
+		<setting name="lazyLoadingEnabled" value="false" />
+		<setting name="defaultStatementTimeout" value="200" />
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
 	 
 	<typeAliases>
 		<typeAlias alias="user" type="com.taxholic.front.user.dto.User" />		       
