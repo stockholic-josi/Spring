@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+  	xmlns:aop="http://www.springframework.org/schema/aop"
+  	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd  
+		http://www.springframework.org/schema/tx 
+ 		http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+  		http://www.springframework.org/schema/aop 
+  	   http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+		
+	
+	<context:component-scan base-package="com.taxholic" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />	
+	</context:component-scan>
+	
+	<!-- Message Source -->
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+    <property name="basenames">
+        <list>
+            <value>classpath:config/properties/server</value>
+        </list>
+    </property>
+    <property name="cacheSeconds" value="5"/>
+	</bean>
+	<bean id="messageSourceAccessor"  class="org.springframework.context.support.MessageSourceAccessor">
+  		<constructor-arg ref="messageSource" />
+ 	</bean>
+	
+	
+	 <bean id="sqliteSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	 	<property name="driverClassName" value="org.sqlite.JDBC" />
+	 	<!-- 
+	 	<property name="url" value="jdbc:log4jdbc:sqlite:C:/01.work/webapps/project/Spring/spring-web/src/main/webapp/data/shkr.db" />
+	 	 -->
+	 	<property name="url" value="jdbc:sqlite:C:/01.work/webapps/project/Spring/spring-web/src/main/webapp/data/shkr.db" />
+	  	<property name="initialSize" value="2"/>
+	 	<property name="maxActive" value="8" />
+		<property name="maxIdle" value="4" />
+	 	<property name="maxWait" value="30000" />
+	</bean>
+	 <bean id="sqlliteSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" name="sqllite">
+		<property name="configLocation"  value="classpath:config/mybatis-config.xml"/>
+		<property name="mapperLocations" value="classpath:mapper/**/*.xml"/>
+		<property name="dataSource" ref="sqliteSource" />
+	</bean>
+	<bean id="sqliteSession" class="org.mybatis.spring.SqlSessionTemplate">
+	  <constructor-arg index="0" ref="sqlliteSessionFactory" />
+	</bean>
+	
+	<bean id="sqlitetxManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="sqliteSource"/>
+	</bean>
+	<tx:advice id="sqlitetxAdvice" transaction-manager="sqlitetxManager">
+    <tx:attributes>
+      <tx:method name="get*" read-only="true"/>
+	  <tx:method name="*" propagation="REQUIRED"/>
+    </tx:attributes>
+  </tx:advice>
+  <aop:config>
+	<aop:pointcut id="sqliteserviceOperation" expression="execution(* com.taxholic..service.*Service.*(..))" />
+	<aop:advisor pointcut-ref="sqliteserviceOperation" advice-ref="sqlitetxAdvice"/>
+   </aop:config>
+   
+   
+	<bean id="testService"  class="com.taxholic.TestService" />
+   
+   
+	
+</beans>
