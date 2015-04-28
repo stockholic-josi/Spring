@@ -20,10 +20,9 @@ import com.taxholic.TestService;
 @Configuration
 //@ComponentScan(basePackages = {"com.taxholic.configuration.beans"},  excludeFilters = {@ComponentScan.Filter(Controller.class), @ComponentScan.Filter(ControllerAdvice.class)})
 @ComponentScan(
-	    basePackages = {"com.taxholic.configuration.beans","com.taxholic.core.dao"}, 
+	    basePackages = {"com.taxholic.configuration.beans","com.taxholic.core.dao","com.taxholic.core.aspect"}, 
 	   // useDefaultFilters = false,
 	    includeFilters = {
-	      //  @ComponentScan.Filter(type = FilterType.ANNOTATION,   value = org.springframework.stereotype.Repository.class),
 	        @ComponentScan.Filter(type = FilterType.ANNOTATION,   value = org.springframework.stereotype.Repository.class)
 	    })
 public class AnnotationConfiguration {

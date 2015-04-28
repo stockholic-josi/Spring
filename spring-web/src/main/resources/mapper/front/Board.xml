@@ -237,7 +237,27 @@ DELETE FROM sk_board_file WHERE idx in
     ${delFileIdx}
 </foreach>
 
-
 </delete>
+
+
+<insert id="roomInsert">
+INSERT INTO ch_room( 
+	name,
+	passwd,
+	num,
+	date
+)VALUES(
+	#{name},
+	#{passwd},
+	#{num},
+	NOW()
+)
+</insert>
+
+
+<select id="getRoomPassword" resultType="com.taxholic.EncryptTest">
+SELECT	passwd FROM ch_room limit 1
+</select>
+
 
 </mapper>

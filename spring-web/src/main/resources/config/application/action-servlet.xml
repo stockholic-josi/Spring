@@ -17,7 +17,7 @@
 	
 	<!-- Controller logging AOP -->
 	<!-- 
-	<bean id="loggingAspect" class="com.taxholic.core.util.AccessLogging" /> 
+	<bean id="loggingAspect" class="com.taxholic.core.aspect.AccessLogging" /> 
 	 <aop:aspectj-autoproxy>
     	 <aop:include name="loggingAspect"/>
 	</aop:aspectj-autoproxy>

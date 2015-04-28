@@ -30,23 +30,15 @@ public class TestService{
 	private CommonDao commonDao;
 
 	public void schedule(){
-		
 		System.out.println(".........................." + new Date());
 	}
 	
-	public int insert(){
-		
-		int gg = this.commonDao.insert("front.board.roomInsert");
-		
-		String[] aa = null;
-		int bb = aa.length;
-		
-		
-		return gg;
+	public int insert(EncryptTest et){
+		return this.commonDao.insert("front.board.roomInsert", et);
 	}
 	
-	public List select(){
-		return this.commonDao.getList("front.board.getChatList");
+	public EncryptTest select(){
+		return (EncryptTest) this.commonDao.getObject("front.board.getRoomPassword");
 	}
 	
 	public String noCashe(){

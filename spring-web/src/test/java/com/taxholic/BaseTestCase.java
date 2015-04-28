@@ -41,9 +41,6 @@ public class BaseTestCase extends Assert {
 	protected ApplicationContext context;
 	
 	@Autowired
-	private TestService testServce;
-	
-	@Autowired
 	private MessageSourceAccessor message;
 
 	@AfterClass
@@ -71,8 +68,8 @@ public class BaseTestCase extends Assert {
 		
 //		System.out.println(">>>>>" + this.testServce.noCashe() );
 		
-		this.testServce.insert();
-		System.out.println(">>>>>" + this.testServce.select().size());
+//		this.testServce.insert();
+//		System.out.println(">>>>>" + this.testServce.select().size());
 		
 		
 	}
