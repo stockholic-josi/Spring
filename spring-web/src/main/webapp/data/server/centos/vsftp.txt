@@ -20,6 +20,9 @@
 553 could not create file
 /etc/selinux/config 파일에서 SELINUX=disabled 라고 수정한뒤 재부팅
 
+디렉토리 조회안되면 아래 추가
+pasv_enable=NO
+
 
 
 
